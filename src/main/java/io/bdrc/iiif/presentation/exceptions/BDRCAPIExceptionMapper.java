@@ -7,10 +7,10 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class AuthExceptionMapper implements ExceptionMapper<AuthException> {
+public class BDRCAPIExceptionMapper implements ExceptionMapper<BDRCAPIException> {
 
     @Override
-    public Response toResponse(AuthException exception) 
+    public Response toResponse(BDRCAPIException exception) 
     {
         ResponseBuilder rs = Response.status(exception.status);
         rs = rs.entity(new ErrorMessage(exception)).type(MediaType.APPLICATION_JSON);

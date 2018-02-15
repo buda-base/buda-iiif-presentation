@@ -1,6 +1,6 @@
 package io.bdrc.iiif.presentation.exceptions;
 
-public class AuthException extends Exception
+public class BDRCAPIException extends Exception
 {
     private static final long serialVersionUID = -5379981810772284216L;
     int status;
@@ -9,10 +9,10 @@ public class AuthException extends Exception
     String developerMessage;
     String message; 
 
-    public AuthException() {
+    public BDRCAPIException() {
     }
 
-    public AuthException(int status, int code, String message,
+    public BDRCAPIException(int status, int code, String message,
             String developerMessage, String link) {
         super(message);
         this.status = status;
@@ -22,7 +22,7 @@ public class AuthException extends Exception
         this.link = link;
     }
 
-    public AuthException(int status, int code, String message) {
+    public BDRCAPIException(int status, int code, String message) {
         super(message);
         this.status = status;
         this.code = code;

@@ -9,6 +9,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+import io.bdrc.iiif.presentation.AppConstants;
+
 // for both Jersey exceptions and unchecked exceptions
 
 @Provider
@@ -32,6 +34,6 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 		return Response.status(errorMessage.status)
 				.entity(errorMessage)
 				.type(MediaType.APPLICATION_JSON)
-				.build();	
+				.build();
 	}
 }

@@ -26,7 +26,7 @@ public class ErrorMessage {
 	@JsonProperty("developerMessage")
 	public String developerMessage;	
 	
-	public ErrorMessage(AuthException ex){
+	public ErrorMessage(BDRCAPIException ex){
 		this.link = ex.link;
 		this.developerMessage = ex.developerMessage;
 		this.code = ex.code;
