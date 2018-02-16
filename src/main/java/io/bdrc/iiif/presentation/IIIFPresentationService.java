@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
-@Path("/2")
+@Path("/2.1.1")
 public class IIIFPresentationService {
 
 	@GET
@@ -18,8 +18,14 @@ public class IIIFPresentationService {
 	public Response getManifest(@PathParam("identifier") String identifier) throws BDRCAPIException {
 
 		String output = "Jersey say : " + identifier;
+		
+		Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
 
-		return Response.status(200).entity(output).build();
+		return Response.status(200)
+		        .entity(output)
+		        .header("Access-Control-Allow-Origin", "*")
+	            .header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
+		        .build();
 
 	}
 
@@ -29,8 +35,14 @@ public class IIIFPresentationService {
     public Response getCollection(@PathParam("identifier") String identifier) throws BDRCAPIException {
 
         String output = "Jersey say : " + identifier;
+        
+        Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
 
-        return Response.status(200).entity(output).build();
+        return Response.status(200)
+                .entity(output)
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
+                .build();
 
     }
 
