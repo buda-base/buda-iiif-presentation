@@ -4,14 +4,17 @@ package io.bdrc.iiif.presentation;
 
 public class AuthService {
     
-    public static final int ACCESS_NONE = 0;
-    public static final int ACCESS_LIMITTED = 1;
-    public static final int ACCESS_FULL = 2;
+    public static enum AuthType {
+        ACCESS_NONE,
+        ACCESS_LIMITTED,
+        ACCESS_FULL;
+    }
     
-    static int getIdentifierAccess(Identifier id)  {
-        if (id.itemId != null && id.itemId == "bdr:I22084_I001") {
-            return ACCESS_FULL;
+    public static AuthType getAccessForIdentifier(Identifier id)  {
+        System.out.println(id.itemId);
+        if (id.itemId != null && id.itemId.equals("bdr:I22084_I001")) {
+            return AuthType.ACCESS_FULL;
         }
-        return ACCESS_NONE;
+        return AuthType.ACCESS_NONE;
     }
 }

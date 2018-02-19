@@ -18,6 +18,8 @@ public class Identifier {
     public static final int MANIFEST_ID_WORK_IN_ITEM_VOLNUM = 7;
     public static final int MANIFEST_ID_ITEM_VOLNUM = 8;
     
+    @JsonProperty("id")
+    String id = null;
     @JsonProperty("type")
     int type = -1;
     @JsonProperty("subtype")
@@ -29,7 +31,7 @@ public class Identifier {
     @JsonProperty("volumeId")
     String volumeId = null;
     @JsonProperty("volNum")
-    int volNum = 0;
+    String volNum = null;
     
     public Identifier(final String iiifIdentifier, final int idType) throws BDRCAPIException {
         if (iiifIdentifier == null || iiifIdentifier.isEmpty())
@@ -47,6 +49,7 @@ public class Identifier {
         final String secondId = (parts.length > 1 && !parts[1].isEmpty()) ? parts[1] : null;
         final String thirdId = (parts.length > 2 && !parts[2].isEmpty()) ? parts[2] : null;
         int nbMaxPartsExpected = 0;
+        this.id = iiifIdentifier;
         this.type = idType;
         if (idType == COLLECTION_ID) {
             switch (typestr) {
@@ -90,18 +93,20 @@ public class Identifier {
             if (secondId == null)
                 throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
             if (thirdId == null) {
-                try {
-                    this.volNum = Integer.parseInt(secondId);
-                } catch (NumberFormatException e) {
-                    throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
-                }
+                this.volNum = secondId;
+//                try {
+//                    this.volNum = Integer.parseInt(secondId);
+//                } catch (NumberFormatException e) {
+//                    throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
+//                }
             } else {
                 this.itemId = secondId;
-                try {
-                    this.volNum = Integer.parseInt(thirdId);
-                } catch (NumberFormatException e) {
-                    throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
-                }
+                this.volNum = thirdId;
+//                try {
+//                    this.volNum = Integer.parseInt(thirdId);
+//                } catch (NumberFormatException e) {
+//                    throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
+//                }
             }
             nbMaxPartsExpected = 3;
             this.subtype = MANIFEST_ID_WORK_IN_ITEM_VOLNUM;
@@ -110,11 +115,12 @@ public class Identifier {
             this.itemId = firstId;
             if (secondId == null)
                 throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
-            try {
-                this.volNum = Integer.parseInt(secondId);
-            } catch (NumberFormatException e) {
-                throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
-            }
+            this.volNum = secondId;
+//            try {
+//                this.volNum = Integer.parseInt(secondId);
+//            } catch (NumberFormatException e) {
+//                throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
+//            }
             nbMaxPartsExpected = 2;
             this.subtype = MANIFEST_ID_ITEM_VOLNUM;
             break;

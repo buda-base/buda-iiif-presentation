@@ -1,5 +1,8 @@
 package io.bdrc.iiif.presentation.exceptions;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public class BDRCAPIException extends Exception
 {
     private static final long serialVersionUID = -5379981810772284216L;
@@ -28,6 +31,18 @@ public class BDRCAPIException extends Exception
         this.code = code;
         this.message = message;
         this.developerMessage = null;
+        this.link = null;
+    }
+
+    public BDRCAPIException(int status, int code, Exception e) {
+        super(e.getMessage());
+        this.status = status;
+        this.code = code;
+        this.message = e.getMessage();
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        this.developerMessage = sw.toString();
         this.link = null;
     }
 
