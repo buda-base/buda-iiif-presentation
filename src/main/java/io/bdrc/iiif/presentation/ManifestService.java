@@ -30,16 +30,15 @@ public class ManifestService {
     }
     
     public static Manifest getManifestForIdentifier(final Identifier id) throws BDRCAPIException {
-        final Manifest manifest = new Manifest("http://presentation.bdrc.io/2.1.1/"+id.id+"/manifest", "This is a label");
+        final Manifest manifest = new Manifest("http://presentation.bdrc.io/2.1.1/"+id.id+"/manifest", "Dergue Kangyur vol. X");
         final PropertyValue attr = new PropertyValue();
         attr.addValue(Locale.ENGLISH, "Buddhist Digital Resource Center");
         manifest.setAttribution(attr);
-        System.out.println(manifest.CONTEXT);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
-        //manifest.addLogo("https://www.tbrc.org/safari-pinned-tab.svg");
-        manifest.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
-        final Sequence seq = new Sequence("http://presentation.bdrc.io/2.1.1/"+id.id+"/sequence");
-        manifest.addSequence(seq);
+        manifest.addLogo("https://eroux.fr/logo.png");
+        final Sequence mainSeq = new Sequence("http://presentation.bdrc.io/2.1.1/"+id.id+"/sequence/main");
+        mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
+        manifest.addSequence(mainSeq);
         List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(id);
         for (int i = 0; i < imageInfoList.size(); i++) {
             final ImageInfo imageInfo = imageInfoList.get(i);
@@ -52,14 +51,13 @@ public class ManifestService {
             //canvas.addIIIFImage(imageServiceUrl, ImageApiProfile.LEVEL_ONE);
             ImageService imgServ = new ImageService(imageServiceUrl, ImageApiProfile.LEVEL_ZERO);
             ImageContent img = new ImageContent(imgServ);
-            img.addService(imgServ);
             img.setWidth(imageInfo.width);
             img.setHeight(imageInfo.height);
             canvas.addImage(img);
-            seq.addCanvas(canvas);
+            mainSeq.addCanvas(canvas);
             if (i == 0) {
                 try {
-                    seq.setStartCanvas(new URI(canvasUri));
+                    mainSeq.setStartCanvas(new URI(canvasUri));
                 } catch (URISyntaxException e) { // completely stupid but necessary
                     throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
                 }
