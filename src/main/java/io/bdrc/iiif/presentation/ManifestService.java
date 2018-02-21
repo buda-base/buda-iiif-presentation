@@ -39,7 +39,7 @@ public class ManifestService {
         final Sequence mainSeq = new Sequence("http://presentation.bdrc.io/2.1.1/"+id.id+"/sequence/main");
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         manifest.addSequence(mainSeq);
-        List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(id);
+        List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList("W22084", "0901");
         for (int i = 0; i < imageInfoList.size(); i++) {
             final ImageInfo imageInfo = imageInfoList.get(i);
             final String label = getLabelFormImage(i);
