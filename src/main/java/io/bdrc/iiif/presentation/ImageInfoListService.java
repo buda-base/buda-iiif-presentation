@@ -12,6 +12,8 @@ import java.util.zip.GZIPInputStream;
 import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
 import org.apache.commons.jcs.access.exception.CacheException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -23,25 +25,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ImageInfoListService {
 
-    final static String prefix = "/home/eroux/BUDA/softs/METStodim/output/60_W22084_W22084-";
     final static ObjectMapper mapper = new ObjectMapper();
     final static String bucketName = "archive.tbrc.org";
     private static AmazonS3 s3Client = null;
     static MessageDigest md;
     private static CacheAccess<String, List<ImageInfo>> cache = null;
     static private final ObjectMapper om;
+    private static final Logger logger = LoggerFactory.getLogger(ImageInfoListService.class);
     
     static {
         om = new ObjectMapper();
         try {
             md = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
-            // silliness...
+            logger.error("this shouldn't happen!", e);
         }
         try {
             cache = JCS.getInstance("default");
         } catch (CacheException e) {
-            // hmm....
+            logger.error("this shouldn't happen!", e);
         }
     }
     
@@ -50,6 +52,7 @@ public class ImageInfoListService {
         try {
             bytesOfMessage = workId.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
+            logger.error("this shouldn't happen!", e);
             return null;
         }
         final byte[] hashBytes = md.digest(bytesOfMessage);
@@ -75,6 +78,7 @@ public class ImageInfoListService {
         try {
             object = s3Client.getObject(new GetObjectRequest(bucketName, key));
         } catch (AmazonS3Exception e) {
+            logger.error("this shouldn't happen!", e);
             return null;
         }
         final InputStream objectData = object.getObjectContent();
@@ -84,14 +88,17 @@ public class ImageInfoListService {
             objectData.close();
             return imageList;
         } catch (IOException e) {
+            logger.error("this shouldn't happen!", e);
             return null;
         }
     }
     
     static List<ImageInfo> getImageInfoList(final String workId, final String imageGroupId) {
+        logger.debug("getting imageInfoList for {}, {}", workId, imageGroupId);
         final String cacheKey = workId+'/'+imageGroupId;
         List<ImageInfo> imageInfoList = cache.get(cacheKey);
         if (imageInfoList != null) {
+            logger.debug("found in cache");
             return imageInfoList;
         }
         imageInfoList = getFromS3(workId, imageGroupId);

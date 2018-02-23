@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
+import javax.ws.rs.core.Application;
+
 import org.junit.Test;
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
@@ -31,6 +33,7 @@ import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
 public class PresentationTest {
 
+    
 //    @Test
 //    public void testS3() throws IOException {
 //        AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();   

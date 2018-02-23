@@ -7,6 +7,9 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.digitalcollections.iiif.model.ImageContent;
 import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.enums.ViewingDirection;
@@ -19,6 +22,8 @@ import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
 public class ManifestService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ManifestService.class);
+    
     public static String getLabelFormImage(final int imageIndex) {
         if (imageIndex < 2)
             return "tbrc-"+(imageIndex+1);
