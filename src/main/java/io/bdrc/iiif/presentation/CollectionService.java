@@ -1,21 +1,10 @@
 package io.bdrc.iiif.presentation;
 
-import static io.bdrc.iiif.presentation.AppConstants.*;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Locale;
 
-import de.digitalcollections.iiif.model.ImageContent;
 import de.digitalcollections.iiif.model.PropertyValue;
-import de.digitalcollections.iiif.model.enums.ViewingDirection;
-import de.digitalcollections.iiif.model.image.ImageApiProfile;
-import de.digitalcollections.iiif.model.image.ImageService;
-import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
-import de.digitalcollections.iiif.model.sharedcanvas.Sequence;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
 public class CollectionService {

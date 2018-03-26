@@ -1,4 +1,4 @@
-package io.bdrc.iiif.presentation;
+package io.bdrc.iiif.presentation.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

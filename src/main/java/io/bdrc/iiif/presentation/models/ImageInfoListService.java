@@ -1,4 +1,4 @@
-package io.bdrc.iiif.presentation;
+package io.bdrc.iiif.presentation.models;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,7 +93,7 @@ public class ImageInfoListService {
         }
     }
     
-    static List<ImageInfo> getImageInfoList(final String workId, final String imageGroupId) {
+    public static List<ImageInfo> getImageInfoList(final String workId, final String imageGroupId) {
         logger.debug("getting imageInfoList for {}, {}", workId, imageGroupId);
         final String cacheKey = workId+'/'+imageGroupId;
         List<ImageInfo> imageInfoList = cache.get(cacheKey);

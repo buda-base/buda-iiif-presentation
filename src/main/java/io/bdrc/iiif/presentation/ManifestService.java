@@ -19,6 +19,8 @@ import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import de.digitalcollections.iiif.model.sharedcanvas.Sequence;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
+import io.bdrc.iiif.presentation.models.ImageInfo;
+import io.bdrc.iiif.presentation.models.ImageInfoListService;
 
 public class ManifestService {
 
