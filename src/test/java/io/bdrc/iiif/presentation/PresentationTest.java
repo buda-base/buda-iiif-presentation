@@ -24,12 +24,18 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.ResultSetMgr;
 import org.apache.jena.riot.resultset.ResultSetLang;
 import org.apache.jena.sparql.engine.QueryExecutionBase;
+import org.apache.jena.system.JenaSystem;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.amazonaws.util.IOUtils;
 
 public class PresentationTest {
 
+      @BeforeClass
+      public static void before() {
+          JenaSystem.init();
+      }
     
 //    @Test
 //    public void testS3() throws IOException {
