@@ -43,7 +43,7 @@ public class ImageInfoListService {
         try {
             cache = JCS.getInstance("default");
         } catch (CacheException e) {
-            logger.error("this shouldn't happen!", e);
+            logger.error("cache initialization error, this shouldn't happen!", e);
         }
     }
     

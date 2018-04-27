@@ -19,12 +19,19 @@ import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import de.digitalcollections.iiif.model.sharedcanvas.Sequence;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
+import io.bdrc.iiif.presentation.models.AccessType;
+import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.ImageInfo;
 import io.bdrc.iiif.presentation.models.ImageInfoListService;
+import io.bdrc.iiif.presentation.models.VolumeInfo;
+import io.bdrc.iiif.presentation.models.VolumeInfoService;
 
 public class ManifestService {
 
     private static final Logger logger = LoggerFactory.getLogger(ManifestService.class);
+    
+    public static final Locale loc_tibetan = Locale.forLanguageTag("bo");
+    public static final Locale loc_chinese = Locale.forLanguageTag("zh");
     
     public static String getLabelFormImage(final int imageIndex) {
         if (imageIndex < 2)
@@ -33,24 +40,15 @@ public class ManifestService {
     }
     
     public static String getImageServiceUrl(final String filename, final Identifier id) {
-        return "https://images.bdrc.io/iiif/2/"+id.itemId+"::"+filename;
+        return "https://images.bdrc.io/iiif/2/"+id.getItemId()+"::"+filename;
     }
     
-    public static Manifest getManifestForIdentifier(final Identifier id) throws BDRCAPIException {
-        final Manifest manifest = new Manifest("http://presentation.bdrc.io/2.1.1/"+id.id+"/manifest", "Dergue Kangyur vol. X");
-        final PropertyValue attr = new PropertyValue();
-        attr.addValue(Locale.ENGLISH, "Buddhist Digital Resource Center");
-        manifest.setAttribution(attr);
-        manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
-        manifest.addLogo("https://eroux.fr/logo.png");
-        final Sequence mainSeq = new Sequence("http://presentation.bdrc.io/2.1.1/"+id.id+"/sequence/main");
-        mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
-        manifest.addSequence(mainSeq);
-        List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList("W22084", "0901");
+    public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
+        final Sequence mainSeq = new Sequence("http://presentation.bdrc.io/2.1.1/"+id.getId()+"/sequence/main");
         for (int i = 0; i < imageInfoList.size(); i++) {
             final ImageInfo imageInfo = imageInfoList.get(i);
             final String label = getLabelFormImage(i);
-            final String canvasUri = "http://presentation.bdrc.io/2.1.1/"+id.id+"/canvas/"+(i+1);
+            final String canvasUri = "http://presentation.bdrc.io/2.1.1/"+id.getId()+"/canvas/"+(i+1);
             final Canvas canvas = new Canvas(canvasUri, label);
             canvas.setWidth(imageInfo.width);
             canvas.setHeight(imageInfo.height);
@@ -70,6 +68,29 @@ public class ManifestService {
                 }
             }
         }
+        return mainSeq;
+    }
+    
+    public static Manifest getManifestForIdentifier(final Identifier id) throws BDRCAPIException {
+        if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID) {
+            return null;
+        }
+        final Manifest manifest = new Manifest("http://presentation.bdrc.io/2.1.1/"+id.getId()+"/manifest", "BUDA Manifest");
+        final PropertyValue attr = new PropertyValue();
+        attr.addValue(Locale.ENGLISH, "Buddhist Digital Resource Center");
+        attr.addValue(loc_tibetan, "ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།");
+        attr.addValue(loc_chinese, "佛教数字资源中心(BDRC)");
+        manifest.setAttribution(attr);
+        manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
+        manifest.addLogo("https://eroux.fr/logo.png");
+        VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
+        if (vi.access != AccessType.OPEN) {
+            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this volume");
+        }
+        List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(vi.workId, vi.imageGroup);
+        final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
+        mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
+        manifest.addSequence(mainSeq);
         return manifest;
     }
     

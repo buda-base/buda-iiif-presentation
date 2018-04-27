@@ -10,6 +10,8 @@ import javax.ws.rs.core.Response;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.AuthService.AuthType;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
+import io.bdrc.iiif.presentation.models.Identifier;
+
 import static io.bdrc.iiif.presentation.AppConstants.*;
 
 @Path("/2.1.1")

@@ -1,4 +1,4 @@
-package io.bdrc.iiif.presentation;
+package io.bdrc.iiif.presentation.models;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import static io.bdrc.iiif.presentation.AppConstants.*;
@@ -15,8 +15,6 @@ public class Identifier {
     public static final int MANIFEST_ID_WORK_IN_ITEM = 4;
     public static final int MANIFEST_ID_VOLUMEID = 5;
     public static final int MANIFEST_ID_WORK_IN_VOLUMEID = 6;
-    public static final int MANIFEST_ID_WORK_IN_ITEM_VOLNUM = 7;
-    public static final int MANIFEST_ID_ITEM_VOLNUM = 8;
     
     @JsonProperty("id")
     String id = null;
@@ -26,12 +24,10 @@ public class Identifier {
     int subtype = -1;
     @JsonProperty("workId")
     String workId = null;
-    @JsonProperty("ItemId")
+    @JsonProperty("itemId")
     String itemId = null;
     @JsonProperty("volumeId")
     String volumeId = null;
-    @JsonProperty("volNum")
-    String volNum = null;
     
     public Identifier(final String iiifIdentifier, final int idType) throws BDRCAPIException {
         if (iiifIdentifier == null || iiifIdentifier.isEmpty())
@@ -88,47 +84,46 @@ public class Identifier {
             nbMaxPartsExpected = 2;
             this.subtype = MANIFEST_ID_WORK_IN_VOLUMEID;
             break;
-        case "wivn":
-            this.workId = firstId;
-            if (secondId == null)
-                throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
-            if (thirdId == null) {
-                this.volNum = secondId;
-//                try {
-//                    this.volNum = Integer.parseInt(secondId);
-//                } catch (NumberFormatException e) {
-//                    throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
-//                }
-            } else {
-                this.itemId = secondId;
-                this.volNum = thirdId;
-//                try {
-//                    this.volNum = Integer.parseInt(thirdId);
-//                } catch (NumberFormatException e) {
-//                    throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
-//                }
-            }
-            nbMaxPartsExpected = 3;
-            this.subtype = MANIFEST_ID_WORK_IN_ITEM_VOLNUM;
-            break;
-        case "ivn":
-            this.itemId = firstId;
-            if (secondId == null)
-                throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
-            this.volNum = secondId;
-//            try {
-//                this.volNum = Integer.parseInt(secondId);
-//            } catch (NumberFormatException e) {
-//                throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
-//            }
-            nbMaxPartsExpected = 2;
-            this.subtype = MANIFEST_ID_ITEM_VOLNUM;
-            break;
         default:
             throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
         }
         if (nbMaxPartsExpected < parts.length)
             throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
+        if (!isWellFormedId(workId) || !isWellFormedId(itemId) || !isWellFormedId(volumeId))
+            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public int getSubType() {
+        return subtype;
+    }
+
+    public String getItemId() {
+        return itemId;
+    }
+
+    public String getVolumeId() {
+        return volumeId;
+    }
+
+    public String getWorkId() {
+        return workId;
+    }
+    
+    public String getId() {
+        return id;
+    }
+    
+    // returns false if id is not well formed, returns true on null (for ease of use)
+    private boolean isWellFormedId(String id) {
+        if (id == null) 
+            return true;
+        if (id.indexOf('"') != -1 || id.indexOf('\\') != -1 || id.indexOf('\n') != -1)
+            return false;
+        return true;
     }
     
 }
