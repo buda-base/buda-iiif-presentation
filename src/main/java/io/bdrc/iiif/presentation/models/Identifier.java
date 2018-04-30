@@ -37,13 +37,12 @@ public class Identifier {
             throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
         final String typestr = iiifIdentifier.substring(0, firstColIndex);
         final String[] parts = iiifIdentifier.substring(firstColIndex+1).split("::");
-        if (parts.length == 0 || parts.length > 3)
+        if (parts.length == 0 || parts.length > 2)
             throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
         final String firstId = parts[0];
         if (firstId.isEmpty())
             throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
         final String secondId = (parts.length > 1 && !parts[1].isEmpty()) ? parts[1] : null;
-        final String thirdId = (parts.length > 2 && !parts[2].isEmpty()) ? parts[2] : null;
         int nbMaxPartsExpected = 0;
         this.id = iiifIdentifier;
         this.type = idType;
@@ -61,7 +60,7 @@ public class Identifier {
                 this.subtype = COLLECTION_ID_WORK_IN_ITEM;
                 break;
             default:
-                throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
+                throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier: invalid type \""+typestr+"\"");
             }
             return;
         }
@@ -85,12 +84,12 @@ public class Identifier {
             this.subtype = MANIFEST_ID_WORK_IN_VOLUMEID;
             break;
         default:
-            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
+            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier: invalid type \""+typestr+"\"");
         }
         if (nbMaxPartsExpected < parts.length)
-            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
+            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier: not enough parts");
         if (!isWellFormedId(workId) || !isWellFormedId(itemId) || !isWellFormedId(volumeId))
-            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
+            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier: ill formed IDs");
     }
 
     public int getType() {

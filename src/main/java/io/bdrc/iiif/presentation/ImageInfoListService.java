@@ -1,12 +1,16 @@
-package io.bdrc.iiif.presentation.models;
+package io.bdrc.iiif.presentation;
+
+import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.jcs.JCS;
@@ -22,6 +26,9 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
+import io.bdrc.iiif.presentation.models.ImageInfo;
 
 public class ImageInfoListService {
 
@@ -47,14 +54,9 @@ public class ImageInfoListService {
         }
     }
     
-    private static String getFirstMd5Nums(final String workId) {
+    private static String getFirstMd5Nums(final String workLocalId) {
         final byte[] bytesOfMessage;
-        try {
-            bytesOfMessage = workId.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            logger.error("this shouldn't happen!", e);
-            return null;
-        }
+        bytesOfMessage = workLocalId.getBytes(Charset.forName("UTF-8"));
         final byte[] hashBytes = md.digest(bytesOfMessage);
         final BigInteger bigInt = new BigInteger(1,hashBytes);
         return String.format("%032x", bigInt).substring(0, 2);
@@ -66,20 +68,20 @@ public class ImageInfoListService {
         return s3Client;
     }
     
-    private static String getKey(final String workId, final String imageGroupId) {
-        final String md5firsttwo = getFirstMd5Nums(workId);
-        return "Works/"+md5firsttwo+"/"+workId+"/images/"+workId+"-"+imageGroupId+"/dimensions.json";
+    private static String getKey(final String workLocalId, final String imageGroupId) {
+        final String md5firsttwo = getFirstMd5Nums(workLocalId);
+        return "Works/"+md5firsttwo+"/"+workLocalId+"/images/"+workLocalId+"-"+imageGroupId+"/dimensions.json";
     }
     
-    private static List<ImageInfo> getFromS3(final String workId, final String imageGroupId)  {
+    private static List<ImageInfo> getFromS3(final String workLocalId, final String imageGroupId) throws BDRCAPIException  {
         final AmazonS3 s3Client = getClient();
-        final String key = getKey(workId, imageGroupId);
+        final String key = getKey(workLocalId, imageGroupId);
+        logger.info("fetching s3 key {}", key);
         final S3Object object;
         try {
             object = s3Client.getObject(new GetObjectRequest(bucketName, key));
         } catch (AmazonS3Exception e) {
-            logger.error("this shouldn't happen!", e);
-            return null;
+            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
         }
         final InputStream objectData = object.getObjectContent();
         try {
@@ -88,20 +90,28 @@ public class ImageInfoListService {
             objectData.close();
             return imageList;
         } catch (IOException e) {
-            logger.error("this shouldn't happen!", e);
-            return null;
+            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
         }
     }
-    
-    public static List<ImageInfo> getImageInfoList(final String workId, final String imageGroupId) {
-        logger.debug("getting imageInfoList for {}, {}", workId, imageGroupId);
-        final String cacheKey = workId+'/'+imageGroupId;
+
+    public static final Pattern oldImageGroupPattern = Pattern.compile("^I\\d{4}$");
+    // for image groups like I\d\d\d\d, the s3 key doesn't contain the I (ex: I0886 -> 0886)
+    public static String getS3ImageGroupId(final String dataImageGroupId) {
+        if (oldImageGroupPattern.matcher(dataImageGroupId).matches())
+            return dataImageGroupId.substring(1);
+        return dataImageGroupId;
+    }
+
+    public static List<ImageInfo> getImageInfoList(final String workLocalId, String imageGroupId) throws BDRCAPIException {
+        logger.debug("getting imageInfoList for {}, {}", workLocalId, imageGroupId);
+        imageGroupId = getS3ImageGroupId(imageGroupId);
+        final String cacheKey = workLocalId+'/'+imageGroupId;
         List<ImageInfo> imageInfoList = cache.get(cacheKey);
         if (imageInfoList != null) {
             logger.debug("found in cache");
             return imageInfoList;
         }
-        imageInfoList = getFromS3(workId, imageGroupId);
+        imageInfoList = getFromS3(workLocalId, imageGroupId);
         if (imageInfoList == null)
             return null;
         cache.put(cacheKey, imageInfoList);

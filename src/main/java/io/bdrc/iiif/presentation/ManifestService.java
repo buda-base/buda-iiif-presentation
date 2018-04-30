@@ -22,9 +22,7 @@ import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.AccessType;
 import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.ImageInfo;
-import io.bdrc.iiif.presentation.models.ImageInfoListService;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
-import io.bdrc.iiif.presentation.models.VolumeInfoService;
 
 public class ManifestService {
 
@@ -32,6 +30,8 @@ public class ManifestService {
     
     public static final Locale loc_tibetan = Locale.forLanguageTag("bo");
     public static final Locale loc_chinese = Locale.forLanguageTag("zh");
+    public static final String BDR = "http://purl.bdrc.io/resource/";
+    public static final int BDR_len = BDR.length();
     
     public static String getLabelFormImage(final int imageIndex) {
         if (imageIndex < 2)
@@ -73,8 +73,18 @@ public class ManifestService {
     
     public static Manifest getManifestForIdentifier(final Identifier id) throws BDRCAPIException {
         if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID) {
-            return null;
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
+        VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
+        if (vi.access != AccessType.OPEN) {
+            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this volume");
+        }
+        if (!vi.workId.startsWith(BDR)) {
+            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you can only access BDRC volumes through this API");
+        }
+        String workLocalId = vi.workId.substring(BDR_len);
+        logger.info("building manifest for ID {}", id.getId());
+        List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(workLocalId, vi.imageGroup);
         final Manifest manifest = new Manifest("http://presentation.bdrc.io/2.1.1/"+id.getId()+"/manifest", "BUDA Manifest");
         final PropertyValue attr = new PropertyValue();
         attr.addValue(Locale.ENGLISH, "Buddhist Digital Resource Center");
@@ -83,15 +93,10 @@ public class ManifestService {
         manifest.setAttribution(attr);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         manifest.addLogo("https://eroux.fr/logo.png");
-        VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
-        if (vi.access != AccessType.OPEN) {
-            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this volume");
-        }
-        List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(vi.workId, vi.imageGroup);
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         manifest.addSequence(mainSeq);
         return manifest;
     }
-    
+
 }
