@@ -4,7 +4,6 @@ import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -39,6 +38,7 @@ public class ImageInfoListService {
     private static CacheAccess<String, List<ImageInfo>> cache = null;
     static private final ObjectMapper om;
     private static final Logger logger = LoggerFactory.getLogger(ImageInfoListService.class);
+    private static final Charset utf8 = Charset.forName("UTF-8");
     
     static {
         om = new ObjectMapper();
@@ -56,7 +56,7 @@ public class ImageInfoListService {
     
     private static String getFirstMd5Nums(final String workLocalId) {
         final byte[] bytesOfMessage;
-        bytesOfMessage = workLocalId.getBytes(Charset.forName("UTF-8"));
+        bytesOfMessage = workLocalId.getBytes(utf8);
         final byte[] hashBytes = md.digest(bytesOfMessage);
         final BigInteger bigInt = new BigInteger(1,hashBytes);
         return String.format("%032x", bigInt).substring(0, 2);

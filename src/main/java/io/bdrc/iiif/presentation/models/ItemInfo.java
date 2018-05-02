@@ -2,7 +2,6 @@ package io.bdrc.iiif.presentation.models;
 
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Resource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -24,6 +24,7 @@ import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.ImageInfo;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
 
+
 public class ManifestService {
 
     private static final Logger logger = LoggerFactory.getLogger(ManifestService.class);
@@ -40,7 +41,7 @@ public class ManifestService {
     }
     
     public static String getImageServiceUrl(final String filename, final Identifier id) {
-        return "https://images.bdrc.io/iiif/2/"+id.getItemId()+"::"+filename;
+        return "https://images.bdrc.io/iiif/2/"+id.getVolumeId()+"::"+filename;
     }
     
     public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
