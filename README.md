@@ -6,7 +6,7 @@ This repository contains a servlet generating manifests and collections for BDRC
 
 - `mvn test` runs the tests
 - `mvn jetty:run` serves the app locally
-- `mvn war:war` produces a war file
+- `mvn package` produces a war file
 
 Ex: http://localhost:8080/2.1.1/v:bdr:V22084_I0886/manifest
 
