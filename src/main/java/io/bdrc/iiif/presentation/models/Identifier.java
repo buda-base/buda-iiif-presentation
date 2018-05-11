@@ -28,6 +28,35 @@ public class Identifier {
     String itemId = null;
     @JsonProperty("volumeId")
     String volumeId = null;
+    @JsonProperty("bPageNum")
+    Integer bPageNum = null;
+    @JsonProperty("ePageNum")
+    Integer ePageNum = null;
+    
+    public void setPageNumFromIdPart(final String idPart) throws BDRCAPIException {
+        if (idPart == null || idPart.isEmpty())
+            return;
+        final String[] parts = idPart.split("-");
+        if (parts.length == 0 || parts.length > 3) {
+            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse page numbers in identifier");
+        }
+        try {
+            this.bPageNum = Integer.parseInt(parts[0]);
+        } catch (NumberFormatException e) {
+            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse page numbers in identifier");
+        }
+        if (this.bPageNum < 1)
+            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse page numbers in identifier");
+        if (parts.length < 2)
+            return;
+        try {
+            this.ePageNum = Integer.parseInt(parts[1]);
+        } catch (NumberFormatException e) {
+            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse page numbers in identifier");
+        }
+        if (this.ePageNum < 1)
+            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse page numbers in identifier");
+    }
     
     public Identifier(final String iiifIdentifier, final int idType) throws BDRCAPIException {
         if (iiifIdentifier == null || iiifIdentifier.isEmpty())
@@ -37,12 +66,13 @@ public class Identifier {
             throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
         final String typestr = iiifIdentifier.substring(0, firstColIndex);
         final String[] parts = iiifIdentifier.substring(firstColIndex+1).split("::");
-        if (parts.length == 0 || parts.length > 2)
+        if (parts.length == 0 || parts.length > 3)
             throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
         final String firstId = parts[0];
         if (firstId.isEmpty())
             throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier");
         final String secondId = (parts.length > 1 && !parts[1].isEmpty()) ? parts[1] : null;
+        final String thirdId = (parts.length > 2 && !parts[2].isEmpty()) ? parts[2] : null;
         int nbMaxPartsExpected = 0;
         this.id = iiifIdentifier;
         this.type = idType;
@@ -69,18 +99,21 @@ public class Identifier {
         case "wi":
             this.workId = firstId;
             this.itemId = secondId;
-            nbMaxPartsExpected = 2;
+            setPageNumFromIdPart(thirdId);
+            nbMaxPartsExpected = 3;
             this.subtype = MANIFEST_ID_WORK_IN_ITEM;
             break;
         case "v":
             this.volumeId = firstId;
-            nbMaxPartsExpected = 1;
+            setPageNumFromIdPart(secondId);
+            nbMaxPartsExpected = 2;
             this.subtype = MANIFEST_ID_VOLUMEID;
             break;
         case "wv":
             this.workId = firstId;
             this.volumeId = secondId;
-            nbMaxPartsExpected = 2;
+            setPageNumFromIdPart(thirdId);
+            nbMaxPartsExpected = 3;
             this.subtype = MANIFEST_ID_WORK_IN_VOLUMEID;
             break;
         default:
@@ -115,7 +148,15 @@ public class Identifier {
     public String getId() {
         return id;
     }
-    
+
+    public Integer getBPageNum() {
+        return bPageNum;
+    }
+
+    public Integer getEPageNum() {
+        return ePageNum;
+    }
+
     // returns false if id is not well formed, returns true on null (for ease of use)
     private boolean isWellFormedId(String id) {
         if (id == null) 

@@ -34,21 +34,36 @@ public class ManifestService {
     public static final String BDR = "http://purl.bdrc.io/resource/";
     public static final int BDR_len = BDR.length();
     
-    public static String getLabelFormImage(final int imageIndex) {
+    public static String getLabelForImage(final int imageIndex) {
         if (imageIndex < 2)
             return "tbrc-"+(imageIndex+1);
         return "p. "+(imageIndex-1);
     }
     
     public static String getImageServiceUrl(final String filename, final Identifier id) {
-        return "https://images.bdrc.io/iiif/2/"+id.getVolumeId()+"::"+filename;
+        return "http://iiif.bdrc.io/image/v2/"+id.getVolumeId()+"::"+filename;
     }
     
     public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence("http://presentation.bdrc.io/2.1.1/"+id.getId()+"/sequence/main");
-        for (int i = 0; i < imageInfoList.size(); i++) {
+        final int imageTotal = imageInfoList.size();
+        // in identifiers, pages go from 1, not 0, we do a translation for Java list indexes
+        final int beginIndex = (id.getBPageNum() == null) ? 0 : id.getBPageNum()-1;
+        if (beginIndex > imageTotal) {
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you asked a manifest for an image number that is greater than the total number of images");
+        }
+        final Integer ePageNum = id.getEPageNum();
+        int endIndex = imageTotal-1;
+        if (ePageNum != null) {
+            if (ePageNum > imageTotal-1) {
+                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you asked a manifest for an image number that is greater than the total number of images");
+            }
+            endIndex = ePageNum-1;
+        }
+        //System.out.println("beginIndex : "+beginIndex+", endIndex: "+endIndex);
+        for (int i = beginIndex ; i <= endIndex ; i++) {
             final ImageInfo imageInfo = imageInfoList.get(i);
-            final String label = getLabelFormImage(i);
+            final String label = getLabelForImage(i);
             final String canvasUri = "http://presentation.bdrc.io/2.1.1/"+id.getId()+"/canvas/"+(i+1);
             final Canvas canvas = new Canvas(canvasUri, label);
             canvas.setWidth(imageInfo.width);
@@ -61,7 +76,7 @@ public class ManifestService {
             img.setHeight(imageInfo.height);
             canvas.addImage(img);
             mainSeq.addCanvas(canvas);
-            if (i == 0) {
+            if (i == beginIndex) {
                 try {
                     mainSeq.setStartCanvas(new URI(canvasUri));
                 } catch (URISyntaxException e) { // completely stupid but necessary
