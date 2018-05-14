@@ -6,6 +6,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.Identifier;
@@ -21,11 +22,13 @@ public class IIIFPresentationService {
 		Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
 		return ManifestService.getManifestForIdentifier(id);
 	}
-//
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Path("/collection/{identifier}")
-//    public Response getCollection(@PathParam("identifier") String identifier) throws BDRCAPIException {
-//    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/collection/{identifier}")
+    public Collection getCollection(@PathParam("identifier") String identifier) throws BDRCAPIException {
+        Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);
+        return CollectionService.getCollectionForIdentifier(id);
+    }
 
 }

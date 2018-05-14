@@ -1,0 +1,23 @@
+@prefix :      <http://purl.bdrc.io/ontology/core/> .
+@prefix bdr:   <http://purl.bdrc.io/resource/> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
+
+bdr:V22083_I3773  :volumeNumber  66 .
+
+bdr:I22083  a                   :Item , :ItemImageAsset ;
+        adm:gitRevision         "20d96cbcccdf81020275982c0a63db08e2700584" ;
+        adm:status              bdr:StatusReleased ;
+        :itemForWork            bdr:W22083 ;
+        :itemHasVolume          bdr:V22083_I3773 , bdr:V22083_I3745 , bdr:V22083_I3709 ;
+        :itemImageAssetForWork  bdr:W22083 ;
+        :itemVolumes            109 .
+
+bdr:V22083_I3745  :volumeNumber  38 .
+
+bdr:V22083_I3709  :volumeNumber  2 .
+
+bdr:W22083  adm:access  bdr:AccessOpen ;
+        adm:license     bdr:LicensePublicDomain ;
+        skos:prefLabel  "bka' 'gyur (stog pho brang bris ma/）"@bo-x-ewts .
+

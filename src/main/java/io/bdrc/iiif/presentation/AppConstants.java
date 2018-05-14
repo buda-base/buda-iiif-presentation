@@ -1,7 +1,12 @@
 package io.bdrc.iiif.presentation;
 
 public class AppConstants {
-    public static final String BDR = "http://purl.bdrc.io/resource/";
+    public static final String BDR  = "http://purl.bdrc.io/resource/";
+    public static final int BDR_len = BDR.length();
+    public static final String BDO  = "http://purl.bdrc.io/ontology/core/";
+    public static final String ADM  = "http://purl.bdrc.io/ontology/admin/";
+    public static final String IIIFPresPrefix = "http://presentation.bdrc.io/2.1.1/";
+    public static final String IIIFPresPrefix_coll = IIIFPresPrefix+"collection/";
     
 	public static final int GENERIC_APP_ERROR_CODE = 5001;
 	

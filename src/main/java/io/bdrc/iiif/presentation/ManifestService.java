@@ -31,8 +31,13 @@ public class ManifestService {
     
     public static final Locale loc_tibetan = Locale.forLanguageTag("bo");
     public static final Locale loc_chinese = Locale.forLanguageTag("zh");
-    public static final String BDR = "http://purl.bdrc.io/resource/";
     public static final int BDR_len = BDR.length();
+    public static final PropertyValue attribution = new PropertyValue();
+    static {
+        attribution.addValue(Locale.ENGLISH, "Buddhist Digital Resource Center");
+        attribution.addValue(loc_tibetan, "ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།");
+        attribution.addValue(loc_chinese, "佛教数字资源中心(BDRC)");
+    }
     
     public static String getLabelForImage(final int imageIndex) {
         if (imageIndex < 2)
@@ -45,7 +50,7 @@ public class ManifestService {
     }
     
     public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
-        final Sequence mainSeq = new Sequence("http://presentation.bdrc.io/2.1.1/"+id.getId()+"/sequence/main");
+        final Sequence mainSeq = new Sequence(IIIFPresPrefix+id.getId()+"/sequence/main");
         final int imageTotal = imageInfoList.size();
         // in identifiers, pages go from 1, not 0, we do a translation for Java list indexes
         final int beginIndex = (id.getBPageNum() == null) ? 0 : id.getBPageNum()-1;
@@ -64,7 +69,7 @@ public class ManifestService {
         for (int i = beginIndex ; i <= endIndex ; i++) {
             final ImageInfo imageInfo = imageInfoList.get(i);
             final String label = getLabelForImage(i);
-            final String canvasUri = "http://presentation.bdrc.io/2.1.1/"+id.getId()+"/canvas/"+(i+1);
+            final String canvasUri = IIIFPresPrefix+id.getId()+"/canvas/"+(i+1);
             final Canvas canvas = new Canvas(canvasUri, label);
             canvas.setWidth(imageInfo.width);
             canvas.setHeight(imageInfo.height);
@@ -101,12 +106,8 @@ public class ManifestService {
         String workLocalId = vi.workId.substring(BDR_len);
         logger.info("building manifest for ID {}", id.getId());
         List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(workLocalId, vi.imageGroup);
-        final Manifest manifest = new Manifest("http://presentation.bdrc.io/2.1.1/"+id.getId()+"/manifest", "BUDA Manifest");
-        final PropertyValue attr = new PropertyValue();
-        attr.addValue(Locale.ENGLISH, "Buddhist Digital Resource Center");
-        attr.addValue(loc_tibetan, "ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།");
-        attr.addValue(loc_chinese, "佛教数字资源中心(BDRC)");
-        manifest.setAttribution(attr);
+        final Manifest manifest = new Manifest(IIIFPresPrefix+id.getId()+"/manifest", "BUDA Manifest");
+        manifest.setAttribution(attribution);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         manifest.addLogo("https://eroux.fr/logo.png");
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
