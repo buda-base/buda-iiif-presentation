@@ -1,0 +1,40 @@
+@prefix :      <http://purl.bdrc.io/ontology/core/> .
+@prefix bdr:   <http://purl.bdrc.io/resource/> .
+@prefix tmp:   <http://purl.bdrc.io/ontology/tmp/> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
+
+bdr:W12827_0053  a           :Work ;
+        adm:workLegacyNode   "O01CT00424CZ206428" ;
+        :workColophon        "'od gsal spyod pa'i gnad yig bdud rtsi rgyal po zhes bya ba/ theg pa mchog gi rnal 'byor pa klong chen rab 'byams kyis bkod pa rdzogs so//"@bo-x-ewts ;
+        :workIsAbout         bdr:T2564 ;
+        :workPartIndex       6 ;
+        :workPartOf          bdr:W12827_0047 ;
+        :workPartTreeIndex   "1.2.1.1.06" ;
+        :work_desc_location  "ff. 43v-45r (pp. 230-233)" ;
+        skos:prefLabel       "'od gsal spyod pa'i gnad yig bdud rtsi rgyal po/"@bo-x-ewts .
+
+bdr:W12827_0059  a           :Work ;
+        adm:workLegacyNode   "O01CT00424CZ206434" ;
+        :workColophon        "gsang ba snying tig gi gnad las/ rig pa sems kyi gegs sel ye shes dri med ces bya ba/ theg pa mchog gi rnal 'byor pa klong chen rab 'byams kyis bkod pa rdzogs so//"@bo-x-ewts ;
+        :workIsAbout         bdr:T2038 ;
+        :workPartIndex       12 ;
+        :workPartOf          bdr:W12827_0047 ;
+        :workPartTreeIndex   "1.2.1.1.12" ;
+        :work_desc_location  "ff. 72v-75v (pp. 288-294)" ;
+        skos:prefLabel       "rig pa sems kyi gegs sel ye shes dri med/"@bo-x-ewts .
+
+bdr:W12827_0047  a           :Work ;
+        adm:workLegacyNode   "O01CT00424CZ206422" ;
+        :workHasPart          bdr:W12827_0053 , bdr:W12827_0059 ;
+        :workLocation        [ :workLocationEndPage  426 ;
+                               :workLocationPage     153 ;
+                               :workLocationVolume   2 ;
+                               :workLocationWork     bdr:W12827
+                             ] ;
+        :workPartIndex       1 ;
+        :workPartOf          bdr:W12827_0046 ;
+        :workPartTreeIndex   "1.2.1.1" ;
+        :work_desc_location  "137 ff. (145-418)" ;
+        tmp:inItem           bdr:I12827 ;
+        skos:prefLabel       "gzhi snang ye shes sgron me sogs/"@bo-x-ewts .

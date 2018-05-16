@@ -17,7 +17,6 @@ import org.apache.jena.vocabulary.SKOS;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.models.ItemInfo.VolumeInfoSmall;
 
 public class WorkInfo {
     
