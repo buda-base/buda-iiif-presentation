@@ -11,6 +11,7 @@ public class Identifier {
     
     public static final int COLLECTION_ID_ITEM = 2;
     public static final int COLLECTION_ID_WORK_IN_ITEM = 3;
+    public static final int COLLECTION_ID_WORK_OUTLINE = 7;
     
     public static final int MANIFEST_ID_WORK_IN_ITEM = 4;
     public static final int MANIFEST_ID_VOLUMEID = 5;
@@ -88,6 +89,12 @@ public class Identifier {
                 this.itemId = secondId;
                 nbMaxPartsExpected = 2;
                 this.subtype = COLLECTION_ID_WORK_IN_ITEM;
+                break;
+            case "wio":
+                this.workId = firstId;
+                this.itemId = secondId;
+                nbMaxPartsExpected = 2;
+                this.subtype = COLLECTION_ID_WORK_OUTLINE;
                 break;
             default:
                 throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse identifier: invalid type \""+typestr+"\"");

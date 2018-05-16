@@ -14,6 +14,11 @@ Ex:
 
 This uses S3 to fetch a dimension.json file, using the default credential provider, make sure the correct environment vars / properties are set.
 
+## TODO
+
+- seeAlso with the link to the BDRC data
+- permalink of the manifest?
+
 ## Copyright and License
 
 All the code and API are `Copyright (C) 2017 Buddhist Digital Resource Center` and are under the [Apache 2.0 Public License](LICENSE).

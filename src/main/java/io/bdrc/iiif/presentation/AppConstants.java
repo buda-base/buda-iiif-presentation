@@ -5,6 +5,7 @@ public class AppConstants {
     public static final int BDR_len = BDR.length();
     public static final String BDO  = "http://purl.bdrc.io/ontology/core/";
     public static final String ADM  = "http://purl.bdrc.io/ontology/admin/";
+    public static final String TMPPREFIX  = "http://purl.bdrc.io/ontology/tmp/";
     public static final String IIIFPresPrefix = "http://presentation.bdrc.io/2.1.1/";
     public static final String IIIFPresPrefix_coll = IIIFPresPrefix+"collection/";
     

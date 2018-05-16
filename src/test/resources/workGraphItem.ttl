@@ -1,0 +1,50 @@
+@prefix :      <http://purl.bdrc.io/ontology/core/> .
+@prefix bdr:   <http://purl.bdrc.io/resource/> .
+@prefix tmp:   <http://purl.bdrc.io/ontology/tmp/> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
+
+bdr:W12827_0062  a           :Work ;
+        adm:workLegacyNode   "O01CT00424CZ206437" ;
+        :workColophon        "mkha' 'gro yid bzhin nor bu zhes bya ba/ theg pa mchog gi rnal 'byor pa klong chen rab 'byams kyis bkod pa rdzogs so//"@bo-x-ewts ;
+        :workIsAbout         bdr:T2614 ;
+        :workPartIndex       15 ;
+        :workPartOf          bdr:W12827_0047 ;
+        :workPartTreeIndex   "1.2.1.1.15" ;
+        :work_desc_location  "ff. 79v-81v (pp. 302-306)" ;
+        skos:prefLabel       "mkha' 'gro yid bzhin nor bu/"@bo-x-ewts .
+
+bdr:W12827_0054  a           :Work ;
+        adm:workLegacyNode   "O01CT00424CZ206437" ;
+        :workPartIndex       1 ;
+        :workPartOf          bdr:W12827_0047 ;
+        :workPartTreeIndex   "1.2.1.1.15" ;
+        skos:prefLabel       "mkha' 'gro yid bzhin nor bu/"@bo-x-ewts .
+
+bdr:W12827_0047  a           :Work ;
+        adm:workLegacyNode   "O01CT00424CZ206422" ;
+        :workHasPart         bdr:W12827_0062 , bdr:W12827_0054 ;
+        :workLocation        [ :workLocationEndPage  426 ;
+                               :workLocationPage     153 ;
+                               :workLocationVolume   2 ;
+                               :workLocationWork     bdr:W12827
+                             ] ;
+        :workPartIndex       1 ;
+        :workPartOf          bdr:W12827_0046 ;
+        :workPartTreeIndex   "1.2.1.1" ;
+        :work_desc_location  "137 ff. (145-418)" ;
+        tmp:inItem           bdr:I12827 ;
+        tmp:workCreatorLit   "bo creator"@bo , "en creator"@en ;
+        skos:prefLabel       "gzhi snang ye shes sgron me sogs/"@bo-x-ewts , "testWorkPrefLabel"@en .
+
+bdr:V12827_I2069  :volumeNumber  9 .
+
+bdr:V12827_I2063  :volumeNumber  3 .
+
+bdr:I12827  a                   :Item , :ItemImageAsset ;
+        adm:gitRevision         "20d96cbcccdf81020275982c0a63db08e2700584" ;
+        adm:status              bdr:StatusReleased ;
+        :itemForWork            bdr:W12827 ;
+        :itemHasVolume          bdr:V12827_I2063 , bdr:V12827_I2069 ;
+        :itemImageAssetForWork  bdr:W12827 ;
+        :itemVolumes            13 .

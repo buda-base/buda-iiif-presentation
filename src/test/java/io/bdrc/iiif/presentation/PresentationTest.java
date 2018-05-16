@@ -18,11 +18,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.ItemInfo;
+import io.bdrc.iiif.presentation.models.WorkInfo;
 
 
 public class PresentationTest {
 
     final static String TESTDIR = "src/test/resources/";
+    final static ObjectMapper om = new ObjectMapper();
     
     @BeforeClass
     public static void before() {
@@ -38,9 +40,21 @@ public class PresentationTest {
                 //.canonicalLiterals(true);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         ItemInfo itemInfo = new ItemInfo(m, "bdr:I22083");
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.writeValue(System.out, itemInfo);
+        om.writeValue(System.out, itemInfo);
     }
-      
+
+    @Test
+    public void workInfoModelTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+        Model m = ModelFactory.createDefaultModel();
+        RDFParserBuilder pb = RDFParser.create()
+                .source(TESTDIR+"workGraphItem.ttl")
+                .lang(RDFLanguages.TTL);
+                //.canonicalLiterals(true);
+        pb.parse(StreamRDFLib.graph(m.getGraph()));
+        WorkInfo workInfo = new WorkInfo(m, "bdr:W12827_0047");
+        om.writerWithDefaultPrettyPrinter().writeValue(System.out, workInfo);
+//        ItemInfo itemInfo = new ItemInfo(m, "bdr:I12827");
+//        om.writeValue(System.out, itemInfo);
+    }
     
 }
