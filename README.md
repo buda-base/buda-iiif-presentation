@@ -18,6 +18,8 @@ This uses S3 to fetch a dimension.json file, using the default credential provid
 
 - seeAlso with the link to the BDRC data
 - permalink of the manifest?
+- when a resource is a 404 on LDS, the error in iiifpres should be 404 too
+- build http redirection when the volume has an external manifest
 
 ## Copyright and License
 

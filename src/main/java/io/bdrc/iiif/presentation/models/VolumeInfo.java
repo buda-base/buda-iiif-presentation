@@ -19,6 +19,8 @@ public class VolumeInfo {
     public String itemId;
     @JsonProperty("imageGroup")
     public String imageGroup;
+    @JsonProperty("iiifManifest")
+    public String iiifManifest = null;
     
     private static final Logger logger = LoggerFactory.getLogger(VolumeInfoService.class);
     
@@ -29,6 +31,9 @@ public class VolumeInfo {
         this.workId = sol.getResource("workId").getURI();
         this.itemId = sol.getResource("itemId").getURI();
         this.imageGroup = sol.getLiteral("imageGroup").getString();
+        if (sol.contains("iiifManifest")) {
+            this.iiifManifest = sol.getResource("iiifManifest").getURI();
+        }
     }
     
     public VolumeInfo() {

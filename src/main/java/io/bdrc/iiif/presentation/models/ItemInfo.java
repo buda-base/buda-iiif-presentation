@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.StmtIterator;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.bdrc.iiif.presentation.CollectionService;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
 
@@ -22,10 +23,20 @@ public class ItemInfo {
         public Integer volumeNumber;
         @JsonProperty("volumeId")
         public String volumeId;
+        @JsonProperty("iiifManifest")
+        public String iiifManifest;
         
-        public VolumeInfoSmall(String volumeId, Integer volumeNumber) {
+        public VolumeInfoSmall(String volumeId, Integer volumeNumber, String iiifManifest) {
             this.volumeId = volumeId;
             this.volumeNumber = volumeNumber;
+            this.iiifManifest = iiifManifest;
+        }
+        
+        public String toDisplay() {
+            if (volumeNumber == null)
+                return CollectionService.getPrefixedForm(volumeId);
+            else
+                return "Volume "+volumeNumber;
         }
 
         @Override
@@ -69,19 +80,33 @@ public class ItemInfo {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "no volume in item");
         final List<VolumeInfoSmall> volumes = new ArrayList<>();
         final Property volumeNumberP = m.getProperty(BDO, "volumeNumber");
+        final Property hasIIIFManifestP = m.getProperty(BDO, "hasIIIFManifest");
         while (volumesItr.hasNext()) {
             final Statement s = volumesItr.next();
             final Resource volume = s.getObject().asResource();
             final String volumeId = volume.getURI();
             final Statement volumeNumberS = volume.getProperty(volumeNumberP);
+            final Statement volumeIiifManifest = volume.getProperty(hasIIIFManifestP);
+            final String iiifmanifest = volumeIiifManifest == null ? null : volumeIiifManifest.getResource().getURI();
             if (volumeNumberS == null) {
-                volumes.add(new VolumeInfoSmall(volumeId, null));
+                volumes.add(new VolumeInfoSmall(volumeId, null, iiifmanifest));
             } else {
                 final Integer volNum = volumeNumberS.getInt();
-                volumes.add(new VolumeInfoSmall(volumeId, volNum));
+                volumes.add(new VolumeInfoSmall(volumeId, volNum, iiifmanifest));
             }
         }
         Collections.sort(volumes);
         this.volumes = volumes;
+    }
+    
+    public VolumeInfoSmall getVolumeNumber(int volumeNumber) {
+        for (VolumeInfoSmall vi : volumes) {
+            final Integer viVolNum = vi.volumeNumber;
+            if (viVolNum == volumeNumber)
+                return vi;
+            if (viVolNum != null && viVolNum > volumeNumber)
+                return null;
+        }
+        return null;
     }
 }
