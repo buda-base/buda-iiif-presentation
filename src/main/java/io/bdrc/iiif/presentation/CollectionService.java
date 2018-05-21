@@ -1,5 +1,6 @@
 package io.bdrc.iiif.presentation;
 
+import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
@@ -7,8 +8,11 @@ import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.ItemInfo;
 import io.bdrc.iiif.presentation.models.ItemInfo.VolumeInfoSmall;
 import io.bdrc.iiif.presentation.models.WorkInfo;
+import io.bdrc.iiif.presentation.models.WorkInfo.LangString;
 
 import static io.bdrc.iiif.presentation.AppConstants.*;
+
+import java.util.Locale;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +61,21 @@ public class CollectionService {
         }
     }
 
+    public static PropertyValue getLabels(String workId, WorkInfo wi) {
+        final PropertyValue label = new PropertyValue();
+        if (wi.labels == null || wi.labels.isEmpty()) {
+            label.addValue(getPrefixedForm(workId));
+            return label;
+        }
+        for (LangString ls : wi.labels) {
+            if (ls.language != null)
+                label.addValue(ManifestService.getLocaleFor(ls.language), ls.value);
+            else
+                label.addValue(ls.value);
+        }
+        return label;
+    }
+    
     public static Collection getCollectionForOutline(final Identifier id) throws BDRCAPIException {
         final WorkInfo wi = WorkInfoService.getWorkInfo(id.getWorkId());
         final ItemInfo ii;
@@ -68,6 +87,7 @@ public class CollectionService {
         collection.setAttribution(ManifestService.attribution);
         collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         collection.addLogo("https://eroux.fr/logo.png");
+        collection.setLabel(getLabels(id.getWorkId(), wi));
         if (wi.parts != null) {
             for (WorkInfo.PartInfo pi : wi.parts) {
                 final String prefixedPartId = getPrefixedForm(pi.partId);
@@ -98,6 +118,7 @@ public class CollectionService {
         collection.setAttribution(ManifestService.attribution);
         collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         collection.addLogo("https://eroux.fr/logo.png");
+        collection.addLabel(id.getItemId());
         for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
             final String manifestId = "v:"+vi.getPrefixedUri();
             final String volumeNumberStr = vi.toDisplay();

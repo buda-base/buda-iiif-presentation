@@ -82,10 +82,15 @@ public class WorkInfo {
             return;
         this.bvolnum = location.getProperty(locationVolumeP).getInt();
         final Property locationEndVolumeP = m.getProperty(BDO, "workLocationEndVolume");
-        if (location.hasProperty(locationEndVolumeP))
+        // a stupid temporary mistake in the data
+        final Property locationEndVolumeTmpP = m.getProperty(BDO, "workLocationVolumeEnd");
+        if (location.hasProperty(locationEndVolumeP)) {
             this.evolnum = location.getProperty(locationEndVolumeP).getInt();
-        else
+        } else if (location.hasProperty(locationEndVolumeTmpP)) {
+            this.evolnum = location.getProperty(locationEndVolumeTmpP).getInt();
+        } else {
             this.evolnum = this.bvolnum;
+        }
         final Property locationPageP = m.getProperty(BDO, "workLocationPage");
         if (location.hasProperty(locationPageP))
             this.bpagenum = location.getProperty(locationPageP).getInt();

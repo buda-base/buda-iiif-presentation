@@ -4,8 +4,10 @@ import static io.bdrc.iiif.presentation.AppConstants.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +31,16 @@ public class ManifestService {
 
     private static final Logger logger = LoggerFactory.getLogger(ManifestService.class);
     
-    public static final Locale loc_tibetan = Locale.forLanguageTag("bo");
-    public static final Locale loc_chinese = Locale.forLanguageTag("zh");
-    public static final int BDR_len = BDR.length();
+    public static final Map<String, Locale> locales = new HashMap<>();
     public static final PropertyValue attribution = new PropertyValue();
     static {
-        attribution.addValue(Locale.ENGLISH, "Buddhist Digital Resource Center");
-        attribution.addValue(loc_tibetan, "ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།");
-        attribution.addValue(loc_chinese, "佛教数字资源中心(BDRC)");
+        attribution.addValue(getLocaleFor("en"), "Buddhist Digital Resource Center");
+        attribution.addValue(getLocaleFor("bo"), "ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།");
+        attribution.addValue(getLocaleFor("zh"), "佛教数字资源中心(BDRC)");
+    }
+    
+    public static Locale getLocaleFor(String lt) {
+        return locales.computeIfAbsent(lt, x -> Locale.forLanguageTag(lt));
     }
     
     public static String getLabelForImage(final int imageIndex) {
@@ -109,6 +113,7 @@ public class ManifestService {
         manifest.setAttribution(attribution);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         manifest.addLogo("https://eroux.fr/logo.png");
+        manifest.addLabel(id.getVolumeId().substring(BDR_len));
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         manifest.addSequence(mainSeq);
