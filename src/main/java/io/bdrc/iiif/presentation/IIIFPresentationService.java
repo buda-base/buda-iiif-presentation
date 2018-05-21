@@ -37,7 +37,6 @@ public class IIIFPresentationService {
 		    logger.info("redirect manifest request for ID {} to {}", identifier, vi.iiifManifest.toString());
 	        return Response.status(302) // maybe 303 or 307 would be better?
 	                .header("Location", vi.iiifManifest)
-	                .header("Access-Control-Allow-Origin", "*")
 	                .build();
 		}
 		final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi); 
