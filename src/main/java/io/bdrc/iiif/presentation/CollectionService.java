@@ -12,8 +12,6 @@ import io.bdrc.iiif.presentation.models.WorkInfo.LangString;
 
 import static io.bdrc.iiif.presentation.AppConstants.*;
 
-import java.util.Locale;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,6 +91,7 @@ public class CollectionService {
                 final String prefixedPartId = getPrefixedForm(pi.partId);
                 final String collectionId = "wio:"+prefixedPartId;
                 final Collection subcollection = new Collection(IIIFPresPrefix_coll+collectionId);
+                subcollection.addLabel(prefixedPartId);
                 collection.addCollection(subcollection);
             }
         }
