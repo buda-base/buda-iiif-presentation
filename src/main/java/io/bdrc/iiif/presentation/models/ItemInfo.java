@@ -10,6 +10,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdrc.iiif.presentation.CollectionService;
@@ -25,16 +26,26 @@ public class ItemInfo {
         public String volumeId;
         @JsonProperty("iiifManifest")
         public String iiifManifest;
+        @JsonIgnore
+        public String prefixedId;
         
         public VolumeInfoSmall(String volumeId, Integer volumeNumber, String iiifManifest) {
             this.volumeId = volumeId;
+            this.prefixedId = CollectionService.getPrefixedForm(volumeId);
             this.volumeNumber = volumeNumber;
             this.iiifManifest = iiifManifest;
+        }
+
+        public String getPrefixedUri() {
+            if (prefixedId == null && volumeId != null) {
+                prefixedId = CollectionService.getPrefixedForm(volumeId);
+            }
+            return prefixedId;
         }
         
         public String toDisplay() {
             if (volumeNumber == null)
-                return CollectionService.getPrefixedForm(volumeId);
+                return getPrefixedUri();
             else
                 return "Volume "+volumeNumber;
         }

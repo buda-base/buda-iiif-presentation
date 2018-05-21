@@ -3,7 +3,6 @@ package io.bdrc.iiif.presentation;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.models.AccessType;
 import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.ItemInfo;
 import io.bdrc.iiif.presentation.models.ItemInfo.VolumeInfoSmall;
@@ -16,9 +15,9 @@ import org.slf4j.LoggerFactory;
 
 public class CollectionService {
     
-    private static final Logger logger = LoggerFactory.getLogger(ManifestService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CollectionService.class);
     
-    public static String getPrefixedForm(String id) {
+    public static String getPrefixedForm(final String id) {
         return "bdr:"+id.substring(BDR_len);
     }
     
@@ -43,7 +42,7 @@ public class CollectionService {
             final int volumebPage = (i == wi.bvolnum) ? wi.bpagenum : 0;
             final int volumeePage = (i == wi.evolnum) ? wi.epagenum : -1;
             final StringBuilder sb = new StringBuilder();
-            sb.append(IIIFPresPrefix+"v:"+vi.volumeId);
+            sb.append(IIIFPresPrefix+"v:"+vi.getPrefixedUri());
             if (volumebPage != 0 || volumeePage != -1) {
                 sb.append("::");
                 if (volumebPage != 0)
@@ -91,22 +90,17 @@ public class CollectionService {
     
     public static Collection getCollectionForItem(final Identifier id) throws BDRCAPIException {
         final ItemInfo ii = ItemInfoService.getItemInfo(id.getItemId());
-        if (ii.access != AccessType.OPEN) {
-            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this collection");
-        }
+//        if (ii.access != AccessType.OPEN) {
+//            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this collection");
+//        }
         logger.info("building item collection for ID {}", id.getId());
         final Collection collection = new Collection(IIIFPresPrefix_coll+id.getId(), "Collection");
         collection.setAttribution(ManifestService.attribution);
         collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         collection.addLogo("https://eroux.fr/logo.png");
         for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
-            final String prefixedVolumeId = getPrefixedForm(vi.volumeId);
-            final String manifestId = "v:"+prefixedVolumeId;
-            final String volumeNumberStr;
-            if (vi.volumeNumber == null)
-                volumeNumberStr = prefixedVolumeId;
-            else
-                volumeNumberStr = "Volume "+vi.volumeNumber;
+            final String manifestId = "v:"+vi.getPrefixedUri();
+            final String volumeNumberStr = vi.toDisplay();
             final String manifestUrl = vi.iiifManifest == null ? IIIFPresPrefix+manifestId+"/manifest" : vi.iiifManifest; 
             final Manifest manifest = new Manifest(manifestUrl, volumeNumberStr);
             collection.addManifest(manifest);
