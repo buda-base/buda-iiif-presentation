@@ -92,11 +92,10 @@ public class ManifestService {
         return mainSeq;
     }
     
-    public static Manifest getManifestForIdentifier(final Identifier id) throws BDRCAPIException {
+    public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi) throws BDRCAPIException {
         if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
-        VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
         if (vi.access != AccessType.OPEN) {
             throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this volume");
         }

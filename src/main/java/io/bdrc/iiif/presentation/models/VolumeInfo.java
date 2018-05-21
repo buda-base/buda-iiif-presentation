@@ -1,5 +1,8 @@
 package io.bdrc.iiif.presentation.models;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.apache.jena.query.QuerySolution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +21,9 @@ public class VolumeInfo {
     @JsonProperty("itemId")
     public String itemId;
     @JsonProperty("imageGroup")
-    public String imageGroup;
+    public String imageGroup = null;
     @JsonProperty("iiifManifest")
-    public String iiifManifest = null;
+    public URI iiifManifest = null;
     
     private static final Logger logger = LoggerFactory.getLogger(VolumeInfoService.class);
     
@@ -30,9 +33,16 @@ public class VolumeInfo {
         this.license = LicenseType.fromString(sol.getResource("license").getURI());
         this.workId = sol.getResource("workId").getURI();
         this.itemId = sol.getResource("itemId").getURI();
-        this.imageGroup = sol.getLiteral("imageGroup").getString();
+        if (sol.contains("imageGroup")) {
+            this.imageGroup = sol.getLiteral("imageGroup").getString();
+        }
         if (sol.contains("iiifManifest")) {
-            this.iiifManifest = sol.getResource("iiifManifest").getURI();
+            final String manifestURIString = sol.getResource("iiifManifest").getURI(); 
+            try {
+                this.iiifManifest = new URI(manifestURIString);
+            } catch (URISyntaxException e) {
+                logger.error("problem converting sparql result to URI: "+manifestURIString, e);
+            }
         }
     }
     

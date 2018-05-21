@@ -40,7 +40,7 @@ public class WorkInfoService {
         logger.debug("fetch workInfo on LDS for {}", workId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead 
         final WorkInfo resWorkInfo;
-        final String queryUrl = "http://purl.bdrc.io/graph/IIIFPres_workGraph_noItem";
+        final String queryUrl = "http://buda1.bdrc.io/graph/IIIFPres_workGraph_noItem";
         logger.debug("query {} with argument R_RES={}", queryUrl, workId);
         try {
             final HttpPost request = new HttpPost(queryUrl);
