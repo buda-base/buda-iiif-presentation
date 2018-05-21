@@ -39,13 +39,13 @@ public class GzipWriterInterceptor implements WriterInterceptor{
                 }
             }
         }
+        final MultivaluedMap<String,Object> headers = context.getHeaders();
+        // https://blog.stackpath.com/accept-encoding-vary-important
+        // gives a warning on iiif presentation validator if not present
+        headers.add("Vary", "Accept-Encoding");
         if (process) {
             log.trace("Writer Interceptor compressing");
-            final MultivaluedMap<String,Object> headers = context.getHeaders();
             headers.add("Content-Encoding", "gzip");
-            // https://blog.stackpath.com/accept-encoding-vary-important
-            // gives a warning on iiif presentation validator if not present
-            headers.add("Vary", "Accept-Encoding");
             final OutputStream outputStream = context.getOutputStream();
             context.setOutputStream(new GZIPOutputStream(outputStream));
             context.proceed();

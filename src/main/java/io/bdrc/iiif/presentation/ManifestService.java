@@ -113,7 +113,7 @@ public class ManifestService {
         manifest.setAttribution(attribution);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         manifest.addLogo("https://eroux.fr/logo.png");
-        manifest.addLabel(id.getVolumeId().substring(BDR_len));
+        manifest.addLabel(id.getVolumeId());
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         manifest.addSequence(mainSeq);

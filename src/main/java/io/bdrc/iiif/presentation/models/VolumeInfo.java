@@ -46,7 +46,5 @@ public class VolumeInfo {
         }
     }
     
-    public VolumeInfo() {
-        
-    }
+    public VolumeInfo() { }
 }
