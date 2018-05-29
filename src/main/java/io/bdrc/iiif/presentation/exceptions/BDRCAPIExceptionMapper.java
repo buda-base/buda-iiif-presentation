@@ -13,7 +13,6 @@ public class BDRCAPIExceptionMapper implements ExceptionMapper<BDRCAPIException>
     {
         return Response.status(exception.status)
                 .entity(new ErrorMessage(exception))
-                .header("Access-Control-Allow-Origin", "*")
                 .type(MediaType.APPLICATION_JSON)
                 .build();
     }

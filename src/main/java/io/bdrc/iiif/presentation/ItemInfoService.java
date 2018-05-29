@@ -40,7 +40,7 @@ public class ItemInfoService {
         logger.debug("fetch itemInfo on LDS for {}", itemId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead 
         final ItemInfo resItemInfo;
-        final String queryUrl = "http://purl.bdrc.io/graph/IIIFPres_itemGraph";
+        final String queryUrl = "http://buda1.bdrc.io/graph/IIIFPres_itemGraph";
         logger.debug("query {} with argument R_RES={}", queryUrl, itemId);
         try {
             final HttpPost request = new HttpPost(queryUrl);
@@ -51,7 +51,7 @@ public class ItemInfoService {
             final HttpResponse response = httpClient.execute(request);
             int code = response.getStatusLine().getStatusCode();
             if (code != 200) {
-                throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error", response.toString(), "");
+                throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error", "request:\n"+request.toString()+"\nresponse:\n"+response.toString(), "");
             }
             final InputStream body = response.getEntity().getContent();
             Model m = ModelFactory.createDefaultModel();

@@ -33,7 +33,6 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
 				
 		return Response.status(errorMessage.status)
 				.entity(errorMessage)
-				.header("Access-Control-Allow-Origin", "*")
 				.type(MediaType.APPLICATION_JSON)
 				.build();
 	}
