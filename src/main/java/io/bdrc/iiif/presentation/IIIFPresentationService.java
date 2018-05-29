@@ -29,6 +29,7 @@ public class IIIFPresentationService {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/{identifier}/manifest")
+	@JerseyCacheControl()
 	// add @Context UriInfo uriInfo to the arguments to get auth header
 	public Response getManifest(@PathParam("identifier") final String identifier) throws BDRCAPIException {
 		final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
@@ -51,6 +52,7 @@ public class IIIFPresentationService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/collection/{identifier}")
+    @JerseyCacheControl()
     public Collection getCollection(@PathParam("identifier") final String identifier) throws BDRCAPIException {
         final Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);
         return CollectionService.getCollectionForIdentifier(id);

@@ -15,12 +15,12 @@ import javax.ws.rs.ext.Provider;
 public class CommonHeadersFilter implements ContainerResponseFilter {
 
     @Override
-    public void filter(ContainerRequestContext request, ContainerResponseContext response) throws IOException {
-        MultivaluedMap<String, Object> headers = response.getHeaders();
+    public void filter(final ContainerRequestContext request, final ContainerResponseContext response) throws IOException {
+        final MultivaluedMap<String, Object> headers = response.getHeaders();
         headers.add("Access-Control-Allow-Origin", "*");
         headers.add("Access-Control-Allow-Credentials", "true");
         headers.add("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
-        //final int ACCESS_CONTROL_MAX_AGE_IN_SECONDS = 24 * 60 * 60;
-        //headers.add("Access-Control-Max-Age", ACCESS_CONTROL_MAX_AGE_IN_SECONDS);
+        final int ACCESS_CONTROL_MAX_AGE_IN_SECONDS = 24 * 60 * 60;
+        headers.add("Access-Control-Max-Age", ACCESS_CONTROL_MAX_AGE_IN_SECONDS);
     }
 }
