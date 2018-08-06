@@ -3,6 +3,9 @@ package io.bdrc.iiif.presentation.models;
 public enum LicenseType {
     COPYRIGHTED("http://purl.bdrc.io/resource/LicenseCopyrighted"),
     PUBLIC_DOMAIN("http://purl.bdrc.io/resource/LicensePublicDomain"),
+    CCBYSA3("http://purl.bdrc.io/resource/LicenseCCBYSA3U"),
+    CCBYSA4("http://purl.bdrc.io/resource/LicenseCCBYSA4U"),
+    CC0("http://purl.bdrc.io/resource/LicenseCC0"),
     MIXED("http://purl.bdrc.io/resource/LicenseMixed");
     
     private String uri;
