@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,12 @@ import io.bdrc.iiif.presentation.models.VolumeInfo;
 public class IIIFPresentationService {
 
     private static final Logger logger = LoggerFactory.getLogger(IIIFPresentationService.class);
+    
+    public IIIFPresentationService() {
+        super();
+        ResourceConfig config=new ResourceConfig(IIIFPresentationService.class);        
+        config.register(CommonHeadersFilter.class); 
+    }
     
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
