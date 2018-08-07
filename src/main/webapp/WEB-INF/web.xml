@@ -9,12 +9,13 @@
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
             <param-value>io.bdrc.iiif.presentation</param-value>
-        </init-param>
+        </init-param>        
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
             <param-value>io.bdrc.iiif.presentation.IIIFPresApplication</param-value>
         </init-param>
     </filter>
+    
     <filter-mapping>
         <filter-name>Jersey Web Application</filter-name>
         <url-pattern>/*</url-pattern>

@@ -8,6 +8,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -26,13 +28,16 @@ import io.bdrc.iiif.presentation.models.VolumeInfo;
 public class IIIFPresentationService {
 
     private static final Logger logger = LoggerFactory.getLogger(IIIFPresentationService.class);
+    static final int ACCESS_CONTROL_MAX_AGE_IN_SECONDS = 24 * 60 * 60;
     
     @GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/2.1.1/{identifier}/manifest")
 	@JerseyCacheControl()
 	// add @Context UriInfo uriInfo to the arguments to get auth header
-	public Response getManifest(@PathParam("identifier") final String identifier) throws BDRCAPIException {
+	public Response getManifest(@PathParam("identifier") final String identifier,
+	        @Context ContainerResponseContext response) throws BDRCAPIException {
+        //applyCors(response);
 		final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
 		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
 		if (vi.iiifManifest != null) {
@@ -54,9 +59,20 @@ public class IIIFPresentationService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/2.1.1/collection/{identifier}")
     @JerseyCacheControl()
-    public Collection getCollection(@PathParam("identifier") final String identifier) throws BDRCAPIException { 
-        final Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);
+    public Collection getCollection(@PathParam("identifier") final String identifier,
+            @Context ContainerResponseContext response) throws BDRCAPIException { 
+        //applyCors(response);
+        final Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);          
         return CollectionService.getCollectionForIdentifier(id);
     }
+    
+    /*public void applyCors(ContainerResponseContext response) {
+        response.getHeaders().add("Access-Control-Allow-Origin", "*");
+        response.getHeaders().add("Access-Control-Allow-Credentials", "true");
+        response.getHeaders().add("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+        response.getHeaders().add("Access-Control-Allow-Headers", "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, Keep-Alive, User-Agent, If-Modified-Since, If-None-Match, Cache-Control");
+        response.getHeaders().add("Access-Control-Expose-Headers", "Cache-Control, ETag, Last-Modified, Content-Type, Cache-Control, Vary, Access-Control-Max-Age");
+        response.getHeaders().add("Access-Control-Max-Age", ACCESS_CONTROL_MAX_AGE_IN_SECONDS);
+    }*/
 
 }
