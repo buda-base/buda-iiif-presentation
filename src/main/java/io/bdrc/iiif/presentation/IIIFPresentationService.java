@@ -22,20 +22,14 @@ import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
 
-@Path("/2.1.1")
+@Path("/")
 public class IIIFPresentationService {
 
     private static final Logger logger = LoggerFactory.getLogger(IIIFPresentationService.class);
     
-    public IIIFPresentationService() {
-        super();
-        ResourceConfig config=new ResourceConfig(IIIFPresentationService.class);        
-        config.register(CommonHeadersFilter.class); 
-    }
-    
-	@GET
+    @GET
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/{identifier}/manifest")
+	@Path("/2.1.1/{identifier}/manifest")
 	@JerseyCacheControl()
 	// add @Context UriInfo uriInfo to the arguments to get auth header
 	public Response getManifest(@PathParam("identifier") final String identifier) throws BDRCAPIException {
@@ -58,9 +52,9 @@ public class IIIFPresentationService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/collection/{identifier}")
+    @Path("/2.1.1/collection/{identifier}")
     @JerseyCacheControl()
-    public Collection getCollection(@PathParam("identifier") final String identifier) throws BDRCAPIException {
+    public Collection getCollection(@PathParam("identifier") final String identifier) throws BDRCAPIException { 
         final Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);
         return CollectionService.getCollectionForIdentifier(id);
     }
