@@ -1,6 +1,7 @@
 package io.bdrc.iiif.presentation;
 
-import static io.bdrc.iiif.presentation.AppConstants.*;
+import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
+import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,9 +26,9 @@ import io.bdrc.iiif.presentation.models.ItemInfo;
 
 public class ItemInfoService {
     private static final Logger logger = LoggerFactory.getLogger(ItemInfoService.class);
-    
+
     private static CacheAccess<String, ItemInfo> cache = null;
-    
+
     static {
         try {
             cache = JCS.getInstance("default");
@@ -35,10 +36,10 @@ public class ItemInfoService {
             logger.error("cache initialization error, this shouldn't happen!", e);
         }
     }
-    
+
     private static ItemInfo fetchLdsVolumeInfo(final String itemId) throws BDRCAPIException {
         logger.debug("fetch itemInfo on LDS for {}", itemId);
-        final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead 
+        final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
         final ItemInfo resItemInfo;
         final String queryUrl = "http://buda1.bdrc.io/graph/IIIFPres_itemGraph";
         logger.debug("query {} with argument R_RES={}", queryUrl, itemId);
@@ -64,7 +65,7 @@ public class ItemInfoService {
         logger.debug("found itemInfo: {}", resItemInfo.toString());
         return resItemInfo;
     }
-    
+
     public static ItemInfo getItemInfo(final String itemId) throws BDRCAPIException {
         ItemInfo resItemInfo = cache.get(itemId);
         if (resItemInfo != null) {

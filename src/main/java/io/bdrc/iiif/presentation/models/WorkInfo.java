@@ -1,6 +1,9 @@
 package io.bdrc.iiif.presentation.models;
 
-import static io.bdrc.iiif.presentation.AppConstants.*;
+import static io.bdrc.iiif.presentation.AppConstants.BDO;
+import static io.bdrc.iiif.presentation.AppConstants.BDR;
+import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
+import static io.bdrc.iiif.presentation.AppConstants.TMPPREFIX;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
 public class WorkInfo {
-    
+
     static public class PartInfo implements Comparable<PartInfo> {
         @JsonProperty("partIndex")
         public Integer partIndex;
@@ -27,7 +30,7 @@ public class WorkInfo {
         public String partId;
         @JsonProperty("labels")
         public List<LangString> labels;
-        
+
         public PartInfo(String partId, Integer partIndex) {
             this.partId = partId;
             this.partIndex = partIndex;
@@ -52,7 +55,7 @@ public class WorkInfo {
             this.language = l.getLanguage();
         }
     }
-    
+
     @JsonProperty("rootWorkId")
     public String rootWorkId = null;
     @JsonProperty("hasLocation")
@@ -73,12 +76,12 @@ public class WorkInfo {
     public Integer epagenum = null;
     @JsonProperty("itemId")
     public String itemId = null;
-    
+
     public WorkInfo() {}
-    
+
     public void readLocation(final Model m, final Resource location) {
         final Property locationVolumeP = m.getProperty(BDO, "workLocationVolume");
-        if (!location.hasProperty(locationVolumeP)) 
+        if (!location.hasProperty(locationVolumeP))
             return;
         this.bvolnum = location.getProperty(locationVolumeP).getInt();
         final Property locationEndVolumeP = m.getProperty(BDO, "workLocationEndVolume");
@@ -106,7 +109,7 @@ public class WorkInfo {
             this.rootWorkId = location.getProperty(locationWorkP).getResource().getURI();
         this.hasLocation = true;
     }
-    
+
     public WorkInfo(final Model m, String workId) throws BDRCAPIException {
         // the model is supposed to come from the IIIFPres_itemInfo graph query
         if (workId.startsWith("bdr:"))
@@ -180,4 +183,13 @@ public class WorkInfo {
             this.creatorLabels = creatorLabels;
         }
     }
+
+    @Override
+    public String toString() {
+        return "WorkInfo [rootWorkId=" + rootWorkId + ", hasLocation=" + hasLocation + ", parts=" + parts + ", labels="
+                + labels + ", creatorLabels=" + creatorLabels + ", bvolnum=" + bvolnum + ", evolnum=" + evolnum
+                + ", bpagenum=" + bpagenum + ", epagenum=" + epagenum + ", itemId=" + itemId + "]";
+    }
+
+
 }
