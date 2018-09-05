@@ -73,11 +73,11 @@ public class IIIFPresentationService {
                 break;
             case Identifier.COLLECTION_ID_WORK_IN_ITEM:
                 WorkInfo winf=WorkInfoService.getWorkInfo(id.getWorkId());
-                accessType=getShortName(ItemInfoService.getItemInfo("bdr:"+getShortName(winf.itemId)).access.getUri());
+                accessType=getShortName(winf.rootAccess);
                 break;
             case Identifier.COLLECTION_ID_WORK_OUTLINE:
                 WorkInfo winf1=WorkInfoService.getWorkInfo(id.getWorkId());
-                accessType=getShortName(ItemInfoService.getItemInfo("bdr:"+getShortName(winf1.itemId)).access.getUri());
+                accessType=getShortName(winf1.rootAccess);
                 break;
         }
         Access acc=(Access)ctx.getProperty("access");

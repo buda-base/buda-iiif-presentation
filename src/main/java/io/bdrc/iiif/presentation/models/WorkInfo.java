@@ -1,5 +1,6 @@
 package io.bdrc.iiif.presentation.models;
 
+import static io.bdrc.iiif.presentation.AppConstants.ADM;
 import static io.bdrc.iiif.presentation.AppConstants.BDO;
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
@@ -55,7 +56,8 @@ public class WorkInfo {
             this.language = l.getLanguage();
         }
     }
-
+    @JsonProperty("rootAccess")
+    public String rootAccess = null;
     @JsonProperty("rootWorkId")
     public String rootWorkId = null;
     @JsonProperty("hasLocation")
@@ -124,6 +126,14 @@ public class WorkInfo {
             this.itemId = item.getURI();
             final Resource location = work.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
             readLocation(m, location);
+        }
+        final Resource root_access = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootAccess"));
+        if(root_access!=null) {
+            this.rootAccess=root_access.getURI();
+        }
+        final Resource access = work.getPropertyResourceValue(m.getProperty(ADM, "access"));
+        if(access!=null) {
+            this.rootAccess=access.getURI();
         }
 
         // TODO: add access and license of the root work in request
