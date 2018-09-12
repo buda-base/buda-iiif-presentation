@@ -52,6 +52,11 @@ public class ManifestService {
     public static String getImageServiceUrl(final String filename, final Identifier id) {
         return "http://iiif.bdrc.io/image/v2/"+id.getVolumeId()+"::"+filename;
     }
+
+    public static String getCanvasUri(final String filename, final Identifier id, final int seqNum) {
+        //return IIIFPresPrefix+id.getVolumeId()+"::"+filename+"/canvas";
+        return IIIFPresPrefix+id.getVolumeId()+"/canvas"+"/"+seqNum;
+    }
     
     public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence(IIIFPresPrefix+id.getId()+"/sequence/main");
@@ -70,10 +75,11 @@ public class ManifestService {
             endIndex = ePageNum-1;
         }
         //System.out.println("beginIndex : "+beginIndex+", endIndex: "+endIndex);
-        for (int i = beginIndex ; i <= endIndex ; i++) {
-            final ImageInfo imageInfo = imageInfoList.get(i);
-            final String label = getLabelForImage(i);
-            final String canvasUri = IIIFPresPrefix+id.getId()+"/canvas/"+(i+1);
+        // imgSeqNum starts at 0 here
+        for (int imgSeqNum = beginIndex ; imgSeqNum <= endIndex ; imgSeqNum++) {
+            final ImageInfo imageInfo = imageInfoList.get(imgSeqNum);
+            final String label = getLabelForImage(imgSeqNum);
+            final String canvasUri = getCanvasUri(imageInfo.filename, id, imgSeqNum);
             final Canvas canvas = new Canvas(canvasUri, label);
             canvas.setWidth(imageInfo.width);
             canvas.setHeight(imageInfo.height);
@@ -85,7 +91,7 @@ public class ManifestService {
             img.setHeight(imageInfo.height);
             canvas.addImage(img);
             mainSeq.addCanvas(canvas);
-            if (i == beginIndex) {
+            if (imgSeqNum == beginIndex) {
                 try {
                     mainSeq.setStartCanvas(new URI(canvasUri));
                 } catch (URISyntaxException e) { // completely stupid but necessary
