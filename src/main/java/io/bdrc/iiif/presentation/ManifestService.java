@@ -55,7 +55,7 @@ public class ManifestService {
 
     public static String getCanvasUri(final String filename, final Identifier id, final int seqNum) {
         //return IIIFPresPrefix+id.getVolumeId()+"::"+filename+"/canvas";
-        return IIIFPresPrefix+id.getVolumeId()+"/canvas"+"/"+seqNum;
+        return IIIFPresPrefix+id.getVolumeId()+"/canvas"+"/"+(seqNum+1);
     }
     
     public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
