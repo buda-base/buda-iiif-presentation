@@ -125,11 +125,15 @@ public class WorkInfo {
         } else {
             this.itemId = item.getURI();
             final Resource location = work.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
-            readLocation(m, location);
+            if (location == null) {
+                this.hasLocation = false;
+            } else {
+                readLocation(m, location);
+            }
         }
         final Resource root_access = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootAccess"));
-        if(root_access!=null) {
-            this.rootAccess=root_access.getURI();
+        if(root_access != null) {
+            this.rootAccess = root_access.getURI();
         }
         final Resource access = work.getPropertyResourceValue(m.getProperty(ADM, "access"));
         if(access!=null) {
