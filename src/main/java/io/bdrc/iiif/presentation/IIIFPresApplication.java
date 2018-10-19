@@ -12,7 +12,7 @@ import io.bdrc.auth.rdf.RdfAuthModel;
 public class IIIFPresApplication extends ResourceConfig {
 
     public IIIFPresApplication() {
-        RdfAuthModel.init();
+        //RdfAuthModel.init();
         register(CommonHeadersFilter.class);
         register(IIIFPresAuthFilter.class);
     }

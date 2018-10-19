@@ -125,12 +125,12 @@ public class WorkInfo {
             workId = BDR+workId.substring(4);
         final Resource work = m.getResource(workId);
         if (work == null)
-            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: missing work");
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: missing work");
         // checking type (needs to be a bdo:Work)
         final Triple t = new Triple(work.asNode(), RDF.type.asNode(), m.getResource(BDO+"Work").asNode());
         final ExtendedIterator<Triple> ext = m.getGraph().find(t);
         if (!ext.hasNext()) {
-            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: not a work");
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: not a work");
         }
         final Resource item = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "inItem"));
         if (item == null) {
@@ -154,7 +154,7 @@ public class WorkInfo {
         }
         if (this.rootAccess == null) {
             logger.warn("cannot find model access for {}", workId);
-            this.rootAccess = "http://purl.bdrc.io/resource/AccessRestrictedByTbrc";
+            this.rootAccess = BDR+"AccessRestrictedByTbrc";
         }
 
         final StmtIterator partsItr = work.listProperties(m.getProperty(BDO, "workHasPart"));
