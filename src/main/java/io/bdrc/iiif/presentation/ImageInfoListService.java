@@ -81,7 +81,11 @@ public class ImageInfoListService {
         try {
             object = s3Client.getObject(new GetObjectRequest(bucketName, key));
         } catch (AmazonS3Exception e) {
-            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
+            if (e.getErrorCode().equals("NoSuchKey")) {
+                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "sorry, BDRC did not complete the data migration for this Work");
+            } else {
+                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
+            }
         }
         final InputStream objectData = object.getObjectContent();
         try {
