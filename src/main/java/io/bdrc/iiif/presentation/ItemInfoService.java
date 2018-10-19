@@ -6,7 +6,6 @@ import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
 import org.apache.commons.jcs.access.exception.CacheException;
 import org.apache.http.HttpHeaders;
@@ -27,11 +26,11 @@ import io.bdrc.iiif.presentation.models.ItemInfo;
 public class ItemInfoService {
     private static final Logger logger = LoggerFactory.getLogger(ItemInfoService.class);
 
-    private static CacheAccess<String, ItemInfo> cache = null;
+    private static CacheAccess<String, Object> cache = null;
 
     static {
         try {
-            cache = JCS.getInstance("iiifpres");
+            cache = ServiceCache.CACHE;
         } catch (CacheException e) {
             logger.error("cache initialization error, this shouldn't happen!", e);
         }
@@ -67,7 +66,7 @@ public class ItemInfoService {
     }
 
     public static ItemInfo getItemInfo(final String itemId) throws BDRCAPIException {
-        ItemInfo resItemInfo = cache.get(itemId);
+        ItemInfo resItemInfo = (ItemInfo)cache.get(itemId);
         if (resItemInfo != null) {
             logger.debug("found itemInfo in cache for "+itemId);
             return resItemInfo;

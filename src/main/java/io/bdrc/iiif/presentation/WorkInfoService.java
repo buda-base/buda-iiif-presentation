@@ -1,11 +1,12 @@
 package io.bdrc.iiif.presentation;
 
-import static io.bdrc.iiif.presentation.AppConstants.*;
+import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
+import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
+import static io.bdrc.iiif.presentation.AppConstants.LDS_WORKGRAPH_QUERY;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
 import org.apache.commons.jcs.access.exception.CacheException;
 import org.apache.http.HttpHeaders;
@@ -25,20 +26,20 @@ import io.bdrc.iiif.presentation.models.WorkInfo;
 
 public class WorkInfoService {
     private static final Logger logger = LoggerFactory.getLogger(WorkInfoService.class);
-    
-    private static CacheAccess<String, WorkInfo> cache = null;
-    
+
+    private static CacheAccess<String, Object> cache = null;
+
     static {
         try {
-            cache = JCS.getInstance("iiifpres");
+            cache = ServiceCache.CACHE;
         } catch (CacheException e) {
             logger.error("cache initialization error, this shouldn't happen!", e);
         }
     }
-    
+
     private static WorkInfo fetchLdsWorkInfo(final String workId) throws BDRCAPIException {
         logger.debug("fetch workInfo on LDS for {}", workId);
-        final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead 
+        final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
         final WorkInfo resWorkInfo;
         final String queryUrl = LDS_WORKGRAPH_QUERY;
         logger.debug("query {} with argument R_RES={}", queryUrl, workId);
@@ -64,9 +65,9 @@ public class WorkInfoService {
         logger.debug("found workInfo: {}", resWorkInfo.toString());
         return resWorkInfo;
     }
-    
+
     public static WorkInfo getWorkInfo(final String workId) throws BDRCAPIException {
-        WorkInfo resWorkInfo = cache.get(workId);
+        WorkInfo resWorkInfo = (WorkInfo)cache.get(workId);
         if (resWorkInfo != null) {
             logger.debug("found workInfo in cache for "+workId);
             return resWorkInfo;

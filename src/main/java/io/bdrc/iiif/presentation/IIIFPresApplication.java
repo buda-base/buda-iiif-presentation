@@ -17,6 +17,7 @@ public class IIIFPresApplication extends ResourceConfig {
     public IIIFPresApplication() {
         AuthProps.init(AUTH_PROPS_FILE);
         RdfAuthModel.init();
+        ServiceCache.init();
         register(CommonHeadersFilter.class);
         register(IIIFPresAuthFilter.class);
     }

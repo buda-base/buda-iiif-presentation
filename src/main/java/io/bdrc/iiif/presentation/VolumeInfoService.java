@@ -1,11 +1,13 @@
 package io.bdrc.iiif.presentation;
 
-import static io.bdrc.iiif.presentation.AppConstants.*;
+import static io.bdrc.iiif.presentation.AppConstants.CANNOT_FIND_VOLUME_ERROR_CODE;
+import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
+import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
+import static io.bdrc.iiif.presentation.AppConstants.LDS_VOLUME_QUERY;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
 import org.apache.commons.jcs.access.exception.CacheException;
 import org.apache.http.HttpResponse;
@@ -25,22 +27,22 @@ import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
 
 public class VolumeInfoService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(VolumeInfoService.class);
-    
-    private static CacheAccess<String, VolumeInfo> cache = null;
-    
+
+    private static CacheAccess<String, Object> cache = null;
+
     static {
         try {
-            cache = JCS.getInstance("iiifpres");
+            cache = ServiceCache.CACHE;
         } catch (CacheException e) {
             logger.error("cache initialization error, this shouldn't happen!", e);
         }
     }
-    
+
     private static VolumeInfo fetchLdsVolumeInfo(final String volumeId) throws BDRCAPIException {
         logger.debug("fetch volume info on LDS for {}", volumeId);
-        final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead 
+        final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
         final VolumeInfo resVolumeInfo;
         try {
             final HttpPost request = new HttpPost(LDS_VOLUME_QUERY);
@@ -69,9 +71,9 @@ public class VolumeInfoService {
         logger.debug("found volume info: {}", resVolumeInfo);
         return resVolumeInfo;
     }
-    
+
     public static VolumeInfo getVolumeInfo(final String volumeId) throws BDRCAPIException {
-        VolumeInfo resVolumeInfo = cache.get(volumeId);
+        VolumeInfo resVolumeInfo = (VolumeInfo)cache.get(volumeId);
         if (resVolumeInfo != null) {
             logger.debug("found volumeInfo in cache for "+volumeId);
             return resVolumeInfo;
@@ -82,5 +84,5 @@ public class VolumeInfoService {
         cache.put(volumeId, resVolumeInfo);
         return resVolumeInfo;
     }
-    
+
 }
