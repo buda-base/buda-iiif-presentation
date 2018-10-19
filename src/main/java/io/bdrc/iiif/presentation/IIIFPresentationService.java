@@ -69,15 +69,15 @@ public class IIIFPresentationService {
         final int subType=id.getSubType();
         switch(subType) {
             case Identifier.COLLECTION_ID_ITEM:
-                accessType=getShortName(ItemInfoService.getItemInfo(id.getItemId()).access.getUri());
+                accessType = getShortName(ItemInfoService.getItemInfo(id.getItemId()).access.getUri());
                 break;
             case Identifier.COLLECTION_ID_WORK_IN_ITEM:
                 WorkInfo winf=WorkInfoService.getWorkInfo(id.getWorkId());
-                accessType=getShortName(winf.rootAccess);
+                accessType = getShortName(winf.rootAccess);
                 break;
             case Identifier.COLLECTION_ID_WORK_OUTLINE:
                 WorkInfo winf1=WorkInfoService.getWorkInfo(id.getWorkId());
-                accessType=getShortName(winf1.rootAccess);
+                accessType = getShortName(winf1.rootAccess);
                 break;
         }
         Access acc=(Access)ctx.getProperty("access");

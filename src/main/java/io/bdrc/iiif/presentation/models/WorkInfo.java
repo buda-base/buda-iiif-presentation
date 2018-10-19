@@ -10,19 +10,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.SKOS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
 public class WorkInfo {
+    
+    private static final Logger logger = LoggerFactory.getLogger(WorkInfo.class);
 
     static public class PartInfo implements Comparable<PartInfo> {
         @JsonProperty("partIndex")
@@ -113,12 +120,18 @@ public class WorkInfo {
     }
 
     public WorkInfo(final Model m, String workId) throws BDRCAPIException {
-        // the model is supposed to come from the IIIFPres_itemInfo graph query
+        // the model is supposed to come from the IIIFPres_workInfo_noItem graph query
         if (workId.startsWith("bdr:"))
             workId = BDR+workId.substring(4);
         final Resource work = m.getResource(workId);
         if (work == null)
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: missing work");
+        // checking type (needs to be a bdo:Work)
+        final Triple t = new Triple(work.asNode(), RDF.type.asNode(), m.getResource(BDO+"Work").asNode());
+        final ExtendedIterator<Triple> ext = m.getGraph().find(t);
+        if (!ext.hasNext()) {
+            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: not a work");
+        }
         final Resource item = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "inItem"));
         if (item == null) {
             this.hasLocation = false;
@@ -132,15 +145,17 @@ public class WorkInfo {
             }
         }
         final Resource root_access = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootAccess"));
-        if(root_access != null) {
+        if (root_access != null) {
             this.rootAccess = root_access.getURI();
         }
         final Resource access = work.getPropertyResourceValue(m.getProperty(ADM, "access"));
-        if(access!=null) {
-            this.rootAccess=access.getURI();
+        if (access != null) {
+            this.rootAccess = access.getURI();
         }
-
-        // TODO: add access and license of the root work in request
+        if (this.rootAccess == null) {
+            logger.warn("cannot find model access for {}", workId);
+            this.rootAccess = "http://purl.bdrc.io/resource/AccessRestrictedByTbrc";
+        }
 
         final StmtIterator partsItr = work.listProperties(m.getProperty(BDO, "workHasPart"));
         if (partsItr.hasNext()) {
