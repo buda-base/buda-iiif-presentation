@@ -66,11 +66,12 @@ public class ManifestService {
         if (beginIndex > imageTotal) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you asked a manifest for an image number that is greater than the total number of images");
         }
-        final Integer ePageNum = id.getEPageNum();
+        Integer ePageNum = id.getEPageNum();
         int endIndex = imageTotal-1;
         if (ePageNum != null) {
             if (ePageNum > imageTotal-1) {
-                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you asked a manifest for an image number that is greater than the total number of images");
+                ePageNum = imageTotal - 1;
+                logger.warn("user asked manifest for id {}, which has an end image ({}) larger than the total number of images ({})", id, ePageNum, imageTotal-1);
             }
             endIndex = ePageNum-1;
         }

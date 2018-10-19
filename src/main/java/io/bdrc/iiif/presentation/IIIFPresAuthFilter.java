@@ -22,28 +22,26 @@ public class IIIFPresAuthFilter implements ContainerRequestFilter {
     public final static Logger log=LoggerFactory.getLogger(IIIFPresAuthFilter.class.getName());
 
     @Override
-    public void filter(ContainerRequestContext ctx) throws IOException {
-        String token=getToken(ctx.getHeaderString("Authorization"));
-        TokenValidation validation=null;
-        UserProfile prof=null;
-        if(token !=null) {
+    public void filter(final ContainerRequestContext ctx) throws IOException {
+        final String token = getToken(ctx.getHeaderString("Authorization"));
+        if (token != null) {
             //User is logged on
             //Getting his profile
-            validation=new TokenValidation(token);
-            prof=validation.getUser();
-            ctx.setProperty("access", new Access(prof,new Endpoint()));
-        }else {
+            final TokenValidation validation = new TokenValidation(token);
+            final UserProfile prof = validation.getUser();
+            ctx.setProperty("access", new Access(prof, new Endpoint()));
+        } else {
             ctx.setProperty("access", new Access());
         }
     }
 
-    String getToken(String header) {
+    String getToken(final String header) {
         try {
-            if(header!=null) {
+            if (header != null) {
                 return header.split(" ")[1];
             }
         }
-        catch(Exception ex) {
+        catch (Exception ex) {
             log.error(ex.getMessage());
             return null;
         }
