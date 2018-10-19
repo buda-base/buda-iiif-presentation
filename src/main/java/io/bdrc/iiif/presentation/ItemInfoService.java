@@ -41,7 +41,7 @@ public class ItemInfoService {
         logger.debug("fetch itemInfo on LDS for {}", itemId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
         final ItemInfo resItemInfo;
-        final String queryUrl = "http://buda1.bdrc.io/graph/IIIFPres_itemGraph";
+        final String queryUrl = AppConstants.LDS_ITEMGRAPH_QUERY;
         logger.debug("query {} with argument R_RES={}", queryUrl, itemId);
         try {
             final HttpPost request = new HttpPost(queryUrl);
@@ -55,14 +55,14 @@ public class ItemInfoService {
                 throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error", "request:\n"+request.toString()+"\nresponse:\n"+response.toString(), "");
             }
             final InputStream body = response.getEntity().getContent();
-            Model m = ModelFactory.createDefaultModel();
+            final Model m = ModelFactory.createDefaultModel();
             // TODO: prefixes
             m.read(body, null, "TURTLE");
             resItemInfo = new ItemInfo(m, itemId);
         } catch (IOException ex) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
         }
-        logger.debug("found itemInfo: {}", resItemInfo.toString());
+        logger.debug("found itemInfo: {}", resItemInfo);
         return resItemInfo;
     }
 

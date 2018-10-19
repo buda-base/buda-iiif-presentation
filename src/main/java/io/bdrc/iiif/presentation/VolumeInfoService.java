@@ -43,7 +43,7 @@ public class VolumeInfoService {
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead 
         final VolumeInfo resVolumeInfo;
         try {
-            final HttpPost request = new HttpPost("http://buda1.bdrc.io/query/IIIFPres_volumeInfo");
+            final HttpPost request = new HttpPost(LDS_VOLUME_QUERY);
             // we suppose that the volumeId is well formed, which is checked by the Identifier constructor
             final StringEntity params = new StringEntity("{\"R_RES\":\""+volumeId+"\"}", ContentType.APPLICATION_JSON);
             //request.addHeader(HttpHeaders.ACCEPT, "application/json");
@@ -66,7 +66,7 @@ public class VolumeInfoService {
         } catch (IOException ex) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
         }
-        logger.debug("found volume info: {}", resVolumeInfo.toString());
+        logger.debug("found volume info: {}", resVolumeInfo);
         return resVolumeInfo;
     }
     

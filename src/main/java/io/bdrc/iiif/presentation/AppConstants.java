@@ -9,6 +9,14 @@ public class AppConstants {
     public static final String IIIFPresPrefix = "http://presentation.bdrc.io/2.1.1/";
     public static final String IIIFPresPrefix_coll = IIIFPresPrefix+"collection/";
     
+    public static final String LDS_QUERYPREFIX = "http://buda1.bdrc.io/graph/";
+    public static final String LDS_WORKGRAPH_QUERY = LDS_QUERYPREFIX+"IIIFPres_workGraph_noItem";
+    public static final String LDS_ITEMGRAPH_QUERY = LDS_QUERYPREFIX+"IIIFPres_itemGraph";
+    public static final String LDS_VOLUME_QUERY = LDS_QUERYPREFIX+"IIIFPres_volumeInfo";
+    
+    
+    public static final String IIIF_IMAGE_PREFIX = "http://iiif.bdrc.io/image/v2/";
+    
 	public static final int GENERIC_APP_ERROR_CODE = 5001;
 	
 	public static final int INVALID_IDENTIFIER_ERROR_CODE = 5002;

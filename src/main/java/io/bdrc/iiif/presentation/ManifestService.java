@@ -50,7 +50,7 @@ public class ManifestService {
     }
     
     public static String getImageServiceUrl(final String filename, final Identifier id) {
-        return "http://iiif.bdrc.io/image/v2/"+id.getVolumeId()+"::"+filename;
+        return IIIF_IMAGE_PREFIX+id.getVolumeId()+"::"+filename;
     }
 
     public static String getCanvasUri(final String filename, final Identifier id, final int seqNum) {
