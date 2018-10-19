@@ -63,7 +63,7 @@ public class IIIFPresentationService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/2.1.1/collection/{identifier}")
     @JerseyCacheControl()
-    public Collection getCollection(@PathParam("identifier") final String identifier,ContainerRequestContext ctx) throws BDRCAPIException {
+    public Collection getCollection(@PathParam("identifier") final String identifier, final ContainerRequestContext ctx) throws BDRCAPIException {
         final Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);
         String accessType="";
         final int subType=id.getSubType();
@@ -87,7 +87,7 @@ public class IIIFPresentationService {
         return CollectionService.getCollectionForIdentifier(id);
     }
 
-    public static String getShortName(String st) {
+    public static String getShortName(final String st) {
         return st.substring(st.lastIndexOf("/")+1);
     }
 

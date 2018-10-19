@@ -32,7 +32,7 @@ public class VolumeInfoService {
     
     static {
         try {
-            cache = JCS.getInstance("default");
+            cache = JCS.getInstance("iiifpres");
         } catch (CacheException e) {
             logger.error("cache initialization error, this shouldn't happen!", e);
         }

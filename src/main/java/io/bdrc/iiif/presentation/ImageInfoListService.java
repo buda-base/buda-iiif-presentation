@@ -48,7 +48,7 @@ public class ImageInfoListService {
             logger.error("this shouldn't happen!", e);
         }
         try {
-            cache = JCS.getInstance("default");
+            cache = JCS.getInstance("iiifpres");
         } catch (CacheException e) {
             logger.error("cache initialization error, this shouldn't happen!", e);
         }
