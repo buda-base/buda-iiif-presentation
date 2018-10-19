@@ -51,7 +51,7 @@ public class WorkInfoService {
             final HttpResponse response = httpClient.execute(request);
             int code = response.getStatusLine().getStatusCode();
             if (code != 200) {
-                throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error", response.toString(), "");
+                throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned http code "+code, response.toString(), "");
             }
             final InputStream body = response.getEntity().getContent();
             Model m = ModelFactory.createDefaultModel();
