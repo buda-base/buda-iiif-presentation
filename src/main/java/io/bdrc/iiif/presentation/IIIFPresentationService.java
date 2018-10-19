@@ -16,6 +16,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.auth.Access;
@@ -59,6 +60,35 @@ public class IIIFPresentationService {
 		return Response.ok(stream).build();
 	}
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/2.1.1/{identifier}/canvas/{imgseqnum}")
+    @JerseyCacheControl()
+    // add @Context UriInfo uriInfo to the arguments to get auth header
+    public Response getCanvas(@PathParam("identifier") final String identifier,
+            @PathParam("imgseqnum") final String imgseqnum,
+            final ContainerRequestContext ctx
+            ) throws BDRCAPIException {
+        final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
+        final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
+        final Access acc = (Access)ctx.getProperty("access");
+        final String accessType = getShortName(vi.access.getUri());
+        if(accessType == null || !acc.hasResourceAccess(accessType)) {
+            return Response.status(403).entity("Insufficient rights").build();
+        }
+        if (vi.iiifManifest != null) {
+            return Response.status(404).entity("Cannot serve canvas for external manifests").build();
+        }
+        final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgseqnum);
+        final StreamingOutput stream = new StreamingOutput() {
+            @Override
+            public void write(final OutputStream os) throws IOException, WebApplicationException {
+                IIIFApiObjectMapperProvider.writer.writeValue(os , res);
+            }
+        };
+        return Response.ok(stream).build();
+    }
+    
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/2.1.1/collection/{identifier}")

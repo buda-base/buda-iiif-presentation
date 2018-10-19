@@ -44,9 +44,10 @@ public class ManifestService {
     }
     
     public static String getLabelForImage(final int imageIndex) {
-        if (imageIndex < 2)
-            return "tbrc-"+(imageIndex+1);
-        return "p. "+(imageIndex-1);
+        // indices start at 1
+        if (imageIndex < 3)
+            return "tbrc-"+imageIndex;
+        return "p. "+(imageIndex-2);
     }
     
     public static String getImageServiceUrl(final String filename, final Identifier id) {
@@ -54,50 +55,34 @@ public class ManifestService {
     }
 
     public static String getCanvasUri(final String filename, final Identifier id, final int seqNum) {
+        // seqNum starts at 1
         //return IIIFPresPrefix+id.getVolumeId()+"::"+filename+"/canvas";
-        return IIIFPresPrefix+id.getVolumeId()+"/canvas"+"/"+(seqNum+1);
+        return IIIFPresPrefix+id.getVolumeId()+"/canvas"+"/"+seqNum;
     }
     
     public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence(IIIFPresPrefix+id.getId()+"/sequence/main");
         final int imageTotal = imageInfoList.size();
-        // in identifiers, pages go from 1, not 0, we do a translation for Java list indexes
-        final int beginIndex = (id.getBPageNum() == null) ? 0 : id.getBPageNum()-1;
+        // all indices start at 1
+        final int beginIndex = (id.getBPageNum() == null) ? 1 : id.getBPageNum();
         if (beginIndex > imageTotal) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you asked a manifest for an image number that is greater than the total number of images");
         }
         Integer ePageNum = id.getEPageNum();
-        int endIndex = imageTotal-1;
+        int endIndex = imageTotal;
         if (ePageNum != null) {
-            if (ePageNum > imageTotal-1) {
-                ePageNum = imageTotal - 1;
+            if (ePageNum > imageTotal) {
+                ePageNum = imageTotal;
                 logger.warn("user asked manifest for id {}, which has an end image ({}) larger than the total number of images ({})", id, ePageNum, imageTotal-1);
             }
-            endIndex = ePageNum-1;
+            endIndex = ePageNum;
         }
         //System.out.println("beginIndex : "+beginIndex+", endIndex: "+endIndex);
-        // imgSeqNum starts at 0 here
         for (int imgSeqNum = beginIndex ; imgSeqNum <= endIndex ; imgSeqNum++) {
-            final ImageInfo imageInfo = imageInfoList.get(imgSeqNum);
-            final String label = getLabelForImage(imgSeqNum);
-            final String canvasUri = getCanvasUri(imageInfo.filename, id, imgSeqNum);
-            final Canvas canvas = new Canvas(canvasUri, label);
-            canvas.setWidth(imageInfo.width);
-            canvas.setHeight(imageInfo.height);
-            final String imageServiceUrl = getImageServiceUrl(imageInfo.filename, id);
-            //canvas.addIIIFImage(imageServiceUrl, ImageApiProfile.LEVEL_ONE);
-            ImageService imgServ = new ImageService(imageServiceUrl, ImageApiProfile.LEVEL_ZERO);
-            ImageContent img = new ImageContent(imgServ);
-            img.setWidth(imageInfo.width);
-            img.setHeight(imageInfo.height);
-            canvas.addImage(img);
+            final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList);
             mainSeq.addCanvas(canvas);
             if (imgSeqNum == beginIndex) {
-                try {
-                    mainSeq.setStartCanvas(new URI(canvasUri));
-                } catch (URISyntaxException e) { // completely stupid but necessary
-                    throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
-                }
+                mainSeq.setStartCanvas(canvas.getIdentifier());
             }
         }
         return mainSeq;
@@ -113,9 +98,9 @@ public class ManifestService {
         if (!vi.workId.startsWith(BDR)) {
             throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you can only access BDRC volumes through this API");
         }
-        String workLocalId = vi.workId.substring(BDR_len);
+        final String workLocalId = vi.workId.substring(BDR_len);
         logger.info("building manifest for ID {}", id.getId());
-        List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(workLocalId, vi.imageGroup);
+        final List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(workLocalId, vi.imageGroup);
         final Manifest manifest = new Manifest(IIIFPresPrefix+id.getId()+"/manifest", "BUDA Manifest");
         manifest.setAttribution(attribution);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
@@ -127,4 +112,47 @@ public class ManifestService {
         return manifest;
     }
 
+    public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final List<ImageInfo> imageInfoList) {
+        // imgSeqNum starts at 1
+        final ImageInfo imageInfo = imageInfoList.get(imgSeqNum-1);
+        final String label = getLabelForImage(imgSeqNum);
+        final String canvasUri = getCanvasUri(imageInfo.filename, id, imgSeqNum);
+        final Canvas canvas = new Canvas(canvasUri, label);
+        canvas.setWidth(imageInfo.width);
+        canvas.setHeight(imageInfo.height);
+        final String imageServiceUrl = getImageServiceUrl(imageInfo.filename, id);
+        //canvas.addIIIFImage(imageServiceUrl, ImageApiProfile.LEVEL_ONE);
+        final ImageService imgServ = new ImageService(imageServiceUrl, ImageApiProfile.LEVEL_ZERO);
+        final ImageContent img = new ImageContent(imgServ);
+        img.setWidth(imageInfo.width);
+        img.setHeight(imageInfo.height);
+        canvas.addImage(img);
+        return canvas;
+    }
+    
+    public static Canvas getCanvasForIdentifier(final Identifier id, final VolumeInfo vi, final String imgSeqNumS) throws BDRCAPIException {
+        final Integer imgSeqNum;
+        try {
+            imgSeqNum = Integer.parseInt(imgSeqNumS);
+        } catch (NumberFormatException e) {
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "cannot understand final part of URL");
+        }
+        if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID) {
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
+        }
+        if (vi.access != AccessType.OPEN) {
+            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this volume");
+        }
+        if (!vi.workId.startsWith(BDR)) {
+            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you can only access BDRC volumes through this API");
+        }
+        final String workLocalId = vi.workId.substring(BDR_len);
+        logger.info("building canvas for ID {}, imgSeqNum {}", id.getId(), imgSeqNum);
+        final List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(workLocalId, vi.imageGroup);
+        final int imageTotal = imageInfoList.size();
+        if (imgSeqNum < 1 || imgSeqNum > imageTotal) {
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you asked a canvas for an image number that is inferior to 1 or greater than the total number of images");
+        }
+        return buildCanvas(id, imgSeqNum, imageInfoList);
+    }
 }
