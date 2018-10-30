@@ -17,7 +17,6 @@ import org.apache.commons.jcs.access.exception.CacheException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.amazonaws.ClientConfiguration;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
@@ -39,12 +38,6 @@ public class ImageInfoListService {
     static private final ObjectMapper om;
     private static final Logger logger = LoggerFactory.getLogger(ImageInfoListService.class);
     private static final Charset utf8 = Charset.forName("UTF-8");
-
-    private static final ClientConfiguration config = new ClientConfiguration()
-            .withConnectionTimeout(300000)
-            .withMaxConnections(50)
-            .withMaxErrorRetry(100)
-            .withSocketTimeout(300000);
 
     static {
         om = new ObjectMapper();
