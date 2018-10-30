@@ -9,6 +9,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -17,9 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
-import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.auth.Access;
+import io.bdrc.auth.AuthProps;
+import io.bdrc.auth.rdf.RdfConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
@@ -34,7 +36,7 @@ public class IIIFPresentationService {
     @GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/2.1.1/{identifier}/manifest")
-	@JerseyCacheControl()
+
 	// add @Context UriInfo uriInfo to the arguments to get auth header
 	public Response getManifest(@PathParam("identifier") final String identifier, ContainerRequestContext ctx) throws BDRCAPIException {
 		final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
@@ -42,7 +44,8 @@ public class IIIFPresentationService {
 		Access acc=(Access)ctx.getProperty("access");
 	    String accessType=getShortName(vi.access.getUri());
 	    if(accessType==null || !acc.hasResourceAccess(accessType)) {
-	        return Response.status(403).entity("Insufficient rights").build();
+
+	        return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
 	    }
 		if (vi.iiifManifest != null) {
 		    logger.info("redirect manifest request for ID {} to {}", identifier, vi.iiifManifest.toString());
@@ -57,13 +60,21 @@ public class IIIFPresentationService {
                 IIIFApiObjectMapperProvider.writer.writeValue(os , resmanifest);
             }
         };
-		return Response.ok(stream).build();
+        //At this point the resource is accessible but we don't whether it is public or restricted
+        //and we don't know either if the user is authenticated or not
+        // temporary test on Image accessType until we improve bdrc-auth-lib to provide a meaningful test
+        boolean open=accessType.equals(RdfConstants.OPEN);
+        if(open) {
+            return Response.ok(stream).header("Cache-Control", "public,max-age="+AuthProps.getProperty("max-age")).build();
+        }else {
+            return Response.ok(stream).header("Cache-Control", "private,max-age="+AuthProps.getProperty("max-age")).build();
+        }
+
 	}
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/2.1.1/{identifier}/canvas/{imgseqnum}")
-    @JerseyCacheControl()
     // add @Context UriInfo uriInfo to the arguments to get auth header
     public Response getCanvas(@PathParam("identifier") final String identifier,
             @PathParam("imgseqnum") final String imgseqnum,
@@ -74,10 +85,10 @@ public class IIIFPresentationService {
         final Access acc = (Access)ctx.getProperty("access");
         final String accessType = getShortName(vi.access.getUri());
         if(accessType == null || !acc.hasResourceAccess(accessType)) {
-            return Response.status(403).entity("Insufficient rights").build();
+            return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
         }
         if (vi.iiifManifest != null) {
-            return Response.status(404).entity("Cannot serve canvas for external manifests").build();
+            return Response.status(404).entity("Cannot serve canvas for external manifests").header("Cache-Control", "no-cache").build();
         }
         final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgseqnum);
         final StreamingOutput stream = new StreamingOutput() {
@@ -86,14 +97,21 @@ public class IIIFPresentationService {
                 IIIFApiObjectMapperProvider.writer.writeValue(os , res);
             }
         };
-        return Response.ok(stream).build();
+        //At this point the resource is accessible but we don't whether it is public or restricted
+        //and we don't know either if the user is authenticated or not
+        // temporary test on Image accessType until we improve bdrc-auth-lib to provide a meaningful test
+        boolean open=accessType.equals(RdfConstants.OPEN);
+        if(open) {
+            return Response.ok(stream).header("Cache-Control", "public,max-age="+AuthProps.getProperty("max-age")).build();
+        }else {
+            return Response.ok(stream).header("Cache-Control", "private,max-age="+AuthProps.getProperty("max-age")).build();
+        }
     }
-    
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/2.1.1/collection/{identifier}")
-    @JerseyCacheControl()
-    public Collection getCollection(@PathParam("identifier") final String identifier, final ContainerRequestContext ctx) throws BDRCAPIException {
+    public Response getCollection(@PathParam("identifier") final String identifier, final ContainerRequestContext ctx) throws BDRCAPIException {
         final Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);
         String accessType="";
         final int subType=id.getSubType();
@@ -114,7 +132,20 @@ public class IIIFPresentationService {
         if(!acc.hasResourceAccess(accessType)) {
             throw new BDRCAPIException(403, AppConstants.GENERIC_LDS_ERROR, "Insufficient rights");
         }
-        return CollectionService.getCollectionForIdentifier(id);
+        //At this point the resource is accessible but we don't whether it is public or restricted
+        //and we don't know either if the user is authenticated or not
+        // temporary test on Image accessType until we improve bdrc-auth-lib to provide a meaningful test
+        boolean open=accessType.equals(RdfConstants.OPEN);
+        int maxAgeSeconds=Integer.parseInt(AuthProps.getProperty("max-age"))/1000;
+        if(open) {
+            return Response.ok().cacheControl(CacheControl.valueOf("public, max-age="+maxAgeSeconds))
+                    .entity(CollectionService.getCollectionForIdentifier(id)).build();
+        }else {
+            return Response.ok().cacheControl(CacheControl.valueOf("private, max-age="+maxAgeSeconds))
+                    .entity(CollectionService.getCollectionForIdentifier(id)).build();
+        }
+
+        //return CollectionService.getCollectionForIdentifier(id);*/
     }
 
     public static String getShortName(final String st) {
