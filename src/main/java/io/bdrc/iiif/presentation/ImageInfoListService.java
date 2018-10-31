@@ -25,6 +25,7 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.bdrc.auth.AuthProps;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.ImageInfo;
 
@@ -62,8 +63,11 @@ public class ImageInfoListService {
     }
 
     private static AmazonS3 getClient() {
-        if (s3Client == null)
-            s3Client = AmazonS3ClientBuilder.defaultClient();
+        if (s3Client == null) {
+            AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard().withRegion(AuthProps.getProperty("awsRegion"));
+            //s3Client = AmazonS3ClientBuilder.defaultClient();
+            s3Client=clientBuilder.build();
+        }
         return s3Client;
     }
 
