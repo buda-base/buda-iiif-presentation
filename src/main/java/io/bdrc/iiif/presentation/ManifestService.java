@@ -114,10 +114,12 @@ public class ManifestService {
         manifest.addLogo("https://eroux.fr/logo.png");
         manifest.addLabel(id.getVolumeId());
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
-        mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
+        //mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         /***Viewing hints and direction*/
-        mainSeq.setViewingHints(VIEW_HINTS);
+        //mainSeq.setViewingHints(VIEW_HINTS);
         manifest.addSequence(mainSeq);
+        manifest.setViewingHints(VIEW_HINTS);
+        manifest.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         return manifest;
     }
 
