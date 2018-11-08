@@ -65,7 +65,6 @@ public class ImageInfoListService {
     private static AmazonS3 getClient() {
         if (s3Client == null) {
             AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard().withRegion(AuthProps.getProperty("awsRegion"));
-            //s3Client = AmazonS3ClientBuilder.defaultClient();
             s3Client=clientBuilder.build();
         }
         return s3Client;

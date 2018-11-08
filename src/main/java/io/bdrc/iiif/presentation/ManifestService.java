@@ -1,9 +1,13 @@
 package io.bdrc.iiif.presentation;
 
-import static io.bdrc.iiif.presentation.AppConstants.*;
+import static io.bdrc.iiif.presentation.AppConstants.BDR;
+import static io.bdrc.iiif.presentation.AppConstants.BDR_len;
+import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
+import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
+import static io.bdrc.iiif.presentation.AppConstants.IIIF_IMAGE_PREFIX;
+import static io.bdrc.iiif.presentation.AppConstants.NO_ACCESS_ERROR_CODE;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -15,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import de.digitalcollections.iiif.model.ImageContent;
 import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.enums.ViewingDirection;
+import de.digitalcollections.iiif.model.enums.ViewingHint;
 import de.digitalcollections.iiif.model.image.ImageApiProfile;
 import de.digitalcollections.iiif.model.image.ImageService;
 import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
@@ -30,26 +35,28 @@ import io.bdrc.iiif.presentation.models.VolumeInfo;
 public class ManifestService {
 
     private static final Logger logger = LoggerFactory.getLogger(ManifestService.class);
-    
+
     public static final Map<String, Locale> locales = new HashMap<>();
     public static final PropertyValue attribution = new PropertyValue();
+    public static final List<ViewingHint> VIEW_HINTS=Arrays.asList(new ViewingHint[] { ViewingHint.CONTINUOUS});
+    public static final ViewingDirection VIEW_DIRECTION= ViewingDirection.TOP_TO_BOTTOM;
     static {
         attribution.addValue(getLocaleFor("en"), "Buddhist Digital Resource Center");
         attribution.addValue(getLocaleFor("bo"), "ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།");
         attribution.addValue(getLocaleFor("zh"), "佛教数字资源中心(BDRC)");
     }
-    
+
     public static Locale getLocaleFor(String lt) {
         return locales.computeIfAbsent(lt, x -> Locale.forLanguageTag(lt));
     }
-    
+
     public static String getLabelForImage(final int imageIndex) {
         // indices start at 1
         if (imageIndex < 3)
             return "tbrc-"+imageIndex;
         return "p. "+(imageIndex-2);
     }
-    
+
     public static String getImageServiceUrl(final String filename, final Identifier id) {
         return IIIF_IMAGE_PREFIX+id.getVolumeId()+"::"+filename;
     }
@@ -59,7 +66,7 @@ public class ManifestService {
         //return IIIFPresPrefix+id.getVolumeId()+"::"+filename+"/canvas";
         return IIIFPresPrefix+id.getVolumeId()+"/canvas"+"/"+seqNum;
     }
-    
+
     public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence(IIIFPresPrefix+id.getId()+"/sequence/main");
         final int imageTotal = imageInfoList.size();
@@ -87,7 +94,7 @@ public class ManifestService {
         }
         return mainSeq;
     }
-    
+
     public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi) throws BDRCAPIException {
         if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
@@ -108,6 +115,8 @@ public class ManifestService {
         manifest.addLabel(id.getVolumeId());
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
+        /***Viewing hints and direction*/
+        mainSeq.setViewingHints(VIEW_HINTS);
         manifest.addSequence(mainSeq);
         return manifest;
     }
@@ -129,7 +138,7 @@ public class ManifestService {
         canvas.addImage(img);
         return canvas;
     }
-    
+
     public static Canvas getCanvasForIdentifier(final Identifier id, final VolumeInfo vi, final String imgSeqNumS) throws BDRCAPIException {
         final Integer imgSeqNum;
         try {
