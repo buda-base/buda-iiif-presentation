@@ -6,8 +6,6 @@ import java.io.StringWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.bdrc.iiif.presentation.VolumeInfoService;
-
 public class BDRCAPIException extends Exception
 {
     private static final Logger logger = LoggerFactory.getLogger(Exception.class);
@@ -16,7 +14,7 @@ public class BDRCAPIException extends Exception
     int code;
     String link;
     String developerMessage;
-    String message; 
+    String message;
 
     public BDRCAPIException() {
     }
@@ -67,6 +65,10 @@ public class BDRCAPIException extends Exception
 
     public void setCode(int code) {
         this.code = code;
+    }
+
+    public int getCode() {
+        return code;
     }
 
     public void setDeveloperMessage(String developerMessage) {

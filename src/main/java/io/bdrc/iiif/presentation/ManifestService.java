@@ -84,7 +84,6 @@ public class ManifestService {
             }
             endIndex = ePageNum;
         }
-        //System.out.println("beginIndex : "+beginIndex+", endIndex: "+endIndex);
         for (int imgSeqNum = beginIndex ; imgSeqNum <= endIndex ; imgSeqNum++) {
             final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList);
             mainSeq.addCanvas(canvas);
@@ -96,12 +95,14 @@ public class ManifestService {
     }
 
     public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi) throws BDRCAPIException {
+
         if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
-        if (vi.access != AccessType.OPEN) {
+        /*if (vi.access != AccessType.OPEN) {
+            System.out.println("MANIFEST service 3>>"+ BDR_len);
             throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this volume");
-        }
+        }*/
         if (!vi.workId.startsWith(BDR)) {
             throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you can only access BDRC volumes through this API");
         }
@@ -116,7 +117,7 @@ public class ManifestService {
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         /***Viewing hints and direction*/
-        //mainSeq.setViewingHints(VIEW_HINTS);
+        mainSeq.setViewingHints(VIEW_HINTS);
         manifest.addSequence(mainSeq);
         return manifest;
     }

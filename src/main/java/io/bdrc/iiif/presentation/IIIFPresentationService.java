@@ -42,9 +42,8 @@ public class IIIFPresentationService {
 		final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
 		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
 		Access acc=(Access)ctx.getProperty("access");
-	    String accessType=getShortName(vi.access.getUri());
+		String accessType=getShortName(vi.access.getUri());
 	    if(accessType==null || !acc.hasResourceAccess(accessType)) {
-
 	        return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
 	    }
 		if (vi.iiifManifest != null) {
@@ -69,7 +68,6 @@ public class IIIFPresentationService {
         }else {
             return Response.ok(stream).header("Cache-Control", "private,max-age="+AuthProps.getProperty("max-age")).build();
         }
-
 	}
 
     @GET

@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
 import org.slf4j.Logger;
@@ -33,6 +34,13 @@ public class IIIFPresAuthFilter implements ContainerRequestFilter {
         } else {
             ctx.setProperty("access", new Access());
         }
+    }
+
+
+    void abort(ContainerRequestContext ctx) {
+        ctx.abortWith(Response.status(Response.Status.FORBIDDEN)
+                .entity("access to this resource is restricted")
+                .build());
     }
 
     String getToken(final String header) {

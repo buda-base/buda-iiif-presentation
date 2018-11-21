@@ -37,7 +37,6 @@ public class IIIFPresApplication extends ResourceConfig {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
     }
 
 }
