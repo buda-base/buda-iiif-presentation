@@ -23,11 +23,18 @@ public class IIIFPresApplication extends ResourceConfig {
     public final static Logger log=LoggerFactory.getLogger(IIIFPresApplication.class.getName());
 
     public IIIFPresApplication() {
-        InputStream is;
+
         try {
-            is = new FileInputStream(configPath+"iiifpres-auth.properties");
+            InputStream input=IIIFPresApplication.class.getClassLoader().getResourceAsStream("iiifpres.properties");
             Properties props=new Properties();
-            props.load(is);
+            props.load(input);
+            try {
+                InputStream is = new FileInputStream(configPath+"iiifpres-private.properties");
+                props.load(is);
+
+            }catch(Exception ex) {
+                //do nothing, continue props initialization
+            }
             AuthProps.init(props);
             RdfAuthModel.init();
             ServiceCache.init();

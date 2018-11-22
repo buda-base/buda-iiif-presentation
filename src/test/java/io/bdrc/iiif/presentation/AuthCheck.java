@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.rdf.RdfAuthModel;
 
-public class AuthTest extends JerseyTest{
+public class AuthCheck extends JerseyTest{
 
     static AuthAPI auth;
     static String token;
