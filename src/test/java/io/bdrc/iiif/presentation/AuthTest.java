@@ -124,24 +124,24 @@ public class AuthTest extends JerseyTest{
     public void ChinaRestrictedResource() throws ClientProtocolException, IOException, IllegalArgumentException, CertificateException, InvalidKeySpecException, NoSuchAlgorithmException {
         //with public Token and authorized picture
         HttpClient client1=HttpClientBuilder.create().build();
-        HttpGet get1=new HttpGet(this.getBaseUri()+"/2.1.1/v:bdr:V29329_I1KG15042::10-35/manifest");
+        HttpGet get1=new HttpGet(this.getBaseUri()+"2.1.1/v:bdr:V29329_I1KG15042::10-35/manifest");
         get1.addHeader("Authorization", "Bearer "+publicToken);
         HttpResponse resp1=client1.execute(get1);
         System.out.println("RESP 1 >>"+resp1.getStatusLine());
         assert(resp1.getStatusLine().getStatusCode()==200);
         //with public Token and restricted picture
         HttpClient client=HttpClientBuilder.create().build();
-        HttpGet get=new HttpGet(this.getBaseUri()+"/2.1.1/v:bdr:V28810_I4644::1-2/manifest");
+        HttpGet get=new HttpGet(this.getBaseUri()+"2.1.1/v:bdr:V28263_I1KG14453/manifest");
         get.addHeader("Authorization", "Bearer "+publicToken);
         HttpResponse resp=client.execute(get);
         System.out.println("RESP 2 >>"+resp.getStatusLine());
         assert(resp.getStatusLine().getStatusCode()==403);
         //with admin Token and restricted picture
-        /*HttpClient client2=HttpClientBuilder.create().build();
-        HttpGet get2=new HttpGet(this.getBaseUri()+"/2.1.1/v:bdr:V28810_I4644/manifest");
+        HttpClient client2=HttpClientBuilder.create().build();
+        HttpGet get2=new HttpGet(this.getBaseUri()+"2.1.1/v:bdr:V28263_I1KG14453/manifest");
         get2.addHeader("Authorization", "Bearer "+adminToken);
         HttpResponse resp2=client2.execute(get2);
         System.out.println("RESP 3 >>"+resp2.getStatusLine());
-        assert(resp2.getStatusLine().getStatusCode()==200);*/
+        assert(resp2.getStatusLine().getStatusCode()==200);
     }
 }
