@@ -116,7 +116,7 @@ public class ManifestService {
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         /***Viewing hints and direction*/
-        mainSeq.setViewingHints(VIEW_HINTS);
+        //mainSeq.setViewingHints(VIEW_HINTS);
         manifest.addSequence(mainSeq);
         return manifest;
     }
