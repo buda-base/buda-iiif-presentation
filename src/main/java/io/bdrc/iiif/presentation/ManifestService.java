@@ -7,7 +7,6 @@ import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIF_IMAGE_PREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.NO_ACCESS_ERROR_CODE;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import de.digitalcollections.iiif.model.ImageContent;
 import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.enums.ViewingDirection;
-import de.digitalcollections.iiif.model.enums.ViewingHint;
 import de.digitalcollections.iiif.model.image.ImageApiProfile;
 import de.digitalcollections.iiif.model.image.ImageService;
 import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
@@ -38,7 +36,8 @@ public class ManifestService {
 
     public static final Map<String, Locale> locales = new HashMap<>();
     public static final PropertyValue attribution = new PropertyValue();
-    public static final List<ViewingHint> VIEW_HINTS=Arrays.asList(new ViewingHint[] { ViewingHint.CONTINUOUS});
+    //public static final List<ViewingHint> VIEW_HINTS=Arrays.asList(new ViewingHint[] { ViewingHint.CONTINUOUS});
+    public static final String VIEW_HINTS= "continuous";
     public static final ViewingDirection VIEW_DIRECTION= ViewingDirection.TOP_TO_BOTTOM;
     static {
         attribution.addValue(getLocaleFor("en"), "Buddhist Digital Resource Center");
