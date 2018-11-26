@@ -20,7 +20,7 @@ import io.bdrc.auth.model.Endpoint;
 @PreMatching
 public class IIIFPresAuthFilter implements ContainerRequestFilter {
 
-    public final static Logger log=LoggerFactory.getLogger(IIIFPresAuthTestFilter.class.getName());
+    public final static Logger log=LoggerFactory.getLogger(IIIFPresAuthFilter.class.getName());
 
     @Override
     public void filter(final ContainerRequestContext ctx) throws IOException {
