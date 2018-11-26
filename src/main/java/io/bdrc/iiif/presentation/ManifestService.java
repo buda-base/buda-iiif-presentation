@@ -106,7 +106,7 @@ public class ManifestService {
         final Manifest manifest = new Manifest(IIIFPresPrefix+id.getId()+"/manifest", "BUDA Manifest");
         manifest.setAttribution(attribution);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
-        manifest.addLogo("https://eroux.fr/logo.png");
+        manifest.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
         manifest.addLabel(id.getVolumeId());
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
