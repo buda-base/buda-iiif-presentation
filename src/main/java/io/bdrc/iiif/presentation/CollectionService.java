@@ -89,7 +89,7 @@ public class CollectionService {
         final Collection collection = new Collection(IIIFPresPrefix_coll+id.getId(), "Collection");
         collection.setAttribution(ManifestService.attribution);
         collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
-        collection.addLogo("https://eroux.fr/logo.png");
+        collection.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
         collection.setLabel(getLabels(id.getWorkId(), wi));
         if(continuous) {
             collection.setViewingHints(VIEW_HINTS);
@@ -124,7 +124,7 @@ public class CollectionService {
         final Collection collection = new Collection(IIIFPresPrefix_coll+id.getId(), "Collection");
         collection.setAttribution(ManifestService.attribution);
         collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
-        collection.addLogo("https://eroux.fr/logo.png");
+        collection.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
         collection.addLabel(id.getItemId());
         if(continuous) {
             collection.setViewingHints(VIEW_HINTS);
