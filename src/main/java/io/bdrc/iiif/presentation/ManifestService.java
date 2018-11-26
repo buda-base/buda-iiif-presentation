@@ -93,7 +93,7 @@ public class ManifestService {
         return mainSeq;
     }
 
-    public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi) throws BDRCAPIException {
+    public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi, boolean continuous) throws BDRCAPIException {
         if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
@@ -111,7 +111,9 @@ public class ManifestService {
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         /***Viewing hints and direction*/
-        //mainSeq.setViewingHints(VIEW_HINTS);
+        if(continuous) {
+            mainSeq.setViewingHints(VIEW_HINTS);
+        }
         manifest.addSequence(mainSeq);
         return manifest;
     }

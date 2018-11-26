@@ -1,5 +1,13 @@
 package io.bdrc.iiif.presentation;
 
+import static io.bdrc.iiif.presentation.AppConstants.BDR_len;
+import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
+import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
+import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix_coll;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
@@ -10,30 +18,27 @@ import io.bdrc.iiif.presentation.models.ItemInfo.VolumeInfoSmall;
 import io.bdrc.iiif.presentation.models.WorkInfo;
 import io.bdrc.iiif.presentation.models.WorkInfo.LangString;
 
-import static io.bdrc.iiif.presentation.AppConstants.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class CollectionService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(CollectionService.class);
-    
+  //public static final List<ViewingHint> VIEW_HINTS=Arrays.asList(new ViewingHint[] { ViewingHint.CONTINUOUS});
+    public static final String VIEW_HINTS= "continuous";
+
     public static String getPrefixedForm(final String id) {
         return "bdr:"+id.substring(BDR_len);
     }
-    
-    public static Collection getCollectionForIdentifier(final Identifier id) throws BDRCAPIException {
+
+    public static Collection getCollectionForIdentifier(final Identifier id,boolean continuous) throws BDRCAPIException {
         switch(id.getSubType()) {
         case Identifier.COLLECTION_ID_ITEM:
-            return getCollectionForItem(id);
+            return getCollectionForItem(id,continuous);
         case Identifier.COLLECTION_ID_WORK_OUTLINE:
-            return getCollectionForOutline(id);
+            return getCollectionForOutline(id,continuous);
         default:
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
     }
-    
+
     public static void addManifestsForLocation(final Collection c, final WorkInfo wi, final ItemInfo ii) {
         if (!wi.hasLocation)
             return;
@@ -73,8 +78,8 @@ public class CollectionService {
         }
         return label;
     }
-    
-    public static Collection getCollectionForOutline(final Identifier id) throws BDRCAPIException {
+
+    public static Collection getCollectionForOutline(final Identifier id,boolean continuous) throws BDRCAPIException {
         final WorkInfo wi = WorkInfoService.getWorkInfo(id.getWorkId());
         final ItemInfo ii;
 //        if (wi.access != AccessType.OPEN) {
@@ -86,6 +91,9 @@ public class CollectionService {
         collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         collection.addLogo("https://eroux.fr/logo.png");
         collection.setLabel(getLabels(id.getWorkId(), wi));
+        if(continuous) {
+            collection.setViewingHints(VIEW_HINTS);
+        }
         if (wi.parts != null) {
             for (WorkInfo.PartInfo pi : wi.parts) {
                 final String prefixedPartId = getPrefixedForm(pi.partId);
@@ -106,8 +114,8 @@ public class CollectionService {
         addManifestsForLocation(collection, wi, ii);
         return collection;
     }
-    
-    public static Collection getCollectionForItem(final Identifier id) throws BDRCAPIException {
+
+    public static Collection getCollectionForItem(final Identifier id,boolean continuous) throws BDRCAPIException {
         final ItemInfo ii = ItemInfoService.getItemInfo(id.getItemId());
 //        if (ii.access != AccessType.OPEN) {
 //            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this collection");
@@ -118,10 +126,13 @@ public class CollectionService {
         collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         collection.addLogo("https://eroux.fr/logo.png");
         collection.addLabel(id.getItemId());
+        if(continuous) {
+            collection.setViewingHints(VIEW_HINTS);
+        }
         for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
             final String manifestId = "v:"+vi.getPrefixedUri();
             final String volumeNumberStr = vi.toDisplay();
-            final String manifestUrl = vi.iiifManifest == null ? IIIFPresPrefix+manifestId+"/manifest" : vi.iiifManifest; 
+            final String manifestUrl = vi.iiifManifest == null ? IIIFPresPrefix+manifestId+"/manifest" : vi.iiifManifest;
             final Manifest manifest = new Manifest(manifestUrl, volumeNumberStr);
             collection.addManifest(manifest);
         }

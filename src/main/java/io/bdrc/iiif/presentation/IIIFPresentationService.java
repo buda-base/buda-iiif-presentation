@@ -10,9 +10,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +41,15 @@ public class IIIFPresentationService {
 	@Path("/2.1.1/{identifier}/manifest")
 
 	// add @Context UriInfo uriInfo to the arguments to get auth header
-	public Response getManifest(@PathParam("identifier") final String identifier, ContainerRequestContext ctx) throws BDRCAPIException {
+	public Response getManifest(@PathParam("identifier") final String identifier,
+	        ContainerRequestContext ctx,
+	        @Context UriInfo info) throws BDRCAPIException {
+        MultivaluedMap<String, String> hm=info.getQueryParameters();
+        String cont=hm.getFirst("continuous");
+        boolean continuous=false;
+        if(cont!=null) {
+            continuous=Boolean.parseBoolean(cont);
+        }
 		final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
 		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
 		Access acc=(Access)ctx.getProperty("access");
@@ -52,7 +63,7 @@ public class IIIFPresentationService {
 	                .header("Location", vi.iiifManifest)
 	                .build();
 		}
-		final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi);
+		final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous);
         final StreamingOutput stream = new StreamingOutput() {
             @Override
             public void write(final OutputStream os) throws IOException, WebApplicationException {
@@ -75,9 +86,7 @@ public class IIIFPresentationService {
     @Path("/2.1.1/{identifier}/canvas/{imgseqnum}")
     // add @Context UriInfo uriInfo to the arguments to get auth header
     public Response getCanvas(@PathParam("identifier") final String identifier,
-            @PathParam("imgseqnum") final String imgseqnum,
-            final ContainerRequestContext ctx
-            ) throws BDRCAPIException {
+            @PathParam("imgseqnum") final String imgseqnum, final ContainerRequestContext ctx) throws BDRCAPIException {
         final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
         final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
         final Access acc = (Access)ctx.getProperty("access");
@@ -109,7 +118,15 @@ public class IIIFPresentationService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/2.1.1/collection/{identifier}")
-    public Response getCollection(@PathParam("identifier") final String identifier, final ContainerRequestContext ctx) throws BDRCAPIException {
+    public Response getCollection(@PathParam("identifier") final String identifier,
+            final ContainerRequestContext ctx,
+            @Context UriInfo info) throws BDRCAPIException {
+        MultivaluedMap<String, String> hm=info.getQueryParameters();
+        String cont=hm.getFirst("continuous");
+        boolean continuous=false;
+        if(cont!=null) {
+            continuous=Boolean.parseBoolean(cont);
+        }
         final Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);
         String accessType="";
         final int subType=id.getSubType();
@@ -137,10 +154,10 @@ public class IIIFPresentationService {
         int maxAgeSeconds=Integer.parseInt(AuthProps.getProperty("max-age"))/1000;
         if(open) {
             return Response.ok().cacheControl(CacheControl.valueOf("public, max-age="+maxAgeSeconds))
-                    .entity(CollectionService.getCollectionForIdentifier(id)).build();
+                    .entity(CollectionService.getCollectionForIdentifier(id,continuous)).build();
         }else {
             return Response.ok().cacheControl(CacheControl.valueOf("private, max-age="+maxAgeSeconds))
-                    .entity(CollectionService.getCollectionForIdentifier(id)).build();
+                    .entity(CollectionService.getCollectionForIdentifier(id,continuous)).build();
         }
 
         //return CollectionService.getCollectionForIdentifier(id);*/
