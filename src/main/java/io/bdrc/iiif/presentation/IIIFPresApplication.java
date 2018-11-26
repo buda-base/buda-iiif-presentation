@@ -19,7 +19,7 @@ import io.bdrc.auth.rdf.RdfAuthModel;
 @Provider
 public class IIIFPresApplication extends ResourceConfig {
 
-    static final String configPath= System.getProperty("iiifpres.configpath");
+    //static final String configPath= System.getProperty("iiifpres.configpath");
     public final static Logger log=LoggerFactory.getLogger(IIIFPresApplication.class.getName());
 
     public IIIFPresApplication() {
@@ -29,7 +29,7 @@ public class IIIFPresApplication extends ResourceConfig {
             Properties props=new Properties();
             props.load(input);
             try {
-                InputStream is = new FileInputStream(configPath+"iiifpres-private.properties");
+                InputStream is = new FileInputStream("/etc/buda/share/shared-private.properties");
                 props.load(is);
 
             }catch(Exception ex) {
