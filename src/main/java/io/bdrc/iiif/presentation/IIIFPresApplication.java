@@ -39,7 +39,7 @@ public class IIIFPresApplication extends ResourceConfig {
             RdfAuthModel.init();
             ServiceCache.init();
             register(CommonHeadersFilter.class);
-            register(IIIFPresAuthFilter.class);
+            register(IIIFPresAuthTestFilter.class);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

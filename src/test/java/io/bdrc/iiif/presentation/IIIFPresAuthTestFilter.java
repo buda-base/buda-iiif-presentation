@@ -11,14 +11,18 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
+
 import io.bdrc.auth.Access;
-import io.bdrc.auth.TokenValidation;
 import io.bdrc.auth.UserProfile;
 import io.bdrc.auth.model.Endpoint;
 
 @Provider
 @PreMatching
-public class IIIFPresAuthFilter implements ContainerRequestFilter {
+public class IIIFPresAuthTestFilter implements ContainerRequestFilter {
 
     public final static Logger log=LoggerFactory.getLogger(IIIFPresAuthTestFilter.class.getName());
 
@@ -28,8 +32,11 @@ public class IIIFPresAuthFilter implements ContainerRequestFilter {
         if (token != null) {
             //User is logged on
             //Getting his profile
-            final TokenValidation validation = new TokenValidation(token);
-            final UserProfile prof = validation.getUser();
+          //User is logged on
+            //Getting his profile
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256("secret")).build();
+            DecodedJWT jwt=verifier.verify(token);
+            UserProfile prof=new UserProfile(jwt);
             ctx.setProperty("access", new Access(prof, new Endpoint()));
         } else {
             ctx.setProperty("access", new Access());
