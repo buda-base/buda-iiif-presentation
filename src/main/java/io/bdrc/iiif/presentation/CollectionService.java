@@ -100,6 +100,9 @@ public class CollectionService {
                 final String collectionId = "wio:"+prefixedPartId;
                 final Collection subcollection = new Collection(IIIFPresPrefix_coll+collectionId);
                 subcollection.addLabel(prefixedPartId);
+                if(continuous) {
+                    subcollection.setViewingHints(VIEW_HINTS);
+                }
                 collection.addCollection(subcollection);
             }
         }
@@ -133,7 +136,10 @@ public class CollectionService {
             final String manifestId = "v:"+vi.getPrefixedUri();
             final String volumeNumberStr = vi.toDisplay();
             final String manifestUrl = vi.iiifManifest == null ? IIIFPresPrefix+manifestId+"/manifest" : vi.iiifManifest;
-            final Manifest manifest = new Manifest(manifestUrl, volumeNumberStr);
+            Manifest manifest = new Manifest(manifestUrl, volumeNumberStr);;
+            if(continuous) {
+                manifest = new Manifest(manifestUrl+"?continuous=true", volumeNumberStr);
+            }
             collection.addManifest(manifest);
         }
         return collection;
