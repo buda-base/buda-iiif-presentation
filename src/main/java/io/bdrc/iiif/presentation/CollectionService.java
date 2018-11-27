@@ -39,7 +39,7 @@ public class CollectionService {
         }
     }
 
-    public static void addManifestsForLocation(final Collection c, final WorkInfo wi, final ItemInfo ii) {
+    public static void addManifestsForLocation(final Collection c, final WorkInfo wi, final ItemInfo ii, final boolean continuous) {
         if (!wi.hasLocation)
             return;
         for (int i = wi.bvolnum ; i <= wi.evolnum ; i++) {
@@ -59,6 +59,9 @@ public class CollectionService {
                     sb.append(volumeePage);
             }
             sb.append("/manifest");
+            if (continuous) {
+                sb.append("?continuous=true");
+            }
             final Manifest m = new Manifest(sb.toString(), vi.toDisplay());
             c.addManifest(m);
         }
@@ -79,7 +82,7 @@ public class CollectionService {
         return label;
     }
 
-    public static Collection getCollectionForOutline(final Identifier id,boolean continuous) throws BDRCAPIException {
+    public static Collection getCollectionForOutline(final Identifier id, final boolean continuous) throws BDRCAPIException {
         final WorkInfo wi = WorkInfoService.getWorkInfo(id.getWorkId());
         final ItemInfo ii;
 //        if (wi.access != AccessType.OPEN) {
@@ -91,18 +94,12 @@ public class CollectionService {
         collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         collection.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
         collection.setLabel(getLabels(id.getWorkId(), wi));
-        if(continuous) {
-            collection.setViewingHints(VIEW_HINTS);
-        }
         if (wi.parts != null) {
-            for (WorkInfo.PartInfo pi : wi.parts) {
+            for (final WorkInfo.PartInfo pi : wi.parts) {
                 final String prefixedPartId = getPrefixedForm(pi.partId);
                 final String collectionId = "wio:"+prefixedPartId;
                 final Collection subcollection = new Collection(IIIFPresPrefix_coll+collectionId);
                 subcollection.addLabel(prefixedPartId);
-                if(continuous) {
-                    subcollection.setViewingHints(VIEW_HINTS);
-                }
                 collection.addCollection(subcollection);
             }
         }
@@ -114,11 +111,11 @@ public class CollectionService {
             // TODO: exception of wi.parts == null ? currently an empty collection is returned
             return collection;
         }
-        addManifestsForLocation(collection, wi, ii);
+        addManifestsForLocation(collection, wi, ii, continuous);
         return collection;
     }
 
-    public static Collection getCollectionForItem(final Identifier id,boolean continuous) throws BDRCAPIException {
+    public static Collection getCollectionForItem(final Identifier id, final boolean continuous) throws BDRCAPIException {
         final ItemInfo ii = ItemInfoService.getItemInfo(id.getItemId());
 //        if (ii.access != AccessType.OPEN) {
 //            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this collection");
@@ -129,17 +126,19 @@ public class CollectionService {
         collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         collection.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
         collection.addLabel(id.getItemId());
-        if(continuous) {
-            collection.setViewingHints(VIEW_HINTS);
-        }
         for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
             final String manifestId = "v:"+vi.getPrefixedUri();
             final String volumeNumberStr = vi.toDisplay();
-            final String manifestUrl = vi.iiifManifest == null ? IIIFPresPrefix+manifestId+"/manifest" : vi.iiifManifest;
-            Manifest manifest = new Manifest(manifestUrl, volumeNumberStr);;
-            if(continuous) {
-                manifest = new Manifest(manifestUrl+"?continuous=true", volumeNumberStr);
+            String manifestUrl;
+            if (vi.iiifManifest != null) {
+                manifestUrl = vi.iiifManifest;
+            } else {
+                manifestUrl = IIIFPresPrefix+manifestId+"/manifest";
+                if(continuous) {
+                    manifestUrl += "?continuous=true";
+                }
             }
+            final Manifest manifest = new Manifest(manifestUrl, volumeNumberStr);
             collection.addManifest(manifest);
         }
         return collection;
