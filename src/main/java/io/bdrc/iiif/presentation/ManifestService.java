@@ -38,7 +38,6 @@ public class ManifestService {
     public static final PropertyValue attribution = new PropertyValue();
     //public static final List<ViewingHint> VIEW_HINTS=Arrays.asList(new ViewingHint[] { ViewingHint.CONTINUOUS});
     public static final String VIEW_HINTS= "continuous";
-    public static final ViewingDirection VIEW_DIRECTION= ViewingDirection.TOP_TO_BOTTOM;
     static {
         attribution.addValue(getLocaleFor("en"), "Buddhist Digital Resource Center");
         attribution.addValue(getLocaleFor("bo"), "ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།");
