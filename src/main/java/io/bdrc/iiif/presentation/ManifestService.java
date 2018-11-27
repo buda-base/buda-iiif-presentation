@@ -7,6 +7,7 @@ import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIF_IMAGE_PREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.NO_ACCESS_ERROR_CODE;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.digitalcollections.iiif.model.ImageContent;
+import de.digitalcollections.iiif.model.OtherContent;
 import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.enums.ViewingDirection;
 import de.digitalcollections.iiif.model.image.ImageApiProfile;
@@ -114,6 +116,26 @@ public class ManifestService {
         if(continuous) {
             mainSeq.setViewingHints(VIEW_HINTS);
         }
+        //PDF stuffs
+        int bPage=-1;
+        int ePage=-1;
+        if(id.getBPageNum()==null || id.getEPageNum()==null ) {
+            bPage=1;
+            ePage=Integer.parseInt(vi.totalPages);
+        }
+        else {
+            bPage=id.getBPageNum().intValue();
+            ePage=id.getEPageNum().intValue();
+        }
+        String output = id.getVolumeId()+"::"+bPage+"-"+ePage;
+        OtherContent oct= new OtherContent("http://iiif.bdrc.io/download/pdf/v:"+output,"application/pdf");
+        oct.setLabel(new PropertyValue("Download as PDF"));
+        OtherContent oct1= new OtherContent("http://iiif.bdrc.io/download/zip/v:"+output,"application/zip");
+        oct1.setLabel(new PropertyValue("Download as ZIP"));
+        ArrayList<OtherContent> ct=new ArrayList<>();
+        ct.add(oct);
+        ct.add(oct1);
+        manifest.setRenderings(ct);
         manifest.addSequence(mainSeq);
         return manifest;
     }

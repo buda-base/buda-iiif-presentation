@@ -39,8 +39,6 @@ public class IIIFPresentationService {
     @GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/2.1.1/{identifier}/manifest")
-
-	// add @Context UriInfo uriInfo to the arguments to get auth header
 	public Response getManifest(@PathParam("identifier") final String identifier,
 	        ContainerRequestContext ctx,
 	        @Context UriInfo info) throws BDRCAPIException {
@@ -72,7 +70,6 @@ public class IIIFPresentationService {
         };
         //At this point the resource is accessible but we don't whether it is public or restricted
         //and we don't know either if the user is authenticated or not
-        // temporary test on Image accessType until we improve bdrc-auth-lib to provide a meaningful test
         boolean open=accessType.equals(RdfConstants.OPEN);
         if(open) {
             return Response.ok(stream).header("Cache-Control", "public,max-age="+AuthProps.getProperty("max-age")).build();
@@ -84,7 +81,6 @@ public class IIIFPresentationService {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/2.1.1/{identifier}/canvas/{imgseqnum}")
-    // add @Context UriInfo uriInfo to the arguments to get auth header
     public Response getCanvas(@PathParam("identifier") final String identifier,
             @PathParam("imgseqnum") final String imgseqnum, final ContainerRequestContext ctx) throws BDRCAPIException {
         final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
@@ -106,7 +102,6 @@ public class IIIFPresentationService {
         };
         //At this point the resource is accessible but we don't whether it is public or restricted
         //and we don't know either if the user is authenticated or not
-        // temporary test on Image accessType until we improve bdrc-auth-lib to provide a meaningful test
         boolean open=accessType.equals(RdfConstants.OPEN);
         if(open) {
             return Response.ok(stream).header("Cache-Control", "public,max-age="+AuthProps.getProperty("max-age")).build();
@@ -149,7 +144,6 @@ public class IIIFPresentationService {
         }
         //At this point the resource is accessible but we don't whether it is public or restricted
         //and we don't know either if the user is authenticated or not
-        // temporary test on Image accessType until we improve bdrc-auth-lib to provide a meaningful test
         boolean open=accessType.equals(RdfConstants.OPEN);
         int maxAgeSeconds=Integer.parseInt(AuthProps.getProperty("max-age"))/1000;
         if(open) {
@@ -159,8 +153,6 @@ public class IIIFPresentationService {
             return Response.ok().cacheControl(CacheControl.valueOf("private, max-age="+maxAgeSeconds))
                     .entity(CollectionService.getCollectionForIdentifier(id,continuous)).build();
         }
-
-        //return CollectionService.getCollectionForIdentifier(id);*/
     }
 
     public static String getShortName(final String st) {

@@ -174,4 +174,12 @@ public class Identifier {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "Identifier [id=" + id + ", type=" + type + ", subtype=" + subtype + ", workId=" + workId + ", itemId="
+                + itemId + ", volumeId=" + volumeId + ", bPageNum=" + bPageNum + ", ePageNum=" + ePageNum + "]";
+    }
+
+
+
 }
