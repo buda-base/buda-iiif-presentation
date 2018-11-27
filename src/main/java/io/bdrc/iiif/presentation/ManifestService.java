@@ -33,7 +33,7 @@ import io.bdrc.iiif.presentation.models.VolumeInfo;
 public class ManifestService {
 
     private static final Logger logger = LoggerFactory.getLogger(ManifestService.class);
-
+    
     public static final Map<String, Locale> locales = new HashMap<>();
     public static final PropertyValue attribution = new PropertyValue();
     //public static final List<ViewingHint> VIEW_HINTS=Arrays.asList(new ViewingHint[] { ViewingHint.CONTINUOUS});
@@ -66,6 +66,18 @@ public class ManifestService {
         return IIIFPresPrefix+id.getVolumeId()+"/canvas"+"/"+seqNum;
     }
 
+    public static ViewingDirection getViewingDirection(final List<ImageInfo> imageInfoList) {
+        if (imageInfoList.size() < 3) {
+            return ViewingDirection.LEFT_TO_RIGHT;
+        }
+        final ImageInfo p3Info = imageInfoList.get(2);
+        if (p3Info.height > p3Info.width) {
+            return ViewingDirection.LEFT_TO_RIGHT;
+        } else {
+            return ViewingDirection.TOP_TO_BOTTOM;
+        }
+    }
+    
     public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence(IIIFPresPrefix+id.getId()+"/sequence/main");
         final int imageTotal = imageInfoList.size();
@@ -83,6 +95,7 @@ public class ManifestService {
             }
             endIndex = ePageNum;
         }
+        mainSeq.setViewingDirection(getViewingDirection(imageInfoList));
         for (int imgSeqNum = beginIndex ; imgSeqNum <= endIndex ; imgSeqNum++) {
             final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList);
             mainSeq.addCanvas(canvas);
