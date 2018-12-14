@@ -51,6 +51,7 @@ public class IIIFPresentationService {
 		final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
 		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
 		Access acc=(Access)ctx.getProperty("access");
+		if(acc == null) { acc = new Access();}
 		String accessType=getShortName(vi.access.getUri());
 	    if(accessType==null || !acc.hasResourceAccess(accessType)) {
 	        return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
@@ -85,7 +86,8 @@ public class IIIFPresentationService {
             @PathParam("imgseqnum") final String imgseqnum, final ContainerRequestContext ctx) throws BDRCAPIException {
         final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
         final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
-        final Access acc = (Access)ctx.getProperty("access");
+        Access acc = (Access)ctx.getProperty("access");
+        if(acc == null) { acc = new Access();}
         final String accessType = getShortName(vi.access.getUri());
         if(accessType == null || !acc.hasResourceAccess(accessType)) {
             return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
@@ -139,6 +141,7 @@ public class IIIFPresentationService {
                 break;
         }
         Access acc=(Access)ctx.getProperty("access");
+        if(acc == null) { acc = new Access();}
         if(!acc.hasResourceAccess(accessType)) {
             throw new BDRCAPIException(403, AppConstants.GENERIC_LDS_ERROR, "Insufficient rights");
         }

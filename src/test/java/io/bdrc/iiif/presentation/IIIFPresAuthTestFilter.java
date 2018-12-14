@@ -32,7 +32,7 @@ public class IIIFPresAuthTestFilter implements ContainerRequestFilter {
         if (token != null) {
             //User is logged on
             //Getting his profile
-          //User is logged on
+            //User is logged on
             //Getting his profile
             JWTVerifier verifier = JWT.require(Algorithm.HMAC256("secret")).build();
             DecodedJWT jwt=verifier.verify(token);

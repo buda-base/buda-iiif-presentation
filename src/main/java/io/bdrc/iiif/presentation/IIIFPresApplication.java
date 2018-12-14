@@ -36,10 +36,13 @@ public class IIIFPresApplication extends ResourceConfig {
                 //do nothing, continue props initialization
             }
             AuthProps.init(props);
-            RdfAuthModel.init();
+            if("true".equals(AuthProps.getProperty("useAuth"))){
+                RdfAuthModel.init();
+                register(IIIFPresAuthFilter.class);
+            }
             ServiceCache.init();
             register(CommonHeadersFilter.class);
-            register(IIIFPresAuthFilter.class);
+
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
