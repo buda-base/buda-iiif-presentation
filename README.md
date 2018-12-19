@@ -1,4 +1,4 @@
-# IIIF Presentation for the BUDA Platform
+# IIIF Presentation for the BUDA Platform 
 
 This repository contains a servlet generating manifests and collections for BDRC.
 
