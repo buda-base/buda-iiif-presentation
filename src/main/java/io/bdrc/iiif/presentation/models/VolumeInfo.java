@@ -45,7 +45,7 @@ public class VolumeInfo {
         this.license = LicenseType.fromString(sol.getResource("license").getURI());
         this.workId = sol.getResource("workId").getURI();
         this.itemId = sol.getResource("itemId").getURI();
-        this.imageList = sol.get("?imageList").asLiteral().getString();
+        if(sol.contains("?imageList")) {this.imageList = sol.get("?imageList").asLiteral().getString();}
         if(sol.contains("?totalPages")) {this.totalPages = sol.get("?totalPages").asLiteral().getString();}
         if(sol.contains("?pagesText")) {this.pagesText = sol.get("?pagesText").asLiteral().getString();}
         if(sol.contains("?pagesIntroTbrc")) {this.pagesIntroTbrc = sol.get("?pagesIntroTbrc").asLiteral().getString();}
