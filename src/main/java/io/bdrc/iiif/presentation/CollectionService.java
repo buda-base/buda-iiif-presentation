@@ -15,8 +15,10 @@ import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.ItemInfo;
 import io.bdrc.iiif.presentation.models.ItemInfo.VolumeInfoSmall;
+import io.bdrc.iiif.presentation.models.PartInfo;
 import io.bdrc.iiif.presentation.models.WorkInfo;
-import io.bdrc.iiif.presentation.models.WorkInfo.LangString;
+import io.bdrc.iiif.presentation.models.LangString;
+import io.bdrc.iiif.presentation.models.Location;
 
 public class CollectionService {
 
@@ -42,12 +44,13 @@ public class CollectionService {
     public static void addManifestsForLocation(final Collection c, final WorkInfo wi, final ItemInfo ii, final boolean continuous) {
         if (!wi.hasLocation)
             return;
-        for (int i = wi.bvolnum ; i <= wi.evolnum ; i++) {
+        final Location loc = wi.location;
+        for (int i = loc.bvolnum ; i <= loc.evolnum ; i++) {
             VolumeInfoSmall vi = ii.getVolumeNumber(i);
             if (vi == null)
                 continue;
-            final int volumebPage = (i == wi.bvolnum) ? wi.bpagenum : 0;
-            final int volumeePage = (i == wi.evolnum) ? wi.epagenum : -1;
+            final int volumebPage = (i == loc.bvolnum) ? loc.bpagenum : 0;
+            final int volumeePage = (i == loc.evolnum) ? loc.epagenum : -1;
             final StringBuilder sb = new StringBuilder();
             sb.append(IIIFPresPrefix+"v:"+vi.getPrefixedUri());
             if (volumebPage != 0 || volumeePage != -1) {
@@ -95,7 +98,7 @@ public class CollectionService {
         collection.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
         collection.setLabel(getLabels(id.getWorkId(), wi));
         if (wi.parts != null) {
-            for (final WorkInfo.PartInfo pi : wi.parts) {
+            for (final PartInfo pi : wi.parts) {
                 final String prefixedPartId = getPrefixedForm(pi.partId);
                 final String collectionId = "wio:"+prefixedPartId;
                 final Collection subcollection = new Collection(IIIFPresPrefix_coll+collectionId);

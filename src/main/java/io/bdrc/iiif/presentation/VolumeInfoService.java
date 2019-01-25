@@ -4,6 +4,7 @@ import static io.bdrc.iiif.presentation.AppConstants.CANNOT_FIND_VOLUME_ERROR_CO
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
 import static io.bdrc.iiif.presentation.AppConstants.LDS_VOLUME_QUERY;
+import static io.bdrc.iiif.presentation.AppConstants.LDS_VOLUME_OUTLINE_QUERY;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +19,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.ResultSetMgr;
 import org.apache.jena.riot.resultset.ResultSetLang;
 import org.slf4j.Logger;
@@ -25,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
+import io.bdrc.iiif.presentation.models.WorkInfo;
 
 public class VolumeInfoService {
 
@@ -65,6 +69,33 @@ public class VolumeInfoService {
             if (res.hasNext()) {
                 throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "more than one volume found in the database, this shouldn't happen");
             }
+        } catch (IOException ex) {
+            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
+        }
+        logger.debug("found volume info: {}", resVolumeInfo);
+        return resVolumeInfo;
+    }
+    
+    private static VolumeInfo fetchLdsVolumeOutline(final String volumeId) throws BDRCAPIException {
+        logger.debug("fetch volume info on LDS for {}", volumeId);
+        final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
+        final VolumeInfo resVolumeInfo;
+        try {
+            final HttpPost request = new HttpPost(LDS_VOLUME_OUTLINE_QUERY);
+            // we suppose that the volumeId is well formed, which is checked by the Identifier constructor
+            final StringEntity params = new StringEntity("{\"R_RES\":\""+volumeId+"\"}", ContentType.APPLICATION_JSON);
+            //request.addHeader(HttpHeaders.ACCEPT, "application/json");
+            request.setEntity(params);
+            final HttpResponse response = httpClient.execute(request);
+            int code = response.getStatusLine().getStatusCode();
+            if (code != 200) {
+                throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error", response.toString(), "");
+            }
+            final InputStream body = response.getEntity().getContent();
+            Model m = ModelFactory.createDefaultModel();
+            // TODO: prefixes
+            m.read(body, null, "TURTLE");
+            resVolumeInfo = new VolumeInfo(m, volumeId);
         } catch (IOException ex) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
         }

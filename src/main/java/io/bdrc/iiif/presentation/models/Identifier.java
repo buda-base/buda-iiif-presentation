@@ -17,6 +17,7 @@ public class Identifier {
     public static final int MANIFEST_ID_WORK_IN_ITEM = 4;
     public static final int MANIFEST_ID_VOLUMEID = 5;
     public static final int MANIFEST_ID_WORK_IN_VOLUMEID = 6;
+    public static final int MANIFEST_ID_VOLUMEID_OUTLINE = 8;
 
     @JsonProperty("id")
     String id = null;
@@ -116,6 +117,11 @@ public class Identifier {
             setPageNumFromIdPart(secondId);
             nbMaxPartsExpected = 2;
             this.subtype = MANIFEST_ID_VOLUMEID;
+            break;
+        case "vo":
+            this.volumeId = firstId;
+            nbMaxPartsExpected = 1;
+            this.subtype = MANIFEST_ID_VOLUMEID_OUTLINE;
             break;
         case "wv":
             this.workId = firstId;
