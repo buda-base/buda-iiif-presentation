@@ -10,9 +10,9 @@ public class PartInfo implements Comparable<PartInfo> {
     @JsonProperty("partId")
     public final String partId;
     @JsonProperty("labels")
-    List<LangString> labels = null;
+    public List<LangString> labels = null;
     @JsonProperty("subparts")
-    List<PartInfo> subparts = null;
+    public List<PartInfo> subparts = null;
     @JsonProperty("location")
     public Location location = null;
     

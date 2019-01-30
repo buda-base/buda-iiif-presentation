@@ -135,7 +135,7 @@ public class WorkInfo {
             while (partsItr.hasNext()) {
                 final Statement s = partsItr.next();
                 final Resource part = s.getObject().asResource();
-                final String partId = part.getURI();
+                final String partId = "bdr:"+part.getLocalName(); // TODO: could be handled better
                 final Statement partIndexS = part.getProperty(partIndexP);
                 final PartInfo partInfo;
                 if (partIndexS == null)

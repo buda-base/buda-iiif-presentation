@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
-import io.bdrc.iiif.presentation.models.WorkInfo;
 
 public class VolumeInfoService {
 

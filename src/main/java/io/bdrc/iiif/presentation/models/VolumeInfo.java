@@ -4,21 +4,17 @@ import static io.bdrc.iiif.presentation.AppConstants.ADM;
 import static io.bdrc.iiif.presentation.AppConstants.BDO;
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
-import static io.bdrc.iiif.presentation.AppConstants.TMPPREFIX;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QuerySolution;
-import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
@@ -30,10 +26,6 @@ import io.bdrc.iiif.presentation.VolumeInfoService;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
 public class VolumeInfo {
-
-    public static final int HAS_TOC = 0;
-    public static final int HAS_NO_TOC = 1;
-    public static final int TOC_UNKNOWN = 2;
     
     @JsonProperty("access")
     public AccessType access;
@@ -46,19 +38,19 @@ public class VolumeInfo {
     @JsonProperty("imageList")
     public String imageList;
     @JsonProperty("totalPages")
-    public String totalPages;
+    public Integer totalPages;
     @JsonProperty("pagesText")
-    public String pagesText="-1";
+    public Integer pagesText = null;
     @JsonProperty("pagesIntroTbrc")
-    public String pagesIntroTbrc="-1";
+    public Integer pagesIntroTbrc = null;
     @JsonProperty("pagesIntro")
-    public String pagesIntro="-1";
+    public Integer pagesIntro = null;
+    @JsonProperty("volumeNumber")
+    public Integer volumeNumber = 1;
     @JsonProperty("imageGroup")
     public String imageGroup = null;
     @JsonProperty("iiifManifest")
     public URI iiifManifest = null;
-    @JsonProperty("hasToC")
-    public int hasToc;
     @JsonProperty("partInfo")
     public List<PartInfo> partInfo = null;
 
@@ -71,12 +63,12 @@ public class VolumeInfo {
         this.license = LicenseType.fromString(sol.getResource("license").getURI());
         this.workId = sol.getResource("workId").getURI();
         this.itemId = sol.getResource("itemId").getURI();
-        this.hasToc = TOC_UNKNOWN;
         if(sol.contains("?imageList")) {this.imageList = sol.get("?imageList").asLiteral().getString();}
-        if(sol.contains("?totalPages")) {this.totalPages = sol.get("?totalPages").asLiteral().getString();}
-        if(sol.contains("?pagesText")) {this.pagesText = sol.get("?pagesText").asLiteral().getString();}
-        if(sol.contains("?pagesIntroTbrc")) {this.pagesIntroTbrc = sol.get("?pagesIntroTbrc").asLiteral().getString();}
-        if(sol.contains("?pagesIntro")) {this.pagesIntro = sol.get("?pagesIntro").asLiteral().getString();}
+        if(sol.contains("?volumeNumber")) {this.volumeNumber = sol.get("?volumeNumber").asLiteral().getInt();}
+        if(sol.contains("?totalPages")) {this.totalPages = sol.get("?totalPages").asLiteral().getInt();}
+        if(sol.contains("?pagesText")) {this.pagesText = sol.get("?pagesText").asLiteral().getInt();}
+        if(sol.contains("?pagesIntroTbrc")) {this.pagesIntroTbrc = sol.get("?pagesIntroTbrc").asLiteral().getInt();}
+        if(sol.contains("?pagesIntro")) {this.pagesIntro = sol.get("?pagesIntro").asLiteral().getInt();}
         if (sol.contains("imageGroup")) {this.imageGroup = sol.getLiteral("imageGroup").getString();}
         if (sol.contains("iiifManifest")) {
             final String manifestURIString = sol.getResource("iiifManifest").getURI();
@@ -120,22 +112,27 @@ public class VolumeInfo {
         
         final Statement volumePagesTotalS = volume.getProperty(m.getProperty(BDO, "volumePagesTotal"));
         if (volumePagesTotalS != null) {
-            this.totalPages = volumePagesTotalS.getString();
+            this.totalPages = volumePagesTotalS.getInt();
+        }
+        
+        final Statement volumeNumberS = volume.getProperty(m.getProperty(BDO, "volumeNumber"));
+        if (volumeNumberS != null) {
+            this.volumeNumber = volumeNumberS.getInt();
         }
 
         final Statement volumePagesTbrcIntroS = volume.getProperty(m.getProperty(BDO, "volumePagesTbrcIntro"));
         if (volumePagesTbrcIntroS != null) {
-            this.pagesIntroTbrc = volumePagesTbrcIntroS.getString();
+            this.pagesIntroTbrc = volumePagesTbrcIntroS.getInt();
         }
 
         final Statement volumePagesIntroS = volume.getProperty(m.getProperty(BDO, "volumePagesIntroS"));
         if (volumePagesIntroS != null) {
-            this.pagesIntro = volumePagesIntroS.getString();
+            this.pagesIntro = volumePagesIntroS.getInt();
         }
 
         final Statement volumePagesTextS = volume.getProperty(m.getProperty(BDO, "volumePagesTextS"));
         if (volumePagesTextS != null) {
-            this.pagesText = volumePagesTextS.getString();
+            this.pagesText = volumePagesTextS.getInt();
         }
         
         final Resource work = item.getPropertyResourceValue(m.getProperty(BDO, "itemImageAssetForWork"));
@@ -158,11 +155,6 @@ public class VolumeInfo {
         }
         
         this.partInfo = WorkInfo.getParts(m, work);
-        if (this.partInfo == null) {
-            this.hasToc = HAS_NO_TOC;
-        } else {
-            this.hasToc = HAS_TOC;
-        }
         //this.labels = getLabels(m, volume);
     }
     
@@ -190,19 +182,19 @@ public class VolumeInfo {
         return imageList;
     }
 
-    public String getTotalPages() {
+    public Integer getTotalPages() {
         return totalPages;
     }
 
-    public String getPagesText() {
+    public Integer getPagesText() {
         return pagesText;
     }
 
-    public String getPagesIntroTbrc() {
+    public Integer getPagesIntroTbrc() {
         return pagesIntroTbrc;
     }
 
-    public String getPagesIntro() {
+    public Integer getPagesIntro() {
         return pagesIntro;
     }
 

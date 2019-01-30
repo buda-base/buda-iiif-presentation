@@ -6,7 +6,6 @@ import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIF_IMAGE_PREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.PDF_URL_PREFIX;
-import static io.bdrc.iiif.presentation.AppConstants.ZIP_URL_PREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.NO_ACCESS_ERROR_CODE;
 
 import java.util.ArrayList;
@@ -26,11 +25,15 @@ import de.digitalcollections.iiif.model.image.ImageApiProfile;
 import de.digitalcollections.iiif.model.image.ImageService;
 import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
+import de.digitalcollections.iiif.model.sharedcanvas.Range;
 import de.digitalcollections.iiif.model.sharedcanvas.Sequence;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.AccessType;
 import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.ImageInfo;
+import io.bdrc.iiif.presentation.models.LangString;
+import io.bdrc.iiif.presentation.models.Location;
+import io.bdrc.iiif.presentation.models.PartInfo;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
 
 
@@ -51,6 +54,20 @@ public class ManifestService {
     public static Locale getLocaleFor(String lt) {
         return locales.computeIfAbsent(lt, x -> Locale.forLanguageTag(lt));
     }
+    
+    public static PropertyValue getPropForLabels(List<LangString> labels) {
+        if (labels == null) return null;
+        final PropertyValue res = new PropertyValue();
+        for (final LangString ls : labels) {
+            // TODO: does it work well or should it be grouped by language first?
+            if (ls.language != null) {
+                res.addValue(getLocaleFor(ls.language), ls.value);
+            } else {
+                res.addValue(ls.value);
+            }
+        }
+        return res;
+    }
 
     public static String getLabelForImage(final int imageIndex) {
         // indices start at 1
@@ -63,10 +80,11 @@ public class ManifestService {
         return IIIF_IMAGE_PREFIX+id.getVolumeId()+"::"+filename;
     }
 
+    // warning: not all calls to this function profile the filename argument
     public static String getCanvasUri(final String filename, final Identifier id, final int seqNum) {
         // seqNum starts at 1
         //return IIIFPresPrefix+id.getVolumeId()+"::"+filename+"/canvas";
-        return IIIFPresPrefix+id.getVolumeId()+"/canvas"+"/"+seqNum;
+        return IIIFPresPrefix+"v:"+id.getVolumeId()+"/canvas"+"/"+seqNum;
     }
 
     public static ViewingDirection getViewingDirection(final List<ImageInfo> imageInfoList) {
@@ -119,7 +137,7 @@ public class ManifestService {
         final String workLocalId = vi.workId.substring(BDR_len);
         logger.info("building manifest for ID {}", id.getId());
         final List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(workLocalId, vi.imageGroup);
-        final Manifest manifest = new Manifest(IIIFPresPrefix+id.getId()+"/manifest", "BUDA Manifest");
+        final Manifest manifest = new Manifest(IIIFPresPrefix+id.getId()+"/manifest", "Volume "+vi.volumeNumber);
         manifest.setAttribution(attribution);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         manifest.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
@@ -129,22 +147,67 @@ public class ManifestService {
         if (continuous) {
             mainSeq.setViewingHints(VIEWING_HINTS);
         }
-        //PDF stuffs
+        // PDF / zip download
         int bPage = id.getBPageNum() == null ? 1 : id.getBPageNum().intValue(); 
-        int ePage = id.getEPageNum() == null ? Integer.parseInt(vi.totalPages) : id.getEPageNum().intValue(); 
-        final String dlCanonicalId = id.getVolumeId()+"::"+bPage+"-"+ePage;
-        final OtherContent oct = new OtherContent(PDF_URL_PREFIX+"v:"+dlCanonicalId,"application/pdf");
-        oct.setLabel(new PropertyValue("Download as PDF"));
-        final OtherContent oct1 = new OtherContent(PDF_URL_PREFIX+"v:"+dlCanonicalId,"application/zip");
-        oct1.setLabel(new PropertyValue("Download as ZIP"));
-        final ArrayList<OtherContent> ct = new ArrayList<>();
-        ct.add(oct);
-        ct.add(oct1);
-        manifest.setRenderings(ct);
+        int ePage = id.getEPageNum() == null ? vi.totalPages : id.getEPageNum().intValue();
+        final List<OtherContent> oc = getRenderings(id.getVolumeId(), bPage, ePage); 
+        manifest.setRenderings(oc);
+        addRangesToManifest(manifest, id, vi);
         manifest.addSequence(mainSeq);
         return manifest;
     }
 
+    public static List<OtherContent> getRenderings(final String volumeId, final int bPage, final int ePage) {
+        final String fullId = volumeId+"::"+bPage+"-"+ePage;
+        final OtherContent oct = new OtherContent(PDF_URL_PREFIX+"v:"+fullId,"application/pdf");
+        oct.setLabel(new PropertyValue("Download as PDF"));
+        final OtherContent oct1 = new OtherContent(PDF_URL_PREFIX+"v:"+fullId,"application/zip");
+        oct1.setLabel(new PropertyValue("Download as ZIP"));
+        final ArrayList<OtherContent> ct = new ArrayList<>();
+        ct.add(oct);
+        ct.add(oct1);
+        return ct;
+    }
+    
+    public static void addRangesToManifest(final Manifest m, final Identifier id, final VolumeInfo vi) throws BDRCAPIException {
+        if (vi.partInfo == null) {
+            return;
+        }
+        final Range r = new Range(IIIFPresPrefix+"vo:"+id.getVolumeId()+"/range/top", "Table of Contents");
+        r.setViewingHints("top");
+        for (final PartInfo part : vi.partInfo) {
+            addSubRangeToRange(r, id, part, vi);
+        }
+    }
+    
+    public static void addSubRangeToRange(final Range r, final Identifier id, final PartInfo part, VolumeInfo vi) throws BDRCAPIException {
+        final Range subRange = new Range(IIIFPresPrefix+"vo:"+id.getVolumeId()+"/range/"+part.partId);
+        final PropertyValue labels = getPropForLabels(part.labels);
+        subRange.setLabel(labels);
+        if (part.location != null) {
+            final Location loc = part.location;
+            int bPage = 1;
+            if (loc.bvolnum == vi.volumeNumber && loc.bpagenum != null)
+                bPage = loc.bpagenum;
+            // ignoring the tbrc pages
+            if (vi.pagesIntroTbrc != null && bPage <= vi.pagesIntroTbrc)
+                bPage = vi.pagesIntroTbrc+1;
+            int ePage = vi.totalPages;
+            if (loc.evolnum != null && loc.evolnum == vi.volumeNumber && loc.epagenum != null)
+                ePage = loc.epagenum;
+            for (int seqNum = bPage ; seqNum <= ePage ; seqNum ++) {
+                // TODO: add the first argument (filename)
+                final String canvasUri = getCanvasUri(null, id, seqNum);
+                subRange.addCanvas(canvasUri);
+            }
+        }
+        if (part.subparts != null) {
+            for (final PartInfo subpart : part.subparts) {
+                addSubRangeToRange(subRange, id, subpart, vi);
+            }
+        }
+    }
+    
     public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final List<ImageInfo> imageInfoList) {
         // imgSeqNum starts at 1
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum-1);
@@ -162,7 +225,7 @@ public class ManifestService {
         canvas.addImage(img);
         return canvas;
     }
-
+    
     public static Canvas getCanvasForIdentifier(final Identifier id, final VolumeInfo vi, final String imgSeqNumS) throws BDRCAPIException {
         final Integer imgSeqNum;
         try {
