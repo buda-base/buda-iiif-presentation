@@ -17,6 +17,8 @@ public class AppConstants {
 
     //public static final String IIIF_IMAGE_PREFIX = "http://iiif.bdrc.io/image/v2/";
     public static final String IIIF_IMAGE_PREFIX = "http://iiif.bdrc.io/";
+    public static final String PDF_URL_PREFIX = IIIF_IMAGE_PREFIX+"download/pdf/";
+    public static final String ZIP_URL_PREFIX = IIIF_IMAGE_PREFIX+"download/zip/";
 
 	public static final int GENERIC_APP_ERROR_CODE = 5001;
 

@@ -5,6 +5,8 @@ import static io.bdrc.iiif.presentation.AppConstants.BDR_len;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIF_IMAGE_PREFIX;
+import static io.bdrc.iiif.presentation.AppConstants.PDF_URL_PREFIX;
+import static io.bdrc.iiif.presentation.AppConstants.ZIP_URL_PREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.NO_ACCESS_ERROR_CODE;
 
 import java.util.ArrayList;
@@ -39,7 +41,7 @@ public class ManifestService {
     public static final Map<String, Locale> locales = new HashMap<>();
     public static final PropertyValue attribution = new PropertyValue();
     //public static final List<ViewingHint> VIEW_HINTS=Arrays.asList(new ViewingHint[] { ViewingHint.CONTINUOUS});
-    public static final String VIEW_HINTS= "continuous";
+    public static final String VIEWING_HINTS= "continuous";
     static {
         attribution.addValue(getLocaleFor("en"), "Buddhist Digital Resource Center");
         attribution.addValue(getLocaleFor("bo"), "ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།");
@@ -124,27 +126,18 @@ public class ManifestService {
         manifest.addLabel(id.getVolumeId());
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
-        /***Viewing hints and direction*/
-        if(continuous) {
-            mainSeq.setViewingHints(VIEW_HINTS);
+        if (continuous) {
+            mainSeq.setViewingHints(VIEWING_HINTS);
         }
         //PDF stuffs
-        int bPage=-1;
-        int ePage=-1;
-        if(id.getBPageNum()==null || id.getEPageNum()==null ) {
-            bPage=1;
-            ePage=Integer.parseInt(vi.totalPages);
-        }
-        else {
-            bPage=id.getBPageNum().intValue();
-            ePage=id.getEPageNum().intValue();
-        }
-        String output = id.getVolumeId()+"::"+bPage+"-"+ePage;
-        OtherContent oct= new OtherContent("http://iiif.bdrc.io/download/pdf/v:"+output,"application/pdf");
+        int bPage = id.getBPageNum() == null ? 1 : id.getBPageNum().intValue(); 
+        int ePage = id.getEPageNum() == null ? Integer.parseInt(vi.totalPages) : id.getEPageNum().intValue(); 
+        final String dlCanonicalId = id.getVolumeId()+"::"+bPage+"-"+ePage;
+        final OtherContent oct = new OtherContent(PDF_URL_PREFIX+"v:"+dlCanonicalId,"application/pdf");
         oct.setLabel(new PropertyValue("Download as PDF"));
-        OtherContent oct1= new OtherContent("http://iiif.bdrc.io/download/zip/v:"+output,"application/zip");
+        final OtherContent oct1 = new OtherContent(PDF_URL_PREFIX+"v:"+dlCanonicalId,"application/zip");
         oct1.setLabel(new PropertyValue("Download as ZIP"));
-        ArrayList<OtherContent> ct=new ArrayList<>();
+        final ArrayList<OtherContent> ct = new ArrayList<>();
         ct.add(oct);
         ct.add(oct1);
         manifest.setRenderings(ct);

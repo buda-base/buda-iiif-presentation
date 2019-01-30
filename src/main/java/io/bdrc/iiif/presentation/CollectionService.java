@@ -23,8 +23,8 @@ import io.bdrc.iiif.presentation.models.Location;
 public class CollectionService {
 
     private static final Logger logger = LoggerFactory.getLogger(CollectionService.class);
-  //public static final List<ViewingHint> VIEW_HINTS=Arrays.asList(new ViewingHint[] { ViewingHint.CONTINUOUS});
-    public static final String VIEW_HINTS= "continuous";
+    // public static final List<ViewingHint> VIEW_HINTS=Arrays.asList(new ViewingHint[] { ViewingHint.MULTI_PART});
+    public static final String VIEWING_HINTS= "multi-part";
 
     public static String getPrefixedForm(final String id) {
         return "bdr:"+id.substring(BDR_len);
@@ -94,6 +94,8 @@ public class CollectionService {
         logger.info("building outline collection for ID {}", id.getId());
         final Collection collection = new Collection(IIIFPresPrefix_coll+id.getId(), "Collection");
         collection.setAttribution(ManifestService.attribution);
+        collection.setViewingHints(VIEWING_HINTS);
+        // TODO: use the actual license
         collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         collection.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
         collection.setLabel(getLabels(id.getWorkId(), wi));
@@ -126,7 +128,9 @@ public class CollectionService {
         logger.info("building item collection for ID {}", id.getId());
         final Collection collection = new Collection(IIIFPresPrefix_coll+id.getId(), "Collection");
         collection.setAttribution(ManifestService.attribution);
+        // TODO: use the actual license
         collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
+        collection.setViewingHints(VIEWING_HINTS);
         collection.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
         collection.addLabel(id.getItemId());
         for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
