@@ -33,6 +33,8 @@ import io.bdrc.iiif.presentation.models.WorkInfo;
 public class VolumeInfoService {
 
     private static final Logger logger = LoggerFactory.getLogger(VolumeInfoService.class);
+    
+    private static final String WITH_OUTLINE_SUFFIX = "-withoutline"; // interestingly ambiguous
 
     private static CacheAccess<String, Object> cache = null;
 
@@ -77,7 +79,7 @@ public class VolumeInfoService {
     }
     
     private static VolumeInfo fetchLdsVolumeOutline(final String volumeId) throws BDRCAPIException {
-        logger.debug("fetch volume info on LDS for {}", volumeId);
+        logger.debug("fetch volume info with outline on LDS for {}", volumeId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
         final VolumeInfo resVolumeInfo;
         try {
@@ -99,20 +101,35 @@ public class VolumeInfoService {
         } catch (IOException ex) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
         }
-        logger.debug("found volume info: {}", resVolumeInfo);
+        logger.debug("found volume info with outline: {}", resVolumeInfo);
         return resVolumeInfo;
     }
 
-    public static VolumeInfo getVolumeInfo(final String volumeId) throws BDRCAPIException {
-        VolumeInfo resVolumeInfo = (VolumeInfo)cache.get(volumeId);
+    public static VolumeInfo getVolumeInfo(final String volumeId, final boolean withOutline) throws BDRCAPIException {
+        VolumeInfo resVolumeInfo = (VolumeInfo)cache.get(volumeId+WITH_OUTLINE_SUFFIX);
         if (resVolumeInfo != null) {
-            logger.debug("found volumeInfo in cache for "+volumeId);
+            logger.debug("found volumeInfo with outline in cache for "+volumeId);
             return resVolumeInfo;
         }
-        resVolumeInfo = fetchLdsVolumeInfo(volumeId);
+        if (!withOutline) {
+            resVolumeInfo = (VolumeInfo)cache.get(volumeId);
+            if (resVolumeInfo != null) {
+                logger.debug("found volumeInfo in cache for "+volumeId);
+                return resVolumeInfo;
+            }
+        }
+        if (withOutline) {
+            resVolumeInfo = fetchLdsVolumeOutline(volumeId);
+        } else {
+            resVolumeInfo = fetchLdsVolumeInfo(volumeId);
+        }
         if (resVolumeInfo == null)
             return null;
-        cache.put(volumeId, resVolumeInfo);
+        if (withOutline) {
+            cache.put(volumeId+WITH_OUTLINE_SUFFIX, resVolumeInfo);
+        } else {
+            cache.put(volumeId, resVolumeInfo);
+        }
         return resVolumeInfo;
     }
 

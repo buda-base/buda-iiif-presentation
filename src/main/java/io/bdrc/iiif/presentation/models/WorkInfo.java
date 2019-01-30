@@ -147,7 +147,8 @@ public class WorkInfo {
                     partInfo.location = new Location(m, location);
                 partInfo.labels = getLabels(m, part);
                 partInfo.subparts = getParts(m, part);
-                parts.add(partInfo);
+                if (location != null || partInfo.labels != null || partInfo.subparts != null)
+                    parts.add(partInfo);
             }
             Collections.sort(parts);
             return parts;

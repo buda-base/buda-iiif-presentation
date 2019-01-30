@@ -92,7 +92,7 @@ public class VolumeInfo {
         logger.debug("creating VolumeInfo for model, volumeId {}", volumeId);
         // the model is supposed to come from the IIIFPres_volumeOutline graph query
         if (volumeId.startsWith("bdr:"))
-            volumeId = BDR+workId.substring(4);
+            volumeId = BDR+volumeId.substring(4);
         final Resource volume = m.getResource(volumeId);
         if (volume == null)
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: missing volume");
@@ -140,8 +140,9 @@ public class VolumeInfo {
         
         final Resource work = item.getPropertyResourceValue(m.getProperty(BDO, "itemImageAssetForWork"));
         if (work == null) {
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: no associated item");
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: no associated work");
         }
+        this.workId = work.getURI();
         
         final Resource access = work.getPropertyResourceValue(m.getProperty(ADM, "access"));
         if (access != null) {
@@ -153,10 +154,15 @@ public class VolumeInfo {
 
         final Resource license = work.getPropertyResourceValue(m.getProperty(ADM, "license"));
         if (license != null) {
-            this.license = LicenseType.fromString(access.getURI());
+            this.license = LicenseType.fromString(license.getURI());
         }
         
         this.partInfo = WorkInfo.getParts(m, work);
+        if (this.partInfo == null) {
+            this.hasToc = HAS_NO_TOC;
+        } else {
+            this.hasToc = HAS_TOC;
+        }
         //this.labels = getLabels(m, volume);
     }
     

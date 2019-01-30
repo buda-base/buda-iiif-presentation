@@ -49,7 +49,11 @@ public class IIIFPresentationService {
             continuous=Boolean.parseBoolean(cont);
         }
 		final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
-		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
+		boolean requiresVolumeOutline = false;
+		if (id.getType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
+		    requiresVolumeOutline = true;
+		}
+		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), requiresVolumeOutline);
 		Access acc=(Access)ctx.getProperty("access");
 		if(acc == null) { acc = new Access();}
 		String accessType=getShortName(vi.access.getUri());
@@ -85,7 +89,7 @@ public class IIIFPresentationService {
     public Response getCanvas(@PathParam("identifier") final String identifier,
             @PathParam("imgseqnum") final String imgseqnum, final ContainerRequestContext ctx) throws BDRCAPIException {
         final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
-        final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId());
+        final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), false); // not entirely sure about the false
         Access acc = (Access)ctx.getProperty("access");
         if(acc == null) { acc = new Access();}
         final String accessType = getShortName(vi.access.getUri());
@@ -107,7 +111,7 @@ public class IIIFPresentationService {
         boolean open=accessType.equals(RdfConstants.OPEN);
         if(open) {
             return Response.ok(stream).header("Cache-Control", "public,max-age="+AuthProps.getProperty("max-age")).build();
-        }else {
+        } else {
             return Response.ok(stream).header("Cache-Control", "private,max-age="+AuthProps.getProperty("max-age")).build();
         }
     }

@@ -10,7 +10,7 @@ public enum LicenseType {
     
     private String uri;
     
-    private LicenseType(String uri) {
+    private LicenseType(final String uri) {
         this.setUri(uri);
     }
 
@@ -18,11 +18,11 @@ public enum LicenseType {
         return uri;
     }
 
-    public void setUri(String uri) {
+    public void setUri(final String uri) {
         this.uri = uri;
     }
 
-    public static LicenseType fromString(String license) {
+    public static LicenseType fromString(final String license) {
         for (LicenseType lt : LicenseType.values()) {
           if (lt.uri.equals(license)) {
             return lt;

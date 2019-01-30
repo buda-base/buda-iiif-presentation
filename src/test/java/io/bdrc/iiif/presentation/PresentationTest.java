@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.ItemInfo;
+import io.bdrc.iiif.presentation.models.VolumeInfo;
 import io.bdrc.iiif.presentation.models.WorkInfo;
 
 
@@ -57,4 +58,15 @@ public class PresentationTest {
 //        om.writeValue(System.out, itemInfo);
     }
     
+    @Test
+    public void volumeOutlineTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+        Model m = ModelFactory.createDefaultModel();
+        RDFParserBuilder pb = RDFParser.create()
+                .source(TESTDIR+"volumeOutline.ttl")
+                .lang(RDFLanguages.TTL);
+                //.canonicalLiterals(true);
+        pb.parse(StreamRDFLib.graph(m.getGraph()));
+        VolumeInfo volumeInfo = new VolumeInfo(m, "bdr:V22084_I0890");
+        om.writerWithDefaultPrettyPrinter().writeValue(System.out, volumeInfo);
+    }
 }
