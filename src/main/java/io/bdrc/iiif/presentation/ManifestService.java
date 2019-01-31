@@ -180,13 +180,14 @@ public class ManifestService {
         final Range r = new Range(IIIFPresPrefix+"vo:"+id.getVolumeId()+"/range/top", "Table of Contents");
         r.setViewingHints("top");
         for (final PartInfo part : vi.partInfo) {
-            addSubRangeToRange(r, id, part, vi);
+            addSubRangeToRange(m, r, id, part, vi);
         }
         m.addRange(r);
     }
     
-    public static void addSubRangeToRange(final Range r, final Identifier id, final PartInfo part, final VolumeInfo vi) throws BDRCAPIException {
-        final Range subRange = new Range(IIIFPresPrefix+"vo:"+id.getVolumeId()+"/range/w:"+part.partId);
+    public static void addSubRangeToRange(final Manifest m, final Range r, final Identifier id, final PartInfo part, final VolumeInfo vi) throws BDRCAPIException {
+        final String rangeUri = IIIFPresPrefix+"vo:"+id.getVolumeId()+"/range/w:"+part.partId;
+        final Range subRange = new Range(rangeUri);
         final PropertyValue labels = getPropForLabels(part.labels);
         subRange.setLabel(labels);
         if (part.location != null) {
@@ -208,10 +209,11 @@ public class ManifestService {
         }
         if (part.subparts != null) {
             for (final PartInfo subpart : part.subparts) {
-                addSubRangeToRange(subRange, id, subpart, vi);
+                addSubRangeToRange(m, subRange, id, subpart, vi);
             }
         }
-        r.addMember(subRange);
+        m.addRange(subRange);
+        r.addRange(rangeUri);
     }
     
     public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final List<ImageInfo> imageInfoList) {
