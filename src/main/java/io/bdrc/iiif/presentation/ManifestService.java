@@ -156,7 +156,6 @@ public class ManifestService {
         manifest.setRenderings(oc);
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
             addRangesToManifest(manifest, id, vi);
-            manifest.addLabel("debug0");
         }
         manifest.addSequence(mainSeq);
         return manifest;
@@ -176,7 +175,6 @@ public class ManifestService {
     
     public static void addRangesToManifest(final Manifest m, final Identifier id, final VolumeInfo vi) throws BDRCAPIException {
         if (vi.partInfo == null) {
-            m.addLabel("debug1");
             return;
         }
         final Range r = new Range(IIIFPresPrefix+"vo:"+id.getVolumeId()+"/range/top", "Table of Contents");

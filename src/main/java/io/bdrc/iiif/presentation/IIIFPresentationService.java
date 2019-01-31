@@ -54,10 +54,10 @@ public class IIIFPresentationService {
 		    requiresVolumeOutline = true;
 		}
 		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), requiresVolumeOutline);
-		Access acc=(Access)ctx.getProperty("access");
-		if(acc == null) { acc = new Access();}
+		Access acc = (Access)ctx.getProperty("access");
+		if (acc == null) { acc = new Access();}
 		String accessType=getShortName(vi.access.getUri());
-	    if(accessType==null || !acc.hasResourceAccess(accessType)) {
+	    if (accessType == null || !acc.hasResourceAccess(accessType)) {
 	        return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
 	    }
 		if (vi.iiifManifest != null) {
