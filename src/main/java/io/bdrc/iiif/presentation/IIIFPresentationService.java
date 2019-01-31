@@ -122,15 +122,15 @@ public class IIIFPresentationService {
     public Response getCollection(@PathParam("identifier") final String identifier,
             final ContainerRequestContext ctx,
             @Context UriInfo info) throws BDRCAPIException {
-        MultivaluedMap<String, String> hm=info.getQueryParameters();
-        String cont=hm.getFirst("continuous");
-        boolean continuous=false;
-        if(cont!=null) {
-            continuous=Boolean.parseBoolean(cont);
+        MultivaluedMap<String, String> hm = info.getQueryParameters();
+        String cont = hm.getFirst("continuous");
+        boolean continuous = false;
+        if(cont != null) {
+            continuous = Boolean.parseBoolean(cont);
         }
         final Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);
-        String accessType="";
-        final int subType=id.getSubType();
+        String accessType = "";
+        final int subType = id.getSubType();
         switch(subType) {
             case Identifier.COLLECTION_ID_ITEM:
             case Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE:
@@ -145,19 +145,19 @@ public class IIIFPresentationService {
                 accessType = getShortName(winf1.rootAccess);
                 break;
         }
-        Access acc=(Access)ctx.getProperty("access");
-        if(acc == null) { acc = new Access();}
-        if(!acc.hasResourceAccess(accessType)) {
+        Access acc = (Access)ctx.getProperty("access");
+        if (acc == null) { acc = new Access(); }
+        if (!acc.hasResourceAccess(accessType)) {
             throw new BDRCAPIException(403, AppConstants.GENERIC_LDS_ERROR, "Insufficient rights");
         }
         //At this point the resource is accessible but we don't whether it is public or restricted
         //and we don't know either if the user is authenticated or not
-        boolean open=accessType.equals(RdfConstants.OPEN);
-        int maxAgeSeconds=Integer.parseInt(AuthProps.getProperty("max-age"))/1000;
-        if(open) {
+        boolean open = accessType.equals(RdfConstants.OPEN);
+        int maxAgeSeconds = Integer.parseInt(AuthProps.getProperty("max-age"))/1000;
+        if (open) {
             return Response.ok().cacheControl(CacheControl.valueOf("public, max-age="+maxAgeSeconds))
                     .entity(CollectionService.getCollectionForIdentifier(id,continuous)).build();
-        }else {
+        } else {
             return Response.ok().cacheControl(CacheControl.valueOf("private, max-age="+maxAgeSeconds))
                     .entity(CollectionService.getCollectionForIdentifier(id,continuous)).build();
         }
