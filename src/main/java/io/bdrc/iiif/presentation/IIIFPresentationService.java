@@ -50,7 +50,7 @@ public class IIIFPresentationService {
         }
 		final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
 		boolean requiresVolumeOutline = false;
-		if (id.getType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
+		if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
 		    requiresVolumeOutline = true;
 		}
 		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), requiresVolumeOutline);

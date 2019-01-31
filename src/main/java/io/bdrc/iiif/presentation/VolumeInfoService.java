@@ -105,15 +105,16 @@ public class VolumeInfoService {
     }
 
     public static VolumeInfo getVolumeInfo(final String volumeId, final boolean withOutline) throws BDRCAPIException {
+        logger.info("getting volume info for {}, with outline: {}", volumeId, withOutline);
         VolumeInfo resVolumeInfo = (VolumeInfo)cache.get(volumeId+WITH_OUTLINE_SUFFIX);
         if (resVolumeInfo != null) {
-            logger.info("found volumeInfo with outline in cache for "+volumeId);
+            logger.info("found volumeInfo with outline in cache for {}", volumeId);
             return resVolumeInfo;
         }
         if (!withOutline) {
             resVolumeInfo = (VolumeInfo)cache.get(volumeId);
             if (resVolumeInfo != null) {
-                logger.info("found volumeInfo in cache for "+volumeId);
+                logger.info("found volumeInfo in cache for {}", volumeId);
                 return resVolumeInfo;
             }
         }
