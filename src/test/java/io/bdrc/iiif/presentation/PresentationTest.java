@@ -1,22 +1,29 @@
 package io.bdrc.iiif.presentation;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
+import org.apache.commons.jcs.access.CacheAccess;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RDFParserBuilder;
 import org.apache.jena.riot.system.StreamRDFLib;
-import org.apache.jena.system.JenaSystem;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
+import io.bdrc.iiif.presentation.models.Identifier;
+import io.bdrc.iiif.presentation.models.ImageInfo;
 import io.bdrc.iiif.presentation.models.ItemInfo;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
 import io.bdrc.iiif.presentation.models.WorkInfo;
@@ -29,7 +36,7 @@ public class PresentationTest {
     
     @BeforeClass
     public static void before() {
-        JenaSystem.init();
+        ServiceCache.init();
     }
     
     @Test
@@ -59,7 +66,7 @@ public class PresentationTest {
     }
     
     @Test
-    public void volumeOutlineTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+    public void volumeInfoOutlineTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create()
                 .source(TESTDIR+"volumeOutline.ttl")
@@ -68,5 +75,30 @@ public class PresentationTest {
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         VolumeInfo volumeInfo = new VolumeInfo(m, "bdr:V22084_I0890");
         om.writerWithDefaultPrettyPrinter().writeValue(System.out, volumeInfo);
+    }
+    
+    public List<ImageInfo> getTestImageList(String filename) throws JsonParseException, JsonMappingException, IOException {
+        final File f = new File(TESTDIR+filename);
+        final List<ImageInfo> imageList = om.readValue(f, new TypeReference<List<ImageInfo>>(){});
+        return imageList;
+    }
+    
+    @Test
+    public void volumeManifestOutlineTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+        Model m = ModelFactory.createDefaultModel();
+        RDFParserBuilder pb = RDFParser.create()
+                .source(TESTDIR+"volumeOutline.ttl")
+                .lang(RDFLanguages.TTL);
+                //.canonicalLiterals(true);
+        pb.parse(StreamRDFLib.graph(m.getGraph()));
+        final VolumeInfo vi = new VolumeInfo(m, "bdr:V22084_I0890");
+        final Identifier id = new Identifier("vo:bdr:V22084_I0890", Identifier.MANIFEST_ID);
+        final String cacheKey = "W22084/0890";
+        final List<ImageInfo> ii = getTestImageList("W22084-0890.json");
+        CacheAccess<String, Object> cache = ServiceCache.CACHE;
+        cache.put(cacheKey, ii);
+        final Manifest mnf = ManifestService.getManifestForIdentifier(id, vi, false);
+        //final File fout = new File("/tmp/toto.json"); 
+        //IIIFApiObjectMapperProvider.writer.writeValue(fout, mnf);
     }
 }

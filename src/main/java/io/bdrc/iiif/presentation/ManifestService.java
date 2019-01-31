@@ -128,7 +128,9 @@ public class ManifestService {
     }
 
     public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi, boolean continuous) throws BDRCAPIException {
-        if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID) {
+        if (id.getType() != Identifier.MANIFEST_ID || (
+                id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID
+                && id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE)) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
         if (!vi.workId.startsWith(BDR)) {
@@ -178,9 +180,10 @@ public class ManifestService {
         for (final PartInfo part : vi.partInfo) {
             addSubRangeToRange(r, id, part, vi);
         }
+        m.addRange(r);
     }
     
-    public static void addSubRangeToRange(final Range r, final Identifier id, final PartInfo part, VolumeInfo vi) throws BDRCAPIException {
+    public static void addSubRangeToRange(final Range r, final Identifier id, final PartInfo part, final VolumeInfo vi) throws BDRCAPIException {
         final Range subRange = new Range(IIIFPresPrefix+"vo:"+id.getVolumeId()+"/range/"+part.partId);
         final PropertyValue labels = getPropForLabels(part.labels);
         subRange.setLabel(labels);
@@ -206,6 +209,7 @@ public class ManifestService {
                 addSubRangeToRange(subRange, id, subpart, vi);
             }
         }
+        r.addMember(subRange);
     }
     
     public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final List<ImageInfo> imageInfoList) {
