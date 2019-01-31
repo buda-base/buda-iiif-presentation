@@ -133,8 +133,9 @@ public class CollectionService {
         collection.setViewingHints(VIEWING_HINTS);
         collection.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
         collection.addLabel(id.getItemId());
+        final String volPrefix = id.getSubType() == Identifier.COLLECTION_ID_WORK_OUTLINE ? "vo:" : "v:";
         for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
-            final String manifestId = "v:"+vi.getPrefixedUri();
+            final String manifestId = volPrefix+vi.getPrefixedUri();
             final String volumeNumberStr = vi.toDisplay();
             String manifestUrl;
             if (vi.iiifManifest != null) {

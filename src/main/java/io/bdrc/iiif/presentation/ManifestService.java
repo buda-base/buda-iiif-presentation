@@ -184,7 +184,7 @@ public class ManifestService {
     }
     
     public static void addSubRangeToRange(final Range r, final Identifier id, final PartInfo part, final VolumeInfo vi) throws BDRCAPIException {
-        final Range subRange = new Range(IIIFPresPrefix+"vo:"+id.getVolumeId()+"/range/"+part.partId);
+        final Range subRange = new Range(IIIFPresPrefix+"vo:"+id.getVolumeId()+"/range/w:"+part.partId);
         final PropertyValue labels = getPropForLabels(part.labels);
         subRange.setLabel(labels);
         if (part.location != null) {

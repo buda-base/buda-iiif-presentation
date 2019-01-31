@@ -13,6 +13,7 @@ public class Identifier {
     public static final int COLLECTION_ID_ITEM = 2;
     public static final int COLLECTION_ID_WORK_IN_ITEM = 3;
     public static final int COLLECTION_ID_WORK_OUTLINE = 7;
+    public static final int COLLECTION_ID_ITEM_VOLUME_OUTLINE = 9;
 
     public static final int MANIFEST_ID_WORK_IN_ITEM = 4;
     public static final int MANIFEST_ID_VOLUMEID = 5;
@@ -85,6 +86,11 @@ public class Identifier {
                 this.itemId = firstId;
                 nbMaxPartsExpected = 1;
                 this.subtype = COLLECTION_ID_ITEM;
+                break;
+            case "ivo":
+                this.itemId = firstId;
+                nbMaxPartsExpected = 1;
+                this.subtype = COLLECTION_ID_ITEM_VOLUME_OUTLINE;
                 break;
             case "wi":
                 this.workId = firstId;
