@@ -46,7 +46,7 @@ public class VolumeInfoService {
     }
 
     private static VolumeInfo fetchLdsVolumeInfo(final String volumeId) throws BDRCAPIException {
-        logger.debug("fetch volume info on LDS for {}", volumeId);
+        logger.info("fetch volume info on LDS for {}", volumeId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
         final VolumeInfo resVolumeInfo;
         try {
@@ -73,12 +73,12 @@ public class VolumeInfoService {
         } catch (IOException ex) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
         }
-        logger.debug("found volume info: {}", resVolumeInfo);
+        logger.info("found volume info: {}", resVolumeInfo);
         return resVolumeInfo;
     }
     
     private static VolumeInfo fetchLdsVolumeOutline(final String volumeId) throws BDRCAPIException {
-        logger.debug("fetch volume info with outline on LDS for {}", volumeId);
+        logger.info("fetch volume info with outline on LDS for {}", volumeId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
         final VolumeInfo resVolumeInfo;
         try {
@@ -100,20 +100,20 @@ public class VolumeInfoService {
         } catch (IOException ex) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
         }
-        logger.debug("found volume info with outline: {}", resVolumeInfo);
+        logger.info("found volume info with outline: {}", resVolumeInfo);
         return resVolumeInfo;
     }
 
     public static VolumeInfo getVolumeInfo(final String volumeId, final boolean withOutline) throws BDRCAPIException {
         VolumeInfo resVolumeInfo = (VolumeInfo)cache.get(volumeId+WITH_OUTLINE_SUFFIX);
         if (resVolumeInfo != null) {
-            logger.debug("found volumeInfo with outline in cache for "+volumeId);
+            logger.info("found volumeInfo with outline in cache for "+volumeId);
             return resVolumeInfo;
         }
         if (!withOutline) {
             resVolumeInfo = (VolumeInfo)cache.get(volumeId);
             if (resVolumeInfo != null) {
-                logger.debug("found volumeInfo in cache for "+volumeId);
+                logger.info("found volumeInfo in cache for "+volumeId);
                 return resVolumeInfo;
             }
         }

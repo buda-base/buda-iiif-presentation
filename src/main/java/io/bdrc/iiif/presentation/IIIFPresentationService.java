@@ -137,7 +137,7 @@ public class IIIFPresentationService {
                 accessType = getShortName(ItemInfoService.getItemInfo(id.getItemId()).access.getUri());
                 break;
             case Identifier.COLLECTION_ID_WORK_IN_ITEM:
-                WorkInfo winf=WorkInfoService.getWorkInfo(id.getWorkId());
+                WorkInfo winf = WorkInfoService.getWorkInfo(id.getWorkId());
                 accessType = getShortName(winf.rootAccess);
                 break;
             case Identifier.COLLECTION_ID_WORK_OUTLINE:
