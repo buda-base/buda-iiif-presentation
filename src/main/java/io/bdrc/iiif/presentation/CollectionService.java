@@ -33,6 +33,7 @@ public class CollectionService {
     public static Collection getCollectionForIdentifier(final Identifier id,boolean continuous) throws BDRCAPIException {
         switch(id.getSubType()) {
         case Identifier.COLLECTION_ID_ITEM:
+        case Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE:
             return getCollectionForItem(id,continuous);
         case Identifier.COLLECTION_ID_WORK_OUTLINE:
             return getCollectionForOutline(id,continuous);

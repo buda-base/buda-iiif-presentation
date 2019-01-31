@@ -133,6 +133,7 @@ public class IIIFPresentationService {
         final int subType=id.getSubType();
         switch(subType) {
             case Identifier.COLLECTION_ID_ITEM:
+            case Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE:
                 accessType = getShortName(ItemInfoService.getItemInfo(id.getItemId()).access.getUri());
                 break;
             case Identifier.COLLECTION_ID_WORK_IN_ITEM:
