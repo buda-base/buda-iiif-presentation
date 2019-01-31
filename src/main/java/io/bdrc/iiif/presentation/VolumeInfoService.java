@@ -11,6 +11,7 @@ import java.io.InputStream;
 
 import org.apache.commons.jcs.access.CacheAccess;
 import org.apache.commons.jcs.access.exception.CacheException;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -77,7 +78,7 @@ public class VolumeInfoService {
         return resVolumeInfo;
     }
     
-    private static VolumeInfo fetchLdsVolumeOutline(final String volumeId) throws BDRCAPIException {
+    public static VolumeInfo fetchLdsVolumeOutline(final String volumeId) throws BDRCAPIException {
         logger.info("fetch volume info with outline on LDS for {}", volumeId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
         final VolumeInfo resVolumeInfo;
@@ -85,10 +86,10 @@ public class VolumeInfoService {
             final HttpPost request = new HttpPost(LDS_VOLUME_OUTLINE_QUERY);
             // we suppose that the volumeId is well formed, which is checked by the Identifier constructor
             final StringEntity params = new StringEntity("{\"R_RES\":\""+volumeId+"\"}", ContentType.APPLICATION_JSON);
-            //request.addHeader(HttpHeaders.ACCEPT, "application/json");
+            request.addHeader(HttpHeaders.ACCEPT, "text/turtle");
             request.setEntity(params);
             final HttpResponse response = httpClient.execute(request);
-            int code = response.getStatusLine().getStatusCode();
+            final int code = response.getStatusLine().getStatusCode();
             if (code != 200) {
                 throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error", response.toString(), "");
             }

@@ -77,6 +77,11 @@ public class PresentationTest {
         om.writerWithDefaultPrettyPrinter().writeValue(System.out, volumeInfo);
     }
     
+    @Test
+    public void volumeInfoOutlineFetchTest() throws BDRCAPIException {
+        VolumeInfoService.fetchLdsVolumeOutline("bdr:V22084_I0890");
+    }
+    
     public List<ImageInfo> getTestImageList(String filename) throws JsonParseException, JsonMappingException, IOException {
         final File f = new File(TESTDIR+filename);
         final List<ImageInfo> imageList = om.readValue(f, new TypeReference<List<ImageInfo>>(){});
