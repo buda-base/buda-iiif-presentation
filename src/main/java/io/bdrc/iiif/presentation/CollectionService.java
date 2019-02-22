@@ -102,10 +102,10 @@ public class CollectionService {
         collection.setLabel(getLabels(id.getWorkId(), wi));
         if (wi.parts != null) {
             for (final PartInfo pi : wi.parts) {
-                final String prefixedPartId = getPrefixedForm(pi.partId);
-                final String collectionId = "wio:"+prefixedPartId;
+                final String collectionId = "wio:"+pi.partId;
                 final Collection subcollection = new Collection(IIIFPresPrefix_coll+collectionId);
-                subcollection.addLabel(prefixedPartId);
+                final PropertyValue labels = ManifestService.getPropForLabels(pi.labels);
+                subcollection.setLabel(labels);
                 collection.addCollection(subcollection);
             }
         }
