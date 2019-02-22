@@ -58,6 +58,12 @@ public class ManifestService {
     public static PropertyValue getPropForLabels(List<LangString> labels) {
         if (labels == null) return null;
         final PropertyValue res = new PropertyValue();
+        if (labels.size() == 1) { 
+            // no lang tag if we have only one lang, that might be changed later on
+            // (it's mostly to work around a bug in Mirador)
+            res.addValue(labels.get(0).value);
+            return res;
+        }
         for (final LangString ls : labels) {
             // TODO: does it work well or should it be grouped by language first?
             if (ls.language != null) {
