@@ -44,13 +44,15 @@ public class Identifier {
         if (parts.length == 0 || parts.length > 3) {
             throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse page numbers in identifier");
         }
-        try {
-            this.bPageNum = Integer.parseInt(parts[0]);
-        } catch (NumberFormatException e) {
-            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse page numbers in identifier");
+        if (!parts[0].isEmpty()) { // case of "-12"
+            try {
+                this.bPageNum = Integer.parseInt(parts[0]);
+            } catch (NumberFormatException e) {
+                throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse page numbers in identifier");
+            }
+            if (this.bPageNum < 1)
+                throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse page numbers in identifier");
         }
-        if (this.bPageNum < 1)
-            throw new BDRCAPIException(404, INVALID_IDENTIFIER_ERROR_CODE, "cannot parse page numbers in identifier");
         if (parts.length < 2)
             return;
         try {
