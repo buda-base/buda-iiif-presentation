@@ -118,9 +118,9 @@ public class VolumeInfo {
         final Statement iiifManifestS = volume.getProperty(m.getProperty(BDO, "hasIIIFManifest"));
         if (iiifManifestS != null) {
             try {
-                this.iiifManifest = new URI(iiifManifestS.toString());
+                this.iiifManifest = new URI(iiifManifestS.getResource().getURI());
             } catch (URISyntaxException e) {
-                logger.error("problem converting sparql graph result to URI: "+iiifManifestS.getString(), e);
+                logger.error("problem converting sparql graph result to URI: "+iiifManifestS.getResource().getURI(), e);
             }
         }
 
