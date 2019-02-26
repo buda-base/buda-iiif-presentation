@@ -115,6 +115,15 @@ public class VolumeInfo {
             this.totalPages = volumePagesTotalS.getInt();
         }
         
+        final Statement iiifManifestS = volume.getProperty(m.getProperty(BDO, "hasIIIFManifest"));
+        if (iiifManifestS != null) {
+            try {
+                this.iiifManifest = new URI(iiifManifestS.toString());
+            } catch (URISyntaxException e) {
+                logger.error("problem converting sparql graph result to URI: "+iiifManifestS.getString(), e);
+            }
+        }
+
         final Statement volumeNumberS = volume.getProperty(m.getProperty(BDO, "volumeNumber"));
         if (volumeNumberS != null) {
             this.volumeNumber = volumeNumberS.getInt();
