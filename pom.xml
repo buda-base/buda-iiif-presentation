@@ -81,6 +81,31 @@
         </plugins>
     </build>
     <dependencies>
+            <dependency>
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-bmp</artifactId>
+      <version>${version.twelvemonkeys}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-jpeg</artifactId>
+      <version>${version.twelvemonkeys}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.twelvemonkeys.imageio</groupId>
+      <artifactId>imageio-tiff</artifactId>
+      <version>${version.twelvemonkeys}</version>
+</dependency>
+    <dependency>
+      <groupId>de.digitalcollections.imageio</groupId>
+      <artifactId>imageio-turbojpeg</artifactId>
+      <version>${version.imageio-jnr}</version>
+    </dependency>
+    <dependency>
+      <groupId>de.digitalcollections.imageio</groupId>
+      <artifactId>imageio-openjpeg</artifactId>
+      <version>${version.imageio-jnr}</version>
+</dependency>
         <dependency><!-- next two: deprected from Java 9: https://stackoverflow.com/questions/46493613/what-is-the-replacement-for-javax-activation-package-in-java-9 -->
             <groupId>com.sun.activation</groupId>
             <artifactId>javax.activation</artifactId>
@@ -216,6 +241,8 @@
         <jersey.version>2.27</jersey.version>
         <slf4j.version>1.7.25</slf4j.version>
         <jackson.version>2.9.7</jackson.version>
+        <version.imageio-jnr>0.2.8</version.imageio-jnr>
+        <version.twelvemonkeys>3.3.2</version.twelvemonkeys> <!-- 3.4.1 -->
         <jetty.version>9.4.9.v20180320</jetty.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

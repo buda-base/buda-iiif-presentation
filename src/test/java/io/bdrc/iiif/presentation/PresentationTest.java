@@ -2,7 +2,13 @@ package io.bdrc.iiif.presentation;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageWriter;
+import javax.imageio.spi.IIORegistry;
 
 import org.apache.commons.jcs.access.CacheAccess;
 import org.apache.jena.rdf.model.Model;
@@ -37,6 +43,11 @@ public class PresentationTest {
     @BeforeClass
     public static void before() {
         ServiceCache.init();
+          Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByMIMEType("image/jpeg");
+          for (Iterator iterator = imageWriters; iterator.hasNext(); ) {
+            ImageWriter imageWriter = (ImageWriter) iterator.next();
+                System.out.println(imageWriter.getClass());
+          }
     }
     
     @Test
