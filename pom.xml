@@ -241,7 +241,7 @@
         <jersey.version>2.27</jersey.version>
         <slf4j.version>1.7.25</slf4j.version>
         <jackson.version>2.9.7</jackson.version>
-        <version.imageio-jnr>0.2.8</version.imageio-jnr>
+        <version.imageio-jnr>0.3.0</version.imageio-jnr>
         <version.twelvemonkeys>3.3.2</version.twelvemonkeys> <!-- 3.4.1 -->
         <jetty.version>9.4.9.v20180320</jetty.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
