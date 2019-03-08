@@ -44,9 +44,13 @@ public class PresentationTest {
     public static void before() {
         ServiceCache.init();
           Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByMIMEType("image/jpeg");
-          for (Iterator iterator = imageWriters; iterator.hasNext(); ) {
-            ImageWriter imageWriter = (ImageWriter) iterator.next();
+          for (Iterator<ImageWriter> iterator = imageWriters; iterator.hasNext(); ) {
+            ImageWriter imageWriter = iterator.next();
+            if (imageWriter == null) {
+                System.out.println("(is null)");
+            } else {
                 System.out.println(imageWriter.getClass());
+            }
           }
     }
     
