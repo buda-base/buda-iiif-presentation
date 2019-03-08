@@ -21,32 +21,25 @@ public class IIIFImageTest {
 
     @Test
     public void iiiftext() throws IOException {
-        Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByMIMEType("image/jpeg");
-        for (Iterator<ImageWriter> iterator = imageWriters; iterator.hasNext(); ) {
-          ImageWriter imageWriter = iterator.next();
-          if (imageWriter == null) {
-              System.out.println("(is null)");
-          } else {
-              System.out.println(imageWriter.getClass());
-          }
-        }
         InputStream input = IIIFImageTest.class.getClassLoader().getResourceAsStream("08860041.tif");
         ImageInputStream iis;
-      try {
+        try {
           iis = ImageIO.createImageInputStream(input);
-      } catch (IOException e) {
+        } catch (IOException e) {
           e.printStackTrace();
           return;
-      }
+        }
         ImageReader reader = ImageIO.getImageReaders(iis).next();
         System.out.println("using reader "+(reader.getClass()));
         reader.setInput(iis);
         ImageReadParam readParam = reader.getDefaultReadParam();
         BufferedImage outImg = reader.read(0, readParam);
         ImageWriter writer = ImageIO.getImageWritersByMIMEType("image/jpeg").next();
+        System.out.println("using writer "+(writer.getClass()));
         OutputStream os = new FileOutputStream(new File("/tmp/imgresult.jpg"));
         ImageOutputStream ios = ImageIO.createImageOutputStream(os);
         writer.setOutput(ios);
+        System.out.println("debug step 1");
         writer.write(outImg);
         writer.dispose();
         ios.flush();
