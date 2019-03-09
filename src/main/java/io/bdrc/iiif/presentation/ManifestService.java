@@ -240,9 +240,9 @@ public class ManifestService {
         final ImageService imgServ = new ImageService(imageServiceUrl, ImageApiProfile.LEVEL_ZERO);
         final String imgUrl;
         if (pngOutput(imageInfo.filename)) {
-            imgUrl = imageServiceUrl+"full/full/0/default.png";
+            imgUrl = imageServiceUrl+"/full/full/0/default.png";
         } else {
-            imgUrl = imageServiceUrl+"full/full/0/default.jpg";
+            imgUrl = imageServiceUrl+"/full/full/0/default.jpg";
         }
         final ImageContent img = new ImageContent(imgUrl);
         img.addService(imgServ);
