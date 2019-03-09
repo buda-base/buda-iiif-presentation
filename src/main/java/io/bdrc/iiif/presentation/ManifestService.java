@@ -222,6 +222,11 @@ public class ManifestService {
         r.addRange(rangeUri);
     }
     
+    public static boolean pngOutput(final String filename) {
+        final String ext = filename.substring(filename.length()-4).toLowerCase();
+        return (ext.equals(".tif") || ext.equals("tiff"));
+    }
+    
     public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final List<ImageInfo> imageInfoList) {
         // imgSeqNum starts at 1
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum-1);
@@ -233,7 +238,14 @@ public class ManifestService {
         final String imageServiceUrl = getImageServiceUrl(imageInfo.filename, id);
         //canvas.addIIIFImage(imageServiceUrl, ImageApiProfile.LEVEL_ONE);
         final ImageService imgServ = new ImageService(imageServiceUrl, ImageApiProfile.LEVEL_ZERO);
-        final ImageContent img = new ImageContent(imgServ);
+        final String imgUrl;
+        if (pngOutput(imageInfo.filename)) {
+            imgUrl = imageServiceUrl+"full/full/0/default.png";
+        } else {
+            imgUrl = imageServiceUrl+"full/full/0/default.jpg";
+        }
+        final ImageContent img = new ImageContent(imgUrl);
+        img.addService(imgServ);
         img.setWidth(imageInfo.width);
         img.setHeight(imageInfo.height);
         canvas.addImage(img);
