@@ -237,7 +237,7 @@ public class ManifestService {
         canvas.setHeight(imageInfo.height);
         final String imageServiceUrl = getImageServiceUrl(imageInfo.filename, id);
         //canvas.addIIIFImage(imageServiceUrl, ImageApiProfile.LEVEL_ONE);
-        final ImageService imgServ = new ImageService(imageServiceUrl, ImageApiProfile.LEVEL_ZERO);
+        final ImageService imgServ = new ImageService(imageServiceUrl, ImageApiProfile.LEVEL_TWO);
         final String imgUrl;
         if (pngOutput(imageInfo.filename)) {
             imgUrl = imageServiceUrl+"/full/full/0/default.png";
