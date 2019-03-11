@@ -6,6 +6,7 @@ import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIF_IMAGE_PREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.PDF_URL_PREFIX;
+import static io.bdrc.iiif.presentation.AppConstants.ZIP_URL_PREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.NO_ACCESS_ERROR_CODE;
 
 import java.util.ArrayList;
@@ -46,7 +47,6 @@ public class ManifestService {
     //public static final List<ViewingHint> VIEW_HINTS=Arrays.asList(new ViewingHint[] { ViewingHint.CONTINUOUS});
     public static final String VIEWING_HINTS= "continuous";
 
-    private static final String ZIP_URL_PREFIX = null;
     static {
         attribution.addValue(getLocaleFor("en"), "Buddhist Digital Resource Center");
         attribution.addValue(getLocaleFor("bo"), "ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།");
