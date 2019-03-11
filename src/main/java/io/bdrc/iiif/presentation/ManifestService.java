@@ -45,6 +45,8 @@ public class ManifestService {
     public static final PropertyValue attribution = new PropertyValue();
     //public static final List<ViewingHint> VIEW_HINTS=Arrays.asList(new ViewingHint[] { ViewingHint.CONTINUOUS});
     public static final String VIEWING_HINTS= "continuous";
+
+    private static final String ZIP_URL_PREFIX = null;
     static {
         attribution.addValue(getLocaleFor("en"), "Buddhist Digital Resource Center");
         attribution.addValue(getLocaleFor("bo"), "ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།");
@@ -171,7 +173,7 @@ public class ManifestService {
         final String fullId = volumeId+"::"+bPage+"-"+ePage;
         final OtherContent oct = new OtherContent(PDF_URL_PREFIX+"v:"+fullId,"application/pdf");
         oct.setLabel(new PropertyValue("Download as PDF"));
-        final OtherContent oct1 = new OtherContent(PDF_URL_PREFIX+"v:"+fullId,"application/zip");
+        final OtherContent oct1 = new OtherContent(ZIP_URL_PREFIX+"v:"+fullId,"application/zip");
         oct1.setLabel(new PropertyValue("Download as ZIP"));
         final ArrayList<OtherContent> ct = new ArrayList<>();
         ct.add(oct);
@@ -237,7 +239,7 @@ public class ManifestService {
         canvas.setHeight(imageInfo.height);
         final String imageServiceUrl = getImageServiceUrl(imageInfo.filename, id);
         //canvas.addIIIFImage(imageServiceUrl, ImageApiProfile.LEVEL_ONE);
-        final ImageService imgServ = new ImageService(imageServiceUrl, ImageApiProfile.LEVEL_TWO);
+        final ImageService imgServ = new ImageService(imageServiceUrl, ImageApiProfile.LEVEL_ZERO);
         final String imgUrl;
         if (pngOutput(imageInfo.filename)) {
             imgUrl = imageServiceUrl+"/full/full/0/default.png";
