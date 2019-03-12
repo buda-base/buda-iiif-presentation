@@ -108,11 +108,15 @@ public class ManifestService {
         }
     }
     
-    public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
+    public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList, final VolumeInfo vi) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence(IIIFPresPrefix+id.getId()+"/sequence/main");
         final int imageTotal = imageInfoList.size();
         // all indices start at 1
-        final int beginIndex = (id.getBPageNum() == null) ? 1 : id.getBPageNum();
+        int nbPagesIntro = vi.pagesIntroTbrc;
+        if (vi.workId.contains("FPL") || vi.workId.contains("NLM")) {
+            nbPagesIntro = 0;
+        }
+        final int beginIndex = (id.getBPageNum() == null) ? 1+nbPagesIntro : id.getBPageNum();
         if (beginIndex > imageTotal) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you asked a manifest for an image number that is greater than the total number of images");
         }
@@ -153,13 +157,17 @@ public class ManifestService {
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         manifest.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
         manifest.addLabel(id.getVolumeId());
-        final Sequence mainSeq = getSequenceFrom(id, imageInfoList);
+        final Sequence mainSeq = getSequenceFrom(id, imageInfoList, vi);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         if (continuous) {
             mainSeq.setViewingHints(VIEWING_HINTS);
         }
+        int nbPagesIntro = vi.pagesIntroTbrc;
+        if (vi.workId.contains("FPL") || vi.workId.contains("NLM")) {
+            nbPagesIntro = 0;
+        }
         // PDF / zip download
-        int bPage = id.getBPageNum() == null ? 1 : id.getBPageNum().intValue(); 
+        int bPage = id.getBPageNum() == null ? 1+nbPagesIntro : id.getBPageNum().intValue();
         int ePage = id.getEPageNum() == null ? vi.totalPages : id.getEPageNum().intValue();
         final List<OtherContent> oc = getRenderings(id.getVolumeId(), bPage, ePage); 
         manifest.setRenderings(oc);
