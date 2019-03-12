@@ -30,6 +30,7 @@ import de.digitalcollections.iiif.model.sharedcanvas.Range;
 import de.digitalcollections.iiif.model.sharedcanvas.Sequence;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.AccessType;
+import io.bdrc.iiif.presentation.models.BDRCPresentationImageService;
 import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.ImageInfo;
 import io.bdrc.iiif.presentation.models.LangString;
@@ -229,6 +230,8 @@ public class ManifestService {
         return (ext.equals(".tif") || ext.equals("tiff"));
     }
     
+    public static final PropertyValue pngHint = new PropertyValue("png", "jpg");
+    
     public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final List<ImageInfo> imageInfoList) {
         // imgSeqNum starts at 1
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum-1);
@@ -239,10 +242,11 @@ public class ManifestService {
         canvas.setHeight(imageInfo.height);
         final String imageServiceUrl = getImageServiceUrl(imageInfo.filename, id);
         //canvas.addIIIFImage(imageServiceUrl, ImageApiProfile.LEVEL_ONE);
-        final ImageService imgServ = new ImageService(imageServiceUrl, ImageApiProfile.LEVEL_ZERO);
+        final BDRCPresentationImageService imgServ = new BDRCPresentationImageService(imageServiceUrl, ImageApiProfile.LEVEL_ZERO);
         final String imgUrl;
         if (pngOutput(imageInfo.filename)) {
             imgUrl = imageServiceUrl+"/full/full/0/default.png";
+            imgServ.setFormatHints(pngHint);
         } else {
             imgUrl = imageServiceUrl+"/full/full/0/default.jpg";
         }
