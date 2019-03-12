@@ -258,6 +258,8 @@ public class ManifestService {
         } else {
             imgUrl = imageServiceUrl+"/full/full/0/default.jpg";
         }
+        imgServ.setHeight(imageInfo.height);
+        imgServ.setWidth(imageInfo.width);
         final ImageContent img = new ImageContent(imgUrl);
         img.addService(imgServ);
         img.setWidth(imageInfo.width);
