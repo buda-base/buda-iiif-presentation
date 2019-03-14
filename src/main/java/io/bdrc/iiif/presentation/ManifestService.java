@@ -253,10 +253,10 @@ public class ManifestService {
         final BDRCPresentationImageService imgServ = new BDRCPresentationImageService(imageServiceUrl, ImageApiProfile.LEVEL_ZERO);
         final String imgUrl;
         if (pngOutput(imageInfo.filename)) {
-            imgUrl = imageServiceUrl+"/full/full/0/default.png";
+            imgUrl = imageServiceUrl+"/full/max/0/default.png";
             imgServ.setFormatHints(pngHint);
         } else {
-            imgUrl = imageServiceUrl+"/full/full/0/default.jpg";
+            imgUrl = imageServiceUrl+"/full/max/0/default.jpg";
         }
         imgServ.setHeight(imageInfo.height);
         imgServ.setWidth(imageInfo.width);
