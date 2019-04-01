@@ -1,5 +1,7 @@
 package io.bdrc.iiif.presentation;
 
+import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix_coll;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -20,11 +22,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.digitalcollections.iiif.model.PropertyValue;
+import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.ImageInfo;
 import io.bdrc.iiif.presentation.models.ItemInfo;
+import io.bdrc.iiif.presentation.models.PartInfo;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
 import io.bdrc.iiif.presentation.models.WorkInfo;
 
@@ -103,7 +108,33 @@ public class PresentationTest {
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
         cache.put(cacheKey, ii);
         final Manifest mnf = ManifestService.getManifestForIdentifier(id, vi, false);
-        //final File fout = new File("/tmp/toto.json"); 
+        //final File fout = new File("/tmp/manifestOutline.json"); 
         //IIIFApiObjectMapperProvider.writer.writeValue(fout, mnf);
+    }
+
+
+    @Test
+    public void virtualWork() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+        Model m = ModelFactory.createDefaultModel();
+        RDFParserBuilder pb = RDFParser.create()
+                .source(TESTDIR+"workGraphNoItem-virtualwork.ttl")
+                .lang(RDFLanguages.TTL);
+                //.canonicalLiterals(true);
+        pb.parse(StreamRDFLib.graph(m.getGraph()));
+        final WorkInfo wi = new WorkInfo(m, "bdr:WSL001_P005");
+        final Identifier id = new Identifier("wio:bdr:WSL001_P005", Identifier.COLLECTION_ID);
+        final Collection collection = CollectionService.getCommonCollection(id);
+        collection.setLabel(CollectionService.getLabels(id.getWorkId(), wi));
+        if (wi.parts != null) {
+            for (final PartInfo pi : wi.parts) {
+                final String collectionId = "wio:"+pi.partId;
+                final Collection subcollection = new Collection(IIIFPresPrefix_coll+collectionId);
+                final PropertyValue labels = ManifestService.getPropForLabels(pi.labels);
+                subcollection.setLabel(labels);
+                collection.addCollection(subcollection);
+            }
+        }
+        //final File fout = new File("/tmp/virtualWork.json"); 
+        //IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
     }
 }

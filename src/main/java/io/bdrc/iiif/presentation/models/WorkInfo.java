@@ -70,10 +70,16 @@ public class WorkInfo {
         if (work == null)
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: missing work");
         // checking type (needs to be a bdo:Work)
-        final Triple t = new Triple(work.asNode(), RDF.type.asNode(), m.getResource(BDO+"Work").asNode());
-        final ExtendedIterator<Triple> ext = m.getGraph().find(t);
+        final Triple isWorkT = new Triple(work.asNode(), RDF.type.asNode(), m.getResource(BDO+"Work").asNode());
+        ExtendedIterator<Triple> ext = m.getGraph().find(isWorkT);
         if (!ext.hasNext()) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: not a work");
+        }
+        final Triple isVirtualWorkT = new Triple(work.asNode(), RDF.type.asNode(), m.getResource(BDO+"VirtualWork").asNode());
+        ext = m.getGraph().find(isVirtualWorkT);
+        boolean isVirtual = false;
+        if (ext.hasNext()) {
+            isVirtual = true;
         }
         final Resource item = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "inItem"));
         if (item == null) {
@@ -96,14 +102,19 @@ public class WorkInfo {
             this.rootAccess = access.getURI();
         }
         if (this.rootAccess == null) {
-            logger.warn("cannot find model access for {}", workId);
-            this.rootAccess = BDR+"AccessRestrictedByTbrc";
+            if (isVirtual) {
+                this.rootAccess = BDR+"AccessOpen";
+            } else {
+                logger.warn("cannot find model access for {}", workId);
+                this.rootAccess = BDR+"AccessRestrictedByTbrc";                
+            }
+            
         }
 
         this.parts = getParts(m, work);
         this.labels = getLabels(m, work);
         
-        final Resource linkTo = work.getPropertyResourceValue(m.getProperty(BDO, "linkTo"));
+        final Resource linkTo = work.getPropertyResourceValue(m.getProperty(BDO, "workLinkTo"));
         if (linkTo != null) {
             this.linkTo = "bdr:"+linkTo.getLocalName();
             final Resource linkToType = linkTo.getPropertyResourceValue(RDF.type);

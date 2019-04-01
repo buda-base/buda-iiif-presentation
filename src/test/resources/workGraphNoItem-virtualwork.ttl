@@ -1,0 +1,86 @@
+@prefix :      <http://purl.bdrc.io/ontology/core/> .
+@prefix bd:    <http://www.bigdata.com/rdf#> .
+@prefix bdd:   <http://purl.bdrc.io/data/> .
+@prefix ad:    <http://schemas.talis.com/2005/address/schema#> .
+@prefix bf:    <http://id.loc.gov/ontologies/bibframe/> .
+@prefix tbr:   <http://purl.bdrc.io/ontology/toberemoved/> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix f:     <java:io.bdrc.ldspdi.sparql.functions.> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
+@prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
+@prefix iiif2: <http://iiif.io/api/presentation/2#> .
+@prefix iiif3: <http://iiif.io/api/presentation/3#> .
+@prefix bdr:   <http://purl.bdrc.io/resource/> .
+@prefix as:    <http://www.w3.org/ns/activitystreams#> .
+@prefix oa:    <http://www.w3.org/ns/oa#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix tmp:   <http://purl.bdrc.io/ontology/tmp/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix text:  <http://jena.apache.org/text#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+
+bdr:W19997_0448  a               bdo:Work ;
+        adm:legacyImageGroupRID  "O1GS447881GS44791" ;
+        bdo:workHasPart          bdr:W19997_0449 , bdr:W19997_0450 , bdr:W19997_0516 , bdr:W19997_0538 , bdr:W19997_0479 ;
+        bdo:workPartIndex        3 ;
+        bdo:workPartLabel        "ga"@bo-x-ewts ;
+        bdo:workPartOf           bdr:W19997 ;
+        bdo:workPartTreeIndex    "3" ;
+        skos:prefLabel           "ga"@bo-x-ewts .
+
+bdr:W19997_0171  a               bdo:Work ;
+        adm:legacyImageGroupRID  "O1GS447881GS44790" ;
+        bdo:workHasPart          bdr:W19997_0172 , bdr:W19997_0338 , bdr:W19997_0383 , bdr:W19997_0439 , bdr:W19997_0222 , bdr:W19997_0344 , bdr:W19997_0257 , bdr:W19997_0411 , bdr:W19997_0301 , bdr:W19997_0331 , bdr:W19997_0269 , bdr:W19997_0311 ;
+        bdo:workPartIndex        2 ;
+        bdo:workPartLabel        "kha/"@bo-x-ewts ;
+        bdo:workPartOf           bdr:W19997 ;
+        bdo:workPartTreeIndex    "2" ;
+        skos:prefLabel           "kha/"@bo-x-ewts .
+
+bdr:W19997  a                         bdo:Work ;
+        adm:access                    bdr:AccessOpen ;
+        adm:gitRevision               "2d58f8275303110e5f9e7b9ce71cc7b1c9e5445b" ;
+        adm:license                   bdr:LicensePublicDomain ;
+        adm:status                    bdr:StatusReleased ;
+        bdo:creatorEditor             bdr:P4746 ;
+        bdo:itemBDRCHoldingStatement  "1" ;
+        bdo:workAuthorshipStatement   "krung go'i bod kyi shes rig zhib 'jug ste gnas kyi chos lugs lo rgyus zhib 'jug so'o dang krung go bod brgyud nang bstan mntho rim slob gling bo brgyud nang bstan zhib 'jug khang, zi khrod zhing chen dkar mdzes khul chus lugs cud/"@bo-x-ewts ;
+        bdo:workCatalogInfo           "Survey of the religious establishments in Kandze Prefecture, Sichuan Province."@en ;
+        bdo:workCreator               bdr:P4746 ;
+        bdo:workExtentStatement       "3 v." ;
+        bdo:workGenre                 bdr:T1134 ;
+        bdo:workHasItem               bdr:I19997 ;
+        bdo:workHasItemImageAsset     bdr:I19997 ;
+        bdo:workHasPart               bdr:W19997_0448 , bdr:W19997_0171 , bdr:W19997_0001 ;
+        bdo:workHollis                "014254943" ;
+        bdo:workIsAbout               bdr:T359 , bdr:G1538 ;
+        bdo:workLangScript            bdr:Bo , bdr:LanguageTaxonomy , bdr:BoTibt ;
+        bdo:workNumberOfVolumes       3 ;
+        bdo:workPagination            bdr:PaginationAbsolute ;
+        bdo:workPublisherLocation     "pe cin/"@bo-x-ewts ;
+        bdo:workPublisherName         "krung go'i bod kyi shes rig dpe skrun khang"@bo-x-ewts ;
+        bdo:workScanInfo              "Scanned at Tibetan Buddhist Resource Center, 150 West 17th St, New York City, NY 10011, US. Comments: vol. 1 created from pdf"@en ;
+        bdo:workType                  bdr:WorkTypePublishedWork ;
+        skos:prefLabel                "dkar mdzes khul gyi dgon sde so so'i lo rgyus gsal bar bshad pa/"@bo-x-ewts .
+
+bdr:W19997_0001  a               bdo:Work ;
+        adm:legacyImageGroupRID  "O1GS447881GS44789" ;
+        bdo:workHasPart          bdr:W19997_0050 , bdr:W19997_0004 , bdr:W19997_0002 , bdr:W19997_0113 , bdr:W19997_0006 , bdr:W19997_0003 , bdr:W19997_0005 ;
+        bdo:workPartIndex        1 ;
+        bdo:workPartLabel        "ka"@bo-x-ewts ;
+        bdo:workPartOf           bdr:W19997 ;
+        bdo:workPartTreeIndex    "1" ;
+        skos:prefLabel           "ka"@bo-x-ewts .
+
+bdr:WSL001_P005  a          bdo:VirtualWork , bdo:Work ;
+        bdo:workLinkTo      bdr:W19997 ;
+        bdo:workPartIndex   5 ;
+        bdo:workPartOf      bdr:WSL001 ;
+        tmp:inItem          bdr:I19997 ;
+        tmp:rootAccess      bdr:AccessOpen ;
+        tmp:workCreatorLit  "'jigs med bsam grub/"@bo-x-ewts ;
+        skos:prefLabel      "དཀར་མཛེས་ཁུལ་གྱི་དགོན་སྡེ་སོ་སོའི་ལོ་རྒྱུས་གསལ་བར་བཤད་པ།"@bo .
