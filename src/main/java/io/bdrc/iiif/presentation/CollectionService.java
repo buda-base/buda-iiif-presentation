@@ -77,12 +77,12 @@ public class CollectionService {
             label.addValue(getPrefixedForm(workId));
             return label;
         }
-        if (wi.labels.size() == 1) { 
-            // no lang tag if we have only one lang, that might be changed later on
-            // (it's mostly to work around a bug in Mirador)
-            label.addValue(wi.labels.get(0).value);
-            return label;
-        }
+//        if (wi.labels.size() == 1) { 
+//            // no lang tag if we have only one lang, that might be changed later on
+//            // (it's mostly to work around a bug in Mirador)
+//            label.addValue(wi.labels.get(0).value);
+//            return label;
+//        }
         for (LangString ls : wi.labels) {
             if (ls.language != null)
                 label.addValue(ManifestService.getLocaleFor(ls.language), ls.value);
