@@ -277,9 +277,9 @@ public class ManifestService {
         if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
-        if (vi.access != AccessType.OPEN) {
-            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this volume");
-        }
+//        if (vi.access != AccessType.OPEN) {
+//            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this volume");
+//        }
         if (!vi.workId.startsWith(BDR)) {
             throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you can only access BDRC volumes through this API");
         }

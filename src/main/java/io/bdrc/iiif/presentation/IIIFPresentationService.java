@@ -56,10 +56,10 @@ public class IIIFPresentationService {
 		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), requiresVolumeOutline);
 		Access acc = (Access)ctx.getProperty("access");
 		if (acc == null) { acc = new Access();}
-		String accessType=getShortName(vi.access.getUri());
-	    if (accessType == null || !acc.hasResourceAccess(accessType)) {
-	        return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
-	    }
+		String accessType = getShortName(vi.access.getUri());
+//	    if (accessType == null || !acc.hasResourceAccess(accessType)) {
+//	        return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
+//	    }
 		if (vi.iiifManifest != null) {
 		    logger.info("redirect manifest request for ID {} to {}", identifier, vi.iiifManifest.toString());
 	        return Response.status(302) // maybe 303 or 307 would be better?
@@ -78,7 +78,7 @@ public class IIIFPresentationService {
         boolean open=accessType.equals(RdfConstants.OPEN);
         if(open) {
             return Response.ok(stream).header("Cache-Control", "public,max-age="+AuthProps.getProperty("max-age")).build();
-        }else {
+        } else {
             return Response.ok(stream).header("Cache-Control", "private,max-age="+AuthProps.getProperty("max-age")).build();
         }
 	}
@@ -93,9 +93,9 @@ public class IIIFPresentationService {
         Access acc = (Access)ctx.getProperty("access");
         if(acc == null) { acc = new Access();}
         final String accessType = getShortName(vi.access.getUri());
-        if(accessType == null || !acc.hasResourceAccess(accessType)) {
-            return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
-        }
+//        if(accessType == null || !acc.hasResourceAccess(accessType)) {
+//            return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
+//        }
         if (vi.iiifManifest != null) {
             return Response.status(404).entity("Cannot serve canvas for external manifests").header("Cache-Control", "no-cache").build();
         }
@@ -147,9 +147,9 @@ public class IIIFPresentationService {
         }
         Access acc = (Access)ctx.getProperty("access");
         if (acc == null) { acc = new Access(); }
-        if (!acc.hasResourceAccess(accessType)) {
-            throw new BDRCAPIException(403, AppConstants.GENERIC_LDS_ERROR, "Insufficient rights");
-        }
+//        if (!acc.hasResourceAccess(accessType)) {
+//            throw new BDRCAPIException(403, AppConstants.GENERIC_LDS_ERROR, "Insufficient rights");
+//        }
         //At this point the resource is accessible but we don't whether it is public or restricted
         //and we don't know either if the user is authenticated or not
         boolean open = accessType.equals(RdfConstants.OPEN);

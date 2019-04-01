@@ -8,7 +8,7 @@ public enum AccessType {
     RESTR_BDRC("http://purl.bdrc.io/resource/AccessRestrictedByTbrc"),
     RESTR_CHINA("http://purl.bdrc.io/resource/AccessRestrictedInChina"),
     RESTR_SEALED("http://purl.bdrc.io/resource/AccessRestrictedSealed"),
-    RESTR_TEMP("http://purl.bdrc.io/resource/AccessRestrictedTemporarily");
+    RESTR_TEMP("http://purl.bdrc.io/resource/AccessTemporarilyRestricted");
     
     private String uri;
     
