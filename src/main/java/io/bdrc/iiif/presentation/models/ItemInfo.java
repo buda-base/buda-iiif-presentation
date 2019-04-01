@@ -70,7 +70,7 @@ public class ItemInfo {
     public ItemInfo() {}
     
     public ItemInfo(final Model m, String itemId) throws BDRCAPIException {
-        // the model is supposed to come from the IIIFPres_itemInfo graph query
+        // the model is supposed to come from the IIIFPres_itemGraph graph query
         if (itemId.startsWith("bdr:"))
             itemId = BDR+itemId.substring(4);
         final Resource item = m.getResource(itemId);

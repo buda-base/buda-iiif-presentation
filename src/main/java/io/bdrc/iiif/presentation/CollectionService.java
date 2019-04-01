@@ -34,9 +34,9 @@ public class CollectionService {
         switch(id.getSubType()) {
         case Identifier.COLLECTION_ID_ITEM:
         case Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE:
-            return getCollectionForItem(id,continuous);
+            return getCollectionForItem(getCommonCollection(id), id,continuous);
         case Identifier.COLLECTION_ID_WORK_OUTLINE:
-            return getCollectionForOutline(id,continuous);
+            return getCollectionForOutline(getCommonCollection(id), id,continuous);
         default:
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
@@ -91,20 +91,21 @@ public class CollectionService {
         }
         return label;
     }
-
-    public static Collection getCollectionForOutline(final Identifier id, final boolean continuous) throws BDRCAPIException {
-        final WorkInfo wi = WorkInfoService.getWorkInfo(id.getWorkId());
-        final ItemInfo ii;
-//        if (wi.access != AccessType.OPEN) {
-//            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this collection");
-//        }
-        logger.info("building outline collection for ID {}", id.getId());
+    
+    public static Collection getCommonCollection(final Identifier id) {
         final Collection collection = new Collection(IIIFPresPrefix_coll+id.getId(), "Collection");
         collection.setAttribution(ManifestService.attribution);
         collection.setViewingHints(VIEWING_HINTS);
         // TODO: use the actual license
         collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         collection.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
+        return collection;
+    }
+
+    public static Collection getCollectionForOutline(final Collection collection, final Identifier id, final boolean continuous) throws BDRCAPIException {
+        final WorkInfo wi = WorkInfoService.getWorkInfo(id.getWorkId());
+        final ItemInfo ii;
+        logger.info("building outline collection for ID {}", id.getId());
         collection.setLabel(getLabels(id.getWorkId(), wi));
         if (wi.parts != null) {
             for (final PartInfo pi : wi.parts) {
@@ -127,18 +128,9 @@ public class CollectionService {
         return collection;
     }
 
-    public static Collection getCollectionForItem(final Identifier id, final boolean continuous) throws BDRCAPIException {
+    public static Collection getCollectionForItem(final Collection collection, final Identifier id, final boolean continuous) throws BDRCAPIException {
         final ItemInfo ii = ItemInfoService.getItemInfo(id.getItemId());
-//        if (ii.access != AccessType.OPEN) {
-//            throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you cannot access this collection");
-//        }
         logger.info("building item collection for ID {}", id.getId());
-        final Collection collection = new Collection(IIIFPresPrefix_coll+id.getId(), "Collection");
-        collection.setAttribution(ManifestService.attribution);
-        // TODO: use the actual license
-        collection.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
-        collection.setViewingHints(VIEWING_HINTS);
-        collection.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
         collection.addLabel(id.getItemId());
         final String volPrefix = id.getSubType() == Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE ? "vo:" : "v:";
         for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {

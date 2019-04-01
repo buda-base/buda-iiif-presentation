@@ -45,6 +45,10 @@ public class WorkInfo {
     public boolean hasLocation = false;
     @JsonProperty("location")
     public Location location = null;
+    @JsonProperty("linkTo")
+    public String linkTo = null;
+    @JsonProperty("linkToType")
+    public String linkToType = null;
     @JsonProperty("itemId")
     public String itemId = null;
 
@@ -98,7 +102,19 @@ public class WorkInfo {
 
         this.parts = getParts(m, work);
         this.labels = getLabels(m, work);
-
+        
+        final Resource linkTo = work.getPropertyResourceValue(m.getProperty(BDO, "linkTo"));
+        if (linkTo != null) {
+            this.linkTo = "bdr:"+linkTo.getLocalName();
+            final Resource linkToType = linkTo.getPropertyResourceValue(RDF.type);
+            if (linkToType != null) {
+                this.linkToType = linkToType.getLocalName();
+            }
+            if (this.parts == null) {
+                this.parts = getParts(m, linkTo);
+            }
+        }
+        
         // creator labels
         final StmtIterator creatorLabelItr = work.listProperties(m.createProperty(TMPPREFIX, "workCreatorLit"));
         if (creatorLabelItr.hasNext()) {
@@ -142,6 +158,14 @@ public class WorkInfo {
                     partInfo = new PartInfo(partId, null);
                 else
                     partInfo = new PartInfo(partId, partIndexS.getInt());
+                final Resource linkTo = work.getPropertyResourceValue(m.getProperty(BDO, "linkTo"));
+                if (linkTo != null) {
+                    partInfo.linkTo = "bdr:"+linkTo.getLocalName();
+                    final Resource linkToType = linkTo.getPropertyResourceValue(RDF.type);
+                    if (linkToType != null) {
+                        partInfo.linkToType = linkToType.getLocalName();
+                    }
+                }
                 final Resource location = part.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
                 if (location != null)
                     partInfo.location = new Location(m, location);
