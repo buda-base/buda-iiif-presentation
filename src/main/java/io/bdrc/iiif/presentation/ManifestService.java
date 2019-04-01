@@ -50,7 +50,7 @@ public class ManifestService {
     static {
         attribution.addValue(getLocaleFor("en"), "Buddhist Digital Resource Center");
         attribution.addValue(getLocaleFor("bo"), "ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།");
-        attribution.addValue(getLocaleFor("zh"), "佛教数字资源中心(BDRC)");
+        attribution.addValue(getLocaleFor("zh"), "佛教数字资源中心（BDRC）");
     }
 
     public static Locale getLocaleFor(String lt) {
