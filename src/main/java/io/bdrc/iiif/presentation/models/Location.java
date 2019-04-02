@@ -22,8 +22,9 @@ public class Location {
     public Location(final Model m, final Resource location) {
         final Property locationVolumeP = m.getProperty(BDO, "workLocationVolume");
         if (!location.hasProperty(locationVolumeP))
-            return;
-        this.bvolnum = location.getProperty(locationVolumeP).getInt();
+            this.bvolnum = 1; // probable reasonable default...
+        else 
+            this.bvolnum = location.getProperty(locationVolumeP).getInt();
         final Property locationEndVolumeP = m.getProperty(BDO, "workLocationEndVolume");
         // a stupid temporary mistake in the data
         final Property locationEndVolumeTmpP = m.getProperty(BDO, "workLocationVolumeEnd");
