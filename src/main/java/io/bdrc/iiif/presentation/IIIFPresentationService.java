@@ -76,7 +76,7 @@ public class IIIFPresentationService {
 	                .header("Location", vi.iiifManifest)
 	                .build();
 		}
-		final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, wi);
+		final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, wi, volumeId);
         final StreamingOutput stream = new StreamingOutput() {
             @Override
             public void write(final OutputStream os) throws IOException, WebApplicationException {
@@ -109,7 +109,7 @@ public class IIIFPresentationService {
         if (vi.iiifManifest != null) {
             return Response.status(404).entity("Cannot serve canvas for external manifests").header("Cache-Control", "no-cache").build();
         }
-        final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgseqnum);
+        final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgseqnum, id.getVolumeId());
         final StreamingOutput stream = new StreamingOutput() {
             @Override
             public void write(final OutputStream os) throws IOException, WebApplicationException {
