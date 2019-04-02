@@ -53,10 +53,20 @@ public class IIIFPresentationService {
 		if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
 		    requiresVolumeOutline = true;
 		}
-		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), requiresVolumeOutline);
+		WorkInfo wi = null;
+		if (id.getWorkId() != null) {
+		    wi = WorkInfoService.getWorkInfo(id.getWorkId());
+		}
+		String volumeId = id.getVolumeId();
+		if (volumeId == null) {
+		    volumeId = wi.firstVolumeId;
+		    if (volumeId == null)
+		        return Response.status(404).entity("Cannot find volume ID").header("Cache-Control", "no-cache").build();
+		}
+		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(volumeId, requiresVolumeOutline);
 		Access acc = (Access)ctx.getProperty("access");
 		if (acc == null) { acc = new Access();}
-		String accessType = getShortName(vi.access.getUri());
+		final String accessType = getShortName(vi.access.getUri());
 //	    if (accessType == null || !acc.hasResourceAccess(accessType)) {
 //	        return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
 //	    }
@@ -66,7 +76,7 @@ public class IIIFPresentationService {
 	                .header("Location", vi.iiifManifest)
 	                .build();
 		}
-		final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous);
+		final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, wi);
         final StreamingOutput stream = new StreamingOutput() {
             @Override
             public void write(final OutputStream os) throws IOException, WebApplicationException {

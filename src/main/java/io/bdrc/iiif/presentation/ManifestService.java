@@ -36,6 +36,7 @@ import io.bdrc.iiif.presentation.models.LangString;
 import io.bdrc.iiif.presentation.models.Location;
 import io.bdrc.iiif.presentation.models.PartInfo;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
+import io.bdrc.iiif.presentation.models.WorkInfo;
 
 
 public class ManifestService {
@@ -132,8 +133,26 @@ public class ManifestService {
         }
         return mainSeq;
     }
-
-    public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi, boolean continuous) throws BDRCAPIException {
+    
+    private static void addLabels(final Manifest manifest, final Identifier id, final VolumeInfo vi, final WorkInfo wi) {
+        final PropertyValue label = new PropertyValue();
+        final String volumeNum = Integer.toString(vi.volumeNumber);
+        if (wi == null || wi.labels == null || wi.labels.isEmpty()) {
+            label.addValue(ManifestService.getLocaleFor("en"), "volume "+volumeNum);
+            label.addValue(ManifestService.getLocaleFor("bo-x-ewts"), "pod"+volumeNum+"/");
+            manifest.setLabel(label);
+            return;
+        }
+        for (LangString ls : wi.labels) {
+            if (ls.language != null)
+                label.addValue(ManifestService.getLocaleFor(ls.language), ls.value);
+            else
+                label.addValue(ls.value);
+        }
+        manifest.setLabel(label);
+    }
+    
+    public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi, boolean continuous, final WorkInfo wi) throws BDRCAPIException {
         if (id.getType() != Identifier.MANIFEST_ID || (
                 id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID
                 && id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE)) {
@@ -149,7 +168,7 @@ public class ManifestService {
         manifest.setAttribution(attribution);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         manifest.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
-        manifest.addLabel(id.getVolumeId());
+        addLabels(manifest, id, vi, wi);
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList, vi);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         if (continuous) {

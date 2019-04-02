@@ -43,12 +43,16 @@ public class WorkInfo {
     public List<LangString> creatorLabels = null; // ?
     @JsonProperty("hasLocation")
     public boolean hasLocation = false;
+    // prefixed
+    @JsonProperty("firstVolumeId")
+    public String firstVolumeId = null;
     @JsonProperty("location")
     public Location location = null;
     @JsonProperty("linkTo")
     public String linkTo = null;
     @JsonProperty("linkToType")
     public String linkToType = null;
+    // prefixed
     @JsonProperty("itemId")
     public String itemId = null;
 
@@ -85,7 +89,7 @@ public class WorkInfo {
         if (item == null) {
             this.hasLocation = false;
         } else {
-            this.itemId = item.getURI();
+            this.itemId = "bdr:"+item.getLocalName();
             final Resource location = work.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
             if (location == null) {
                 this.hasLocation = false;
@@ -93,6 +97,12 @@ public class WorkInfo {
                 readLocation(m, location);
             }
         }
+        
+        final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
+        if (firstVolume != null) {
+            this.firstVolumeId = "bdr:"+firstVolume.getLocalName();
+        }
+        
         final Resource root_access = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootAccess"));
         if (root_access != null) {
             this.rootAccess = root_access.getURI();

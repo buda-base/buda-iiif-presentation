@@ -36,11 +36,11 @@ public class WorkInfoService {
             logger.error("cache initialization error, this shouldn't happen!", e);
         }
     }
-
-    private static WorkInfo fetchLdsWorkInfo(final String workId) throws BDRCAPIException {
+    
+    private static Model fetchLdsWorkInfoModel(final String workId) throws BDRCAPIException {
         logger.debug("fetch workInfo on LDS for {}", workId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
-        final WorkInfo resWorkInfo;
+        final Model resModel;
         final String queryUrl = LDS_WORKGRAPH_QUERY;
         logger.debug("query {} with argument R_RES={}", queryUrl, workId);
         try {
@@ -55,15 +55,14 @@ public class WorkInfoService {
                 throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned http code "+code, response.toString(), "");
             }
             final InputStream body = response.getEntity().getContent();
-            Model m = ModelFactory.createDefaultModel();
+            resModel = ModelFactory.createDefaultModel();
             // TODO: prefixes
-            m.read(body, null, "TURTLE");
-            resWorkInfo = new WorkInfo(m, workId);
+            resModel.read(body, null, "TURTLE");
         } catch (IOException ex) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
         }
-        logger.debug("found workInfo: {}", resWorkInfo.toString());
-        return resWorkInfo;
+        logger.debug("found workModel: {}", resModel);
+        return resModel;
     }
 
     public static WorkInfo getWorkInfo(final String workId) throws BDRCAPIException {
@@ -72,10 +71,10 @@ public class WorkInfoService {
             logger.debug("found workInfo in cache for "+workId);
             return resWorkInfo;
         }
-        resWorkInfo = fetchLdsWorkInfo(workId);
-        if (resWorkInfo == null)
-            return null;
+        final Model workInfoModel = fetchLdsWorkInfoModel(workId);
+        resWorkInfo = new WorkInfo(workInfoModel, workId);
         cache.put(workId, resWorkInfo);
         return resWorkInfo;
     }
+
 }

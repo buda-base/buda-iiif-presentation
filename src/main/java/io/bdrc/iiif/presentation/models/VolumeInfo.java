@@ -4,6 +4,7 @@ import static io.bdrc.iiif.presentation.AppConstants.ADM;
 import static io.bdrc.iiif.presentation.AppConstants.BDO;
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
+import static io.bdrc.iiif.presentation.AppConstants.TMPPREFIX;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -80,7 +81,7 @@ public class VolumeInfo {
         }
     }
 
-    public VolumeInfo(final Model m, String volumeId) throws BDRCAPIException {
+    private void fromModel(final Model m, String volumeId) throws BDRCAPIException {
         logger.debug("creating VolumeInfo for model, volumeId {}", volumeId);
         // the model is supposed to come from the IIIFPres_volumeOutline graph query
         if (volumeId.startsWith("bdr:"))
@@ -165,6 +166,28 @@ public class VolumeInfo {
         
         this.partInfo = WorkInfo.getParts(m, work);
         //this.labels = getLabels(m, volume);
+    }
+    
+    public VolumeInfo(final Model m, final String volumeId) throws BDRCAPIException {
+        fromModel(m, volumeId);
+    }
+    
+    public VolumeInfo(final Model m, String workId, String volumeId) throws BDRCAPIException {
+        //result of IIIFPres_workGraph_withVol
+        if (volumeId != null) {
+            fromModel(m, volumeId);
+            return;
+        }
+        if (workId.startsWith("bdr:"))
+            workId = BDR+workId.substring(4);
+        final Resource work = m.getResource(workId);
+        final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
+        if (firstVolume == null) {
+            volumeId = firstVolume.getURI();
+            fromModel(m, volumeId);
+        } else {
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "cannot get volumeId from work model");
+        }
     }
     
     public Iterator<String> getImageListIterator(int beginIdx, int endIdx) {
