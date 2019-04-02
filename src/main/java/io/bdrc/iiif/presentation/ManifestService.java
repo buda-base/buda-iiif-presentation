@@ -79,8 +79,8 @@ public class ManifestService {
         return "p. "+(imageIndex-2);
     }
 
-    public static String getImageServiceUrl(final String filename, final Identifier id) {
-        return IIIF_IMAGE_PREFIX+id.getVolumeId()+"::"+filename;
+    public static String getImageServiceUrl(final String filename, final String volumeId) {
+        return IIIF_IMAGE_PREFIX+volumeId+"::"+filename;
     }
 
     // warning: not all calls to this function profile the filename argument
@@ -107,9 +107,6 @@ public class ManifestService {
         final int imageTotal = imageInfoList.size();
         // all indices start at 1
         int nbPagesIntro = vi.pagesIntroTbrc;
-        if (vi.workId.contains("FPL") || vi.workId.contains("NLM")) {
-            nbPagesIntro = 0;
-        }
         final int beginIndex = (id.getBPageNum() == null) ? 1+nbPagesIntro : id.getBPageNum();
         if (beginIndex > imageTotal) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you asked a manifest for an image number that is greater than the total number of images");
@@ -201,9 +198,8 @@ public class ManifestService {
     }
     
     public static void addRangesToManifest(final Manifest m, final Identifier id, final VolumeInfo vi, final String volumeId) throws BDRCAPIException {
-        if (vi.partInfo == null) {
+        if (vi.partInfo == null)
             return;
-        }
         final Range r = new Range(IIIFPresPrefix+"vo:"+id.getVolumeId()+"/range/top", "Table of Contents");
         r.setViewingHints("top");
         for (final PartInfo part : vi.partInfo) {
@@ -258,7 +254,7 @@ public class ManifestService {
         final Canvas canvas = new Canvas(canvasUri, label);
         canvas.setWidth(imageInfo.width);
         canvas.setHeight(imageInfo.height);
-        final String imageServiceUrl = getImageServiceUrl(imageInfo.filename, id);
+        final String imageServiceUrl = getImageServiceUrl(imageInfo.filename, volumeId);
         //canvas.addIIIFImage(imageServiceUrl, ImageApiProfile.LEVEL_ONE);
         final BDRCPresentationImageService imgServ = new BDRCPresentationImageService(imageServiceUrl, ImageApiProfile.LEVEL_ZERO);
         final String imgUrl;
