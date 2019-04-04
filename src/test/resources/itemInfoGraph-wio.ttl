@@ -1,0 +1,41 @@
+@prefix :      <http://purl.bdrc.io/ontology/core/> .
+@prefix bd:    <http://www.bigdata.com/rdf#> .
+@prefix bdd:   <http://purl.bdrc.io/data/> .
+@prefix ad:    <http://schemas.talis.com/2005/address/schema#> .
+@prefix bf:    <http://id.loc.gov/ontologies/bibframe/> .
+@prefix tbr:   <http://purl.bdrc.io/ontology/toberemoved/> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix f:     <java:io.bdrc.ldspdi.sparql.functions.> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
+@prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
+@prefix iiif2: <http://iiif.io/api/presentation/2#> .
+@prefix iiif3: <http://iiif.io/api/presentation/3#> .
+@prefix bdr:   <http://purl.bdrc.io/resource/> .
+@prefix as:    <http://www.w3.org/ns/activitystreams#> .
+@prefix oa:    <http://www.w3.org/ns/oa#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix tmp:   <http://purl.bdrc.io/ontology/tmp/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix text:  <http://jena.apache.org/text#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+
+bdr:V22073_I1KG17893  bdo:volumeNumber  2 .
+
+bdr:W22073  adm:access  bdr:AccessOpen ;
+        adm:license     bdr:LicensePublicDomain ;
+        skos:prefLabel  "hor gling g.yul 'gyed/"@bo-x-ewts .
+
+bdr:V22073_I1KG17892  bdo:volumeNumber  1 .
+
+bdr:I22073  a                      bdo:Item , bdo:ItemImageAsset ;
+        adm:gitRevision            "824b1a4b296fa976e0a6003202e9f4a64881a1fe" ;
+        adm:status                 bdr:StatusReleased ;
+        adm:volumeScanVenue        "TBRC" ;
+        bdo:itemForWork            bdr:W22073 ;
+        bdo:itemHasVolume          bdr:V22073_I1KG17893 , bdr:V22073_I1KG17892 ;
+        bdo:itemImageAssetForWork  bdr:W22073 ;
+        bdo:itemVolumes            2 .
