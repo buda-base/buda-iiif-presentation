@@ -13,7 +13,9 @@ import org.apache.jena.rdf.model.StmtIterator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import de.digitalcollections.iiif.model.PropertyValue;
 import io.bdrc.iiif.presentation.CollectionService;
+import io.bdrc.iiif.presentation.ManifestService;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
 
@@ -43,11 +45,15 @@ public class ItemInfo {
             return prefixedId;
         }
         
-        public String toDisplay() {
-            if (volumeNumber == null)
-                return getPrefixedUri();
-            else
-                return "Volume "+volumeNumber;
+        public PropertyValue getLabel() {
+            final PropertyValue label = new PropertyValue();
+            if (volumeNumber == null) {
+                label.addValue(prefixedId);
+            } else {
+                label.addValue(ManifestService.getLocaleFor("en"), "volume "+volumeNumber);
+                label.addValue(ManifestService.getLocaleFor("bo-x-ewts"), "pod"+volumeNumber+"/");
+            }
+            return label;
         }
 
         @Override
@@ -74,8 +80,6 @@ public class ItemInfo {
         if (itemId.startsWith("bdr:"))
             itemId = BDR+itemId.substring(4);
         final Resource item = m.getResource(itemId);
-        if (item == null)
-            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: missing item");
         final Resource work = item.getPropertyResourceValue(m.getProperty(BDO, "itemForWork"));
         if (work == null)
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: missing work");

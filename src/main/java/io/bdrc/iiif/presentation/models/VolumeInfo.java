@@ -173,7 +173,7 @@ public class VolumeInfo {
     }
     
     public VolumeInfo(final Model m, String workId, String volumeId) throws BDRCAPIException {
-        //result of IIIFPres_workGraph_withVol
+        //result of IIIFPres_workGraph_noItem
         if (volumeId != null) {
             fromModel(m, volumeId);
             return;
@@ -182,7 +182,7 @@ public class VolumeInfo {
             workId = BDR+workId.substring(4);
         final Resource work = m.getResource(workId);
         final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
-        if (firstVolume == null) {
+        if (firstVolume != null) {
             volumeId = firstVolume.getURI();
             fromModel(m, volumeId);
         } else {

@@ -113,7 +113,6 @@ public class ImageInfoListService {
         logger.debug("getting imageInfoList for {}, {}", workLocalId, imageGroupId);
         imageGroupId = getS3ImageGroupId(imageGroupId);
         final String cacheKey = workLocalId+'/'+imageGroupId;
-        System.out.println(cacheKey);
         List<ImageInfo> imageInfoList = (List<ImageInfo>)cache.get(cacheKey);
         if (imageInfoList != null) {
             logger.debug("found in cache");

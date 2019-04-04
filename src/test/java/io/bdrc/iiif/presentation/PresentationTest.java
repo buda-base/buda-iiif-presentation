@@ -1,5 +1,6 @@
 package io.bdrc.iiif.presentation;
 
+import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix_coll;
 
 import java.io.File;
@@ -136,5 +137,48 @@ public class PresentationTest {
         }
         //final File fout = new File("/tmp/virtualWork.json"); 
         //IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
+    }
+
+    @Test
+    public void wioTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+        Model m = ModelFactory.createDefaultModel();
+        RDFParserBuilder pb = RDFParser.create()
+                .source(TESTDIR+"workGraphNoItem-wio.ttl")
+                .lang(RDFLanguages.TTL);
+                //.canonicalLiterals(true);
+        pb.parse(StreamRDFLib.graph(m.getGraph()));
+        final WorkInfo wi = new WorkInfo(m, "bdr:W22073");
+        System.out.println(wi.itemId);
+        final Identifier id = new Identifier("wio:bdr:W22073", Identifier.COLLECTION_ID);
+        final Collection collection = CollectionService.getCommonCollection(id);
+        collection.setLabel(CollectionService.getLabels(id.getWorkId(), wi));
+        m = ModelFactory.createDefaultModel();
+        pb = RDFParser.create()
+                .source(TESTDIR+"itemInfoGraph-wio.ttl")
+                .lang(RDFLanguages.TTL);
+                //.canonicalLiterals(true);
+        pb.parse(StreamRDFLib.graph(m.getGraph()));
+        m.write(System.out, "TTL");
+        final ItemInfo ii = new ItemInfo(m, "bdr:I22073");
+        if (wi.hasLocation) {
+            CollectionService.addManifestsForLocation(collection, wi, ii, false);
+        } else if (wi.isRoot) {
+            final String volPrefix = "v:";
+            boolean needsVolumeIndication = ii.volumes.size() > 1;
+            for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
+                final String manifestId = volPrefix+vi.getPrefixedUri();
+                String manifestUrl;
+                if (vi.iiifManifest != null) {
+                    manifestUrl = vi.iiifManifest;
+                } else {
+                    manifestUrl = IIIFPresPrefix+manifestId+"/manifest";
+                }
+                final Manifest manifest = new Manifest(manifestUrl);
+                manifest.setLabel(ManifestService.getLabel(vi.volumeNumber, wi, needsVolumeIndication));
+                collection.addManifest(manifest);
+            }
+        }
+//        final File fout = new File("/tmp/wio.json"); 
+//        IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
     }
 }

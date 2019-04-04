@@ -28,7 +28,6 @@ import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import de.digitalcollections.iiif.model.sharedcanvas.Range;
 import de.digitalcollections.iiif.model.sharedcanvas.Sequence;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.models.AccessType;
 import io.bdrc.iiif.presentation.models.BDRCPresentationImageService;
 import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.ImageInfo;
@@ -73,7 +72,7 @@ public class ManifestService {
     }
 
     public static String getLabelForImage(final int imageIndex) {
-        // indices start at 1
+        // TODO: this doesn't seem right, it should depend on VolumeInfo.pagesIntroTbrc
         if (imageIndex < 3)
             return "tbrc-"+imageIndex;
         return "p. "+(imageIndex-2);
@@ -83,7 +82,8 @@ public class ManifestService {
         return IIIF_IMAGE_PREFIX+volumeId+"::"+filename;
     }
 
-    // warning: not all calls to this function profile the filename argument
+    // TODO: not all calls to this function profile the filename argument, but they should and the canvas should
+    // have the image filename, not the image seqnum
     public static String getCanvasUri(final String filename, final String volumeId, final int seqNum) {
         // seqNum starts at 1
         //return IIIFPresPrefix+id.getVolumeId()+"::"+filename+"/canvas";
@@ -131,22 +131,25 @@ public class ManifestService {
         return mainSeq;
     }
     
-    private static void addLabels(final Manifest manifest, final Identifier id, final VolumeInfo vi, final WorkInfo wi) {
+    public static PropertyValue getLabel(final int volumeNumber, final WorkInfo wi, final boolean needsVolumeIndication) {
         final PropertyValue label = new PropertyValue();
-        final String volumeNum = Integer.toString(vi.volumeNumber);
+        final String volumeNum = Integer.toString(volumeNumber);
         if (wi == null || wi.labels == null || wi.labels.isEmpty()) {
             label.addValue(ManifestService.getLocaleFor("en"), "volume "+volumeNum);
             label.addValue(ManifestService.getLocaleFor("bo-x-ewts"), "pod"+volumeNum+"/");
-            manifest.setLabel(label);
-            return;
+            return label;
         }
         for (LangString ls : wi.labels) {
-            if (ls.language != null)
-                label.addValue(ManifestService.getLocaleFor(ls.language), ls.value);
-            else
+            if (ls.language != null) {
+                if (ls.language.equals("bo-x-ewts"))
+                    label.addValue(ManifestService.getLocaleFor(ls.language), ls.value+"_(pod"+volumeNum+")");
+                else
+                    label.addValue(ManifestService.getLocaleFor(ls.language), ls.value);
+            } else {
                 label.addValue(ls.value);
+            }
         }
-        manifest.setLabel(label);
+        return label;
     }
     
     public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi, boolean continuous, final WorkInfo wi, final String volumeId) throws BDRCAPIException {
@@ -166,7 +169,7 @@ public class ManifestService {
         manifest.setAttribution(attribution);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         manifest.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
-        addLabels(manifest, id, vi, wi);
+        manifest.setLabel(getLabel(vi.volumeNumber, wi, true)); // TODO: the final true shouldn't always be true
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList, vi, volumeId);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         if (continuous) {

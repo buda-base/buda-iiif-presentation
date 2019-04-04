@@ -46,6 +46,7 @@ public class CollectionService {
         if (!wi.hasLocation)
             return;
         final Location loc = wi.location;
+        final boolean needsVolumeIndication = loc.evolnum -loc.bvolnum > 2;
         for (int i = loc.bvolnum ; i <= loc.evolnum ; i++) {
             VolumeInfoSmall vi = ii.getVolumeNumber(i);
             if (vi == null)
@@ -66,7 +67,8 @@ public class CollectionService {
             if (continuous) {
                 sb.append("?continuous=true");
             }
-            final Manifest m = new Manifest(sb.toString(), vi.toDisplay());
+            final Manifest m = new Manifest(sb.toString());
+            m.setLabel(ManifestService.getLabel(i, wi, needsVolumeIndication));
             c.addManifest(m);
         }
     }
@@ -118,7 +120,27 @@ public class CollectionService {
             // TODO: exception of wi.parts == null ? currently an empty collection is returned
             return collection;
         }
-        addManifestsForLocation(collection, wi, ii, continuous);
+        if (wi.hasLocation) {
+            addManifestsForLocation(collection, wi, ii, continuous);
+        } else if (wi.isRoot) {
+            final String volPrefix = "v:";
+            boolean needsVolumeIndication = ii.volumes.size() > 1;
+            for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
+                final String manifestId = volPrefix+vi.getPrefixedUri();
+                String manifestUrl;
+                if (vi.iiifManifest != null) {
+                    manifestUrl = vi.iiifManifest;
+                } else {
+                    manifestUrl = IIIFPresPrefix+manifestId+"/manifest";
+                    if(continuous) {
+                        manifestUrl += "?continuous=true";
+                    }
+                }
+                final Manifest manifest = new Manifest(manifestUrl);
+                manifest.setLabel(ManifestService.getLabel(vi.volumeNumber, wi, needsVolumeIndication));
+                collection.addManifest(manifest);
+            }
+        }
         return collection;
     }
 
@@ -129,7 +151,6 @@ public class CollectionService {
         final String volPrefix = id.getSubType() == Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE ? "vo:" : "v:";
         for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
             final String manifestId = volPrefix+vi.getPrefixedUri();
-            final String volumeNumberStr = vi.toDisplay();
             String manifestUrl;
             if (vi.iiifManifest != null) {
                 manifestUrl = vi.iiifManifest;
@@ -139,7 +160,8 @@ public class CollectionService {
                     manifestUrl += "?continuous=true";
                 }
             }
-            final Manifest manifest = new Manifest(manifestUrl, volumeNumberStr);
+            final Manifest manifest = new Manifest(manifestUrl);
+            manifest.setLabel(vi.getLabel());
             collection.addManifest(manifest);
         }
         return collection;

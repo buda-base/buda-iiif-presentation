@@ -36,10 +36,8 @@ public class IIIFPresApplication extends ResourceConfig {
                 // do nothing, continue props initialization
             }
             AuthProps.init(props);
-            System.out.println("PROPS >>" + props);
             if ("true".equals(AuthProps.getProperty("useAuth"))) {
                 RdfAuthModel.init();
-                System.out.println("AUTH MODEL >>" + RdfAuthModel.getUsers());
                 register(IIIFPresAuthFilter.class);
             }
             ServiceCache.init();

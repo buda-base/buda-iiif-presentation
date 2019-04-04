@@ -33,6 +33,8 @@ public class WorkInfo {
 
     @JsonProperty("rootAccess")
     public String rootAccess = null;
+    @JsonProperty("isRoot")
+    public Boolean isRoot = false;
     @JsonProperty("rootWorkId")
     public String rootWorkId = null;
     @JsonProperty("parts")
@@ -62,7 +64,7 @@ public class WorkInfo {
         this.location = new Location(m, location);
         final Property locationWorkP = m.getProperty(BDO, "workLocationWork");
         if (location.hasProperty(locationWorkP))
-            this.rootWorkId = location.getProperty(locationWorkP).getResource().getURI();
+            this.rootWorkId = "bdr:"+location.getProperty(locationWorkP).getResource().getLocalName();
         this.hasLocation = true;
     }
 
@@ -85,7 +87,13 @@ public class WorkInfo {
         if (ext.hasNext()) {
             isVirtual = true;
         }
-        final Resource item = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "inItem"));
+        final Resource partOf = work.getPropertyResourceValue(m.getProperty(BDO, "workPartOf"));
+        if (partOf == null) {
+            this.isRoot = true;
+        } else {
+            this.isRoot = false;
+        }
+        Resource item = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "inItem"));
         if (item == null) {
             this.hasLocation = false;
         } else {
@@ -97,7 +105,6 @@ public class WorkInfo {
                 readLocation(m, location);
             }
         }
-        
         final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
         if (firstVolume != null) {
             this.firstVolumeId = "bdr:"+firstVolume.getLocalName();
