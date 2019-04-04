@@ -3,8 +3,8 @@ package io.bdrc.iiif.presentation;
 import static io.bdrc.iiif.presentation.AppConstants.CANNOT_FIND_VOLUME_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
-import static io.bdrc.iiif.presentation.AppConstants.LDS_VOLUME_QUERY;
 import static io.bdrc.iiif.presentation.AppConstants.LDS_VOLUME_OUTLINE_QUERY;
+import static io.bdrc.iiif.presentation.AppConstants.LDS_VOLUME_QUERY;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +33,7 @@ import io.bdrc.iiif.presentation.models.VolumeInfo;
 public class VolumeInfoService {
 
     private static final Logger logger = LoggerFactory.getLogger(VolumeInfoService.class);
-    
+
     private static final String WITH_OUTLINE_SUFFIX = "-withoutline"; // interestingly ambiguous
 
     private static CacheAccess<String, Object> cache = null;
@@ -48,13 +48,14 @@ public class VolumeInfoService {
 
     private static VolumeInfo fetchLdsVolumeInfo(final String volumeId) throws BDRCAPIException {
         logger.info("fetch volume info on LDS for {}", volumeId);
-        final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
+        final HttpClient httpClient = HttpClientBuilder.create().build(); // Use this instead
         final VolumeInfo resVolumeInfo;
         try {
             final HttpPost request = new HttpPost(LDS_VOLUME_QUERY);
-            // we suppose that the volumeId is well formed, which is checked by the Identifier constructor
-            final StringEntity params = new StringEntity("{\"R_RES\":\""+volumeId+"\"}", ContentType.APPLICATION_JSON);
-            //request.addHeader(HttpHeaders.ACCEPT, "application/json");
+            // we suppose that the volumeId is well formed, which is checked by the
+            // Identifier constructor
+            final StringEntity params = new StringEntity("{\"R_RES\":\"" + volumeId + "\"}", ContentType.APPLICATION_JSON);
+            // request.addHeader(HttpHeaders.ACCEPT, "application/json");
             request.setEntity(params);
             final HttpResponse response = httpClient.execute(request);
             int code = response.getStatusLine().getStatusCode();
@@ -77,15 +78,16 @@ public class VolumeInfoService {
         logger.info("found volume info: {}", resVolumeInfo);
         return resVolumeInfo;
     }
-    
+
     public static VolumeInfo fetchLdsVolumeOutline(final String volumeId) throws BDRCAPIException {
         logger.info("fetch volume info with outline on LDS for {}", volumeId);
-        final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
+        final HttpClient httpClient = HttpClientBuilder.create().build(); // Use this instead
         final VolumeInfo resVolumeInfo;
         try {
             final HttpPost request = new HttpPost(LDS_VOLUME_OUTLINE_QUERY);
-            // we suppose that the volumeId is well formed, which is checked by the Identifier constructor
-            final StringEntity params = new StringEntity("{\"R_RES\":\""+volumeId+"\"}", ContentType.APPLICATION_JSON);
+            // we suppose that the volumeId is well formed, which is checked by the
+            // Identifier constructor
+            final StringEntity params = new StringEntity("{\"R_RES\":\"" + volumeId + "\"}", ContentType.APPLICATION_JSON);
             request.addHeader(HttpHeaders.ACCEPT, "text/turtle");
             request.setEntity(params);
             final HttpResponse response = httpClient.execute(request);
@@ -107,13 +109,13 @@ public class VolumeInfoService {
 
     public static VolumeInfo getVolumeInfo(final String volumeId, final boolean withOutline) throws BDRCAPIException {
         logger.info("getting volume info for {}, with outline: {}", volumeId, withOutline);
-        VolumeInfo resVolumeInfo = (VolumeInfo)cache.get(volumeId+WITH_OUTLINE_SUFFIX);
+        VolumeInfo resVolumeInfo = (VolumeInfo) cache.get(volumeId + WITH_OUTLINE_SUFFIX);
         if (resVolumeInfo != null) {
             logger.info("found volumeInfo with outline in cache for {}", volumeId);
             return resVolumeInfo;
         }
         if (!withOutline) {
-            resVolumeInfo = (VolumeInfo)cache.get(volumeId);
+            resVolumeInfo = (VolumeInfo) cache.get(volumeId);
             if (resVolumeInfo != null) {
                 logger.info("found volumeInfo in cache for {}", volumeId);
                 return resVolumeInfo;
@@ -127,7 +129,7 @@ public class VolumeInfoService {
         if (resVolumeInfo == null)
             return null;
         if (withOutline) {
-            cache.put(volumeId+WITH_OUTLINE_SUFFIX, resVolumeInfo);
+            cache.put(volumeId + WITH_OUTLINE_SUFFIX, resVolumeInfo);
         } else {
             cache.put(volumeId, resVolumeInfo);
         }

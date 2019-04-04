@@ -19,25 +19,27 @@ import io.bdrc.auth.rdf.RdfAuthModel;
 @Provider
 public class IIIFPresApplication extends ResourceConfig {
 
-    //static final String configPath= System.getProperty("iiifpres.configpath");
-    public final static Logger log=LoggerFactory.getLogger(IIIFPresApplication.class.getName());
+    // static final String configPath= System.getProperty("iiifpres.configpath");
+    public final static Logger log = LoggerFactory.getLogger(IIIFPresApplication.class.getName());
 
     public IIIFPresApplication() {
 
         try {
-            InputStream input=IIIFPresApplication.class.getClassLoader().getResourceAsStream("iiifpres.properties");
-            Properties props=new Properties();
+            InputStream input = IIIFPresApplication.class.getClassLoader().getResourceAsStream("iiifpres.properties");
+            Properties props = new Properties();
             props.load(input);
             try {
                 InputStream is = new FileInputStream("/etc/buda/share/shared-private.properties");
                 props.load(is);
 
-            }catch(Exception ex) {
-                //do nothing, continue props initialization
+            } catch (Exception ex) {
+                // do nothing, continue props initialization
             }
             AuthProps.init(props);
-            if("true".equals(AuthProps.getProperty("useAuth"))){
+            System.out.println("PROPS >>" + props);
+            if ("true".equals(AuthProps.getProperty("useAuth"))) {
                 RdfAuthModel.init();
+                System.out.println("AUTH MODEL >>" + RdfAuthModel.getUsers());
                 register(IIIFPresAuthFilter.class);
             }
             ServiceCache.init();
