@@ -43,7 +43,7 @@ public class VolumeInfo {
     @JsonProperty("pagesText")
     public Integer pagesText = null;
     @JsonProperty("pagesIntroTbrc")
-    public Integer pagesIntroTbrc = null;
+    public Integer pagesIntroTbrc = 0;
     @JsonProperty("pagesIntro")
     public Integer pagesIntro = null;
     @JsonProperty("volumeNumber")

@@ -71,11 +71,16 @@ public class ManifestService {
         return res;
     }
 
-    public static String getLabelForImage(final int imageIndex) {
-        // TODO: this doesn't seem right, it should depend on VolumeInfo.pagesIntroTbrc
-        if (imageIndex < 3)
-            return "tbrc-"+imageIndex;
-        return "p. "+(imageIndex-2);
+    public static PropertyValue getLabelForImage(final int imageIndex, final VolumeInfo vi) {
+        final PropertyValue res = new PropertyValue();
+        if (imageIndex < (vi.pagesIntroTbrc+1)) {
+            // this shouldn't really happen anymore
+            res.addValue(getLocaleFor("en"), "Bdrc-"+imageIndex);
+            return res;
+        }
+        res.addValue(getLocaleFor("en"), "p. "+imageIndex);
+        res.addValue(getLocaleFor("bo-x-ewts"), Integer.toString(imageIndex));
+        return res;
     }
 
     public static String getImageServiceUrl(final String filename, final String volumeId) {
@@ -122,7 +127,7 @@ public class ManifestService {
         }
         mainSeq.setViewingDirection(getViewingDirection(imageInfoList));
         for (int imgSeqNum = beginIndex ; imgSeqNum <= endIndex ; imgSeqNum++) {
-            final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList, volumeId);
+            final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi);
             mainSeq.addCanvas(canvas);
             if (imgSeqNum == beginIndex) {
                 mainSeq.setStartCanvas(canvas.getIdentifier());
@@ -249,12 +254,13 @@ public class ManifestService {
     
     public static final PropertyValue pngHint = new PropertyValue("png", "jpg");
     
-    public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final List<ImageInfo> imageInfoList, final String volumeId) {
+    public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final List<ImageInfo> imageInfoList, final String volumeId, final VolumeInfo vi) {
         // imgSeqNum starts at 1
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum-1);
-        final String label = getLabelForImage(imgSeqNum);
+        final PropertyValue label = getLabelForImage(imgSeqNum, vi);
         final String canvasUri = getCanvasUri(imageInfo.filename, volumeId, imgSeqNum);
-        final Canvas canvas = new Canvas(canvasUri, label);
+        final Canvas canvas = new Canvas(canvasUri);
+        canvas.setLabel(label);
         canvas.setWidth(imageInfo.width);
         canvas.setHeight(imageInfo.height);
         final String imageServiceUrl = getImageServiceUrl(imageInfo.filename, volumeId);
@@ -300,6 +306,6 @@ public class ManifestService {
         if (imgSeqNum < 1 || imgSeqNum > imageTotal) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you asked a canvas for an image number that is inferior to 1 or greater than the total number of images");
         }
-        return buildCanvas(id, imgSeqNum, imageInfoList, volumeId);
+        return buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi);
     }
 }
