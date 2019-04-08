@@ -131,7 +131,7 @@ public class ManifestService {
             final ImageInfo imageInfo = imageInfoList.get(imgSeqNum-1);
             final Integer size = imageInfo.size;
             if (size != null && size > 1000000)
-                break;
+                continue;
             final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi);
             mainSeq.addCanvas(canvas);
             if (imgSeqNum == beginIndex) {
