@@ -127,6 +127,11 @@ public class ManifestService {
         }
         mainSeq.setViewingDirection(getViewingDirection(imageInfoList));
         for (int imgSeqNum = beginIndex ; imgSeqNum <= endIndex ; imgSeqNum++) {
+            // imgSeqNum starts at 1
+            final ImageInfo imageInfo = imageInfoList.get(imgSeqNum-1);
+            final Integer size = imageInfo.size;
+            if (size != null && size > 1000000)
+                break;
             final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi);
             mainSeq.addCanvas(canvas);
             if (imgSeqNum == beginIndex) {
@@ -264,8 +269,11 @@ public class ManifestService {
         canvas.setWidth(imageInfo.width);
         canvas.setHeight(imageInfo.height);
         final String imageServiceUrl = getImageServiceUrl(imageInfo.filename, volumeId);
-        //canvas.addIIIFImage(imageServiceUrl, ImageApiProfile.LEVEL_ONE);
-        final BDRCPresentationImageService imgServ = new BDRCPresentationImageService(imageServiceUrl, ImageApiProfile.LEVEL_ZERO);
+        ImageApiProfile profile = ImageApiProfile.LEVEL_ZERO;
+        final Integer size = imageInfo.size;
+        if (size != null && size > 1000000)
+            profile = ImageApiProfile.LEVEL_ONE;
+        final BDRCPresentationImageService imgServ = new BDRCPresentationImageService(imageServiceUrl, profile);
         final String imgUrl;
         if (pngOutput(imageInfo.filename)) {
             imgUrl = imageServiceUrl+"/full/max/0/default.png";
