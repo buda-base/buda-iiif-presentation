@@ -277,7 +277,7 @@ public class ManifestService {
         final String imgUrl;
         if (pngOutput(imageInfo.filename)) {
             imgUrl = imageServiceUrl+"/full/max/0/default.png";
-            imgServ.setFormatHints(pngHint);
+            imgServ.setPreferredFormats(pngHint);
         } else {
             imgUrl = imageServiceUrl+"/full/max/0/default.jpg";
         }
