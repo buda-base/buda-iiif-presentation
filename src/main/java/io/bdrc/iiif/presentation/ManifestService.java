@@ -178,7 +178,7 @@ public class ManifestService {
         final Manifest manifest = new Manifest(IIIFPresPrefix+id.getId()+"/manifest");
         manifest.setAttribution(attribution);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
-        manifest.addLogo("https://s3.amazonaws.com/bdrcwebassets/prod/iiif-logo.png");
+        manifest.addLogo(IIIF_IMAGE_PREFIX+"static::logo.png/full/max/0/default.png");
         manifest.setLabel(getLabel(vi.volumeNumber, wi, true)); // TODO: the final true shouldn't always be true
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList, vi, volumeId);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
@@ -271,7 +271,7 @@ public class ManifestService {
         final String imageServiceUrl = getImageServiceUrl(imageInfo.filename, volumeId);
         ImageApiProfile profile = ImageApiProfile.LEVEL_ZERO;
         final Integer size = imageInfo.size;
-        if (size != null && size > 1000000)
+        if (size != null && size > 2000000)
             profile = ImageApiProfile.LEVEL_ONE;
         final BDRCPresentationImageService imgServ = new BDRCPresentationImageService(imageServiceUrl, profile);
         final String imgUrl;

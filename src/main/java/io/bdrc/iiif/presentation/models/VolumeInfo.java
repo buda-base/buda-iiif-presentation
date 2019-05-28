@@ -30,6 +30,8 @@ public class VolumeInfo {
     
     @JsonProperty("access")
     public AccessType access;
+    @JsonProperty("restrictedInChina")
+    public Boolean restrictedInChina;
     @JsonProperty("license")
     public LicenseType license;
     @JsonProperty("workId")
