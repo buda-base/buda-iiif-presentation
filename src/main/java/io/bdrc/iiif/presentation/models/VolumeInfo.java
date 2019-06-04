@@ -42,12 +42,8 @@ public class VolumeInfo {
     public String imageList;
     @JsonProperty("totalPages")
     public Integer totalPages;
-    @JsonProperty("pagesText")
-    public Integer pagesText = null;
     @JsonProperty("pagesIntroTbrc")
     public Integer pagesIntroTbrc = 0;
-    @JsonProperty("pagesIntro")
-    public Integer pagesIntro = null;
     @JsonProperty("volumeNumber")
     public Integer volumeNumber = 1;
     @JsonProperty("imageGroup")
@@ -69,9 +65,7 @@ public class VolumeInfo {
         if(sol.contains("?imageList")) {this.imageList = sol.get("?imageList").asLiteral().getString();}
         if(sol.contains("?volumeNumber")) {this.volumeNumber = sol.get("?volumeNumber").asLiteral().getInt();}
         if(sol.contains("?totalPages")) {this.totalPages = sol.get("?totalPages").asLiteral().getInt();}
-        if(sol.contains("?pagesText")) {this.pagesText = sol.get("?pagesText").asLiteral().getInt();}
         if(sol.contains("?pagesIntroTbrc")) {this.pagesIntroTbrc = sol.get("?pagesIntroTbrc").asLiteral().getInt();}
-        if(sol.contains("?pagesIntro")) {this.pagesIntro = sol.get("?pagesIntro").asLiteral().getInt();}
         if (sol.contains("imageGroup")) {this.imageGroup = sol.getLiteral("imageGroup").getString();}
         if (sol.contains("iiifManifest")) {
             final String manifestURIString = sol.getResource("iiifManifest").getURI();
@@ -135,16 +129,6 @@ public class VolumeInfo {
         final Statement volumePagesTbrcIntroS = volume.getProperty(m.getProperty(BDO, "volumePagesTbrcIntro"));
         if (volumePagesTbrcIntroS != null) {
             this.pagesIntroTbrc = volumePagesTbrcIntroS.getInt();
-        }
-
-        final Statement volumePagesIntroS = volume.getProperty(m.getProperty(BDO, "volumePagesIntroS"));
-        if (volumePagesIntroS != null) {
-            this.pagesIntro = volumePagesIntroS.getInt();
-        }
-
-        final Statement volumePagesTextS = volume.getProperty(m.getProperty(BDO, "volumePagesTextS"));
-        if (volumePagesTextS != null) {
-            this.pagesText = volumePagesTextS.getInt();
         }
         
         final Resource work = item.getPropertyResourceValue(m.getProperty(BDO, "itemImageAssetForWork"));
@@ -220,16 +204,8 @@ public class VolumeInfo {
         return totalPages;
     }
 
-    public Integer getPagesText() {
-        return pagesText;
-    }
-
     public Integer getPagesIntroTbrc() {
         return pagesIntroTbrc;
-    }
-
-    public Integer getPagesIntro() {
-        return pagesIntro;
     }
 
     public String getImageGroup() {
