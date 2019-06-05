@@ -32,7 +32,9 @@ public class WorkInfo {
     private static final Logger logger = LoggerFactory.getLogger(WorkInfo.class);
 
     @JsonProperty("rootAccess")
-    public String rootAccess = null;
+    public AccessType rootAccess = null;
+    @JsonProperty("rootRestrictedInChina")
+    public Boolean rootRestrictedInChina = false;
     @JsonProperty("isRoot")
     public Boolean isRoot = false;
     @JsonProperty("rootWorkId")
@@ -112,20 +114,25 @@ public class WorkInfo {
         
         final Resource root_access = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootAccess"));
         if (root_access != null) {
-            this.rootAccess = root_access.getURI();
+            this.rootAccess = AccessType.fromString(root_access.getURI());
+        }
+        final Statement restrictedInChinaS = work.getProperty(m.getProperty(TMPPREFIX, "rootRestrictedInChina"));
+        if (restrictedInChinaS == null) {
+            this.rootRestrictedInChina = true;
+        } else {
+            this.rootRestrictedInChina = restrictedInChinaS.getBoolean();
         }
         final Resource access = work.getPropertyResourceValue(m.getProperty(ADM, "access"));
         if (access != null) {
-            this.rootAccess = access.getURI();
+            this.rootAccess = AccessType.fromString(access.getURI());
         }
         if (this.rootAccess == null) {
             if (isVirtual) {
-                this.rootAccess = BDR+"AccessOpen";
+                this.rootAccess = AccessType.OPEN;
             } else {
                 logger.warn("cannot find model access for {}", workId);
-                this.rootAccess = BDR+"AccessRestrictedByTbrc";                
+                this.rootAccess = AccessType.RESTR_BDRC;                
             }
-            
         }
 
         this.parts = getParts(m, work);

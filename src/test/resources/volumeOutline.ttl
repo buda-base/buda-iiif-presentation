@@ -1,96 +1,76 @@
 @prefix :      <http://purl.bdrc.io/ontology/core/> .
-@prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
-@prefix adr:   <http://purl.bdrc.io/resource-auth/> .
-@prefix as:    <http://www.w3.org/ns/activitystreams#> .
-@prefix aut:   <http://purl.bdrc.io/ontology/ext/auth/> .
-@prefix bdac:  <http://purl.bdrc.io/anncollection/> .
-@prefix bdan:  <http://purl.bdrc.io/annotation/> .
-@prefix bdd:   <http://purl.bdrc.io/data/> .
-@prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
 @prefix bdr:   <http://purl.bdrc.io/resource/> .
-@prefix bf:    <http://id.loc.gov/ontologies/bibframe/> .
-@prefix dcterms: <http://purl.org/dc/terms/> .
-@prefix f:     <java:io.bdrc.ldspdi.sparql.functions.> .
-@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
-@prefix iiif2: <http://iiif.io/api/presentation/2#> .
-@prefix iiif3: <http://iiif.io/api/presentation/3#> .
-@prefix ldp:   <http://www.w3.org/ns/ldp#> .
-@prefix oa:    <http://www.w3.org/ns/oa#> .
-@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix bd:    <http://www.bigdata.com/rdf#> .
+@prefix bdg:   <http://purl.bdrc.io/graph/> .
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix rsh:   <http://purl.bdrc.io/shacl/core/shape/> .
-@prefix sh:    <http://www.w3.org/ns/shacl#> .
-@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
-@prefix tbr:   <http://purl.bdrc.io/ontology/toberemoved/> .
-@prefix text:  <http://jena.apache.org/text#> .
 @prefix tmp:   <http://purl.bdrc.io/ontology/tmp/> .
-@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
-@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
+@prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
 
-bdr:I22084  bdo:itemImageAssetForWork
-      bdr:W22084 .
+PREFIX tmp: <http://purl.bdrc.io/ontology/tmp/>
 
-bdr:V22084_I0890  a  bdo:VolumeImageAsset ;
-   bdo:imageCount  586 ;
-   bdo:imageList  "08900001.tif:586" ;
-   bdo:volumeNumber  5 ;
-   bdo:volumeOf  bdr:I22084 ;
-   bdo:volumePagesIntro  0 ;
-   bdo:volumePagesTbrcIntro  2 ;
-   bdo:volumePagesText  584 ;
-   bdo:volumePagesTotal  586 ;
-   adm:legacyImageGroupRID  "I0890" ;
-   adm:volumeQcDate  "01/15/03" ;
-   adm:volumeQcPerson  "Tony Lulek" .
+bdr:V22084_I0890  a                bdo:VolumeImageAsset ;
+        bdo:imageCount             586 ;
+        bdo:imageList              "08900001.tif:586" ;
+        bdo:volumeNumber           5 ;
+        bdo:volumeOf               bdr:I22084 ;
+        bdo:volumePagesIntro       0 ;
+        bdo:volumePagesTbrcIntro   2 ;
+        bdo:volumePagesText        584 ;
+        bdo:volumePagesTotal       586 ;
+        tmp:legacyImageGroupRID    "I0890" ;
+        tmp:rootAccess             <http://purl.bdrc.io/admindata/AccessOpen> ;
+        tmp:rootLicense            <http://purl.bdrc.io/admindata/LicensePublicDomain> ;
+        tmp:rootRestrictedInChina  false .
 
-bdr:W22084  bdo:workHasPart  bdr:W22084_S0001 , bdr:W22084_S0002 , bdr:W22084_S0003 , bdr:W22084_S0004 , bdr:W22084_S0005 , bdr:W22084_S0006 , bdr:W22084_S0007 , bdr:W22084_S0008 , bdr:W22084_S0009 , bdr:W22084_S0010 , bdr:W22084_S0011 , bdr:W22084_S0012 , bdr:W22084_S0013 , bdr:W22084_S0014 ;
-   adm:access    bdr:AccessOpen ;
-   adm:license   bdr:LicensePublicDomain .
+bdr:W22084_0002  a             bdo:Work ;
+        bdo:workColophon       "so sor thar ba'i mdo rdzogs s+ho/ dbang phyug dam pa'i mnga' bdag dpal lha btsan po'i bka' lung gis 'phags pa gzhi thams cad yod par smra ba'i 'dul ba 'dzin ba slob dpon dzin mi tra dang / zhus chen gyi lo tsA ba ban de cog ro klu'i rgyal mtshan gyis bsgyur cing zhus te gtan la phab pa/"@bo-x-ewts ;
+        bdo:workExpressionOf   bdr:W0RKT0002 ;
+        bdo:workKaTenSiglaD    "2" ;
+        bdo:workLocation       [ bdo:workLocationEndLine  7 ;
+                                 bdo:workLocationEndPage  42 ;
+                                 bdo:workLocationLine     1 ;
+                                 bdo:workLocationPage     4 ;
+                                 bdo:workLocationVolume   5 ;
+                                 bdo:workLocationWork     bdr:W22084
+                               ] ;
+        bdo:workPartIndex      2 ;
+        bdo:workPartOf         bdr:W22084_S0001 ;
+        bdo:workPartTreeIndex  "01.02" ;
+        bdo:workPartType       bdr:WorkText ;
+        bdo:workTitle          bdr:W22084_0002_TT73d7d9d87489 , bdr:W22084_0002_TTd390e2386427 ;
+        skos:prefLabel         "so sor thar ba'i mdo/"@bo-x-ewts , "pra ti mo k+Sha sU tra"@sa-x-ewts .
 
-bdr:W22084_0002  a  bdo:Work ;
-   skos:prefLabel  "so sor thar ba'i mdo/"@bo-x-ewts , "pra ti mo k+Sha sU tra"@sa-x-ewts ;
-   bdo:workColophon  "so sor thar ba'i mdo rdzogs s+ho/ dbang phyug dam pa'i mnga' bdag dpal lha btsan po'i bka' lung gis 'phags pa gzhi thams cad yod par smra ba'i 'dul ba 'dzin ba slob dpon dzin mi tra dang / zhus chen gyi lo tsA ba ban de cog ro klu'i rgyal mtshan gyis bsgyur cing zhus te gtan la phab pa/"@bo-x-ewts ;
-   bdo:workExpressionOf  bdr:W0RKT0002 ;
-   bdo:workKaTenSiglaD  "2" ;
-   bdo:workLocation  [ bdo:workLocationEndLine  7 ;
-                       bdo:workLocationEndPage  42 ;
-                       bdo:workLocationLine  1 ;
-                       bdo:workLocationPage  4 ;
-                       bdo:workLocationVolume  5 ;
-                       bdo:workLocationWork  bdr:W22084
-                     ] ;
-   bdo:workPartIndex  2 ;
-   bdo:workPartOf  bdr:W22084_S0001 ;
-   bdo:workPartTreeIndex  "01.02" ;
-   bdo:workPartType  bdr:WorkText ;
-   bdo:workTitle  []  ;
-   adm:logEntry  []  .
+bdr:W22084_S0001  a            bdo:Work ;
+        bdo:workHasPart        bdr:W22084_0005 , bdr:W22084_0006 , bdr:W22084_0003 , bdr:W22084_0004 , bdr:W22084_0001 , bdr:W22084_0007 , bdr:W22084_0007A , bdr:W22084_0002 ;
+        bdo:workLocation       []  ;
+        bdo:workPartIndex      1 ;
+        bdo:workPartOf         bdr:W22084 ;
+        bdo:workPartTreeIndex  "01" ;
+        bdo:workPartType       bdr:WorkSection ;
+        skos:prefLabel         "'dul ba/"@bo-x-ewts .
 
-bdr:W22084_0003  a  bdo:Work ;
-   skos:prefLabel  "'dul ba rnam par 'byed pa/"@bo-x-ewts , "bi na ya bi b+​hang ga"@sa-x-ewts ;
-   bdo:workColophon  "'dul ba rnam par 'byed pa rdzogs so/ dbang phyug dam pa'i mnga' bdag dpal lha btsan po'i bka' lung gis/ 'phags pa gzhi thams cad yod par smra ba'i 'dul ba 'dzin pa kha che'i bye brag tu smra ba'i slob dpon dzin mi tra dang / zhu chen gyi lo tsA ba ban de klu'i rgyal mtshan gyis bsgyur cing zhus te gtan la phab/ 'di la sha lo ka ni nyi khri lnga stong yod/ bam po ni brgyad bcu rtsa gsum byas so/ mang ga laM/"@bo-x-ewts ;
-   bdo:workExpressionOf  bdr:W0RKT0003 ;
-   bdo:workKaTenSiglaD  "3" ;
-   bdo:workLocation  [ bdo:workLocationEndLine  6 ;
-                       bdo:workLocationEndPage  539 ;
-                       bdo:workLocationEndVolume  8 ;
-                       bdo:workLocationLine  1 ;
-                       bdo:workLocationPage  43 ;
-                       bdo:workLocationVolume  5 ;
-                       bdo:workLocationWork  bdr:W22084
-                     ] ;
-   bdo:workPartIndex  3 ;
-   bdo:workPartOf  bdr:W22084_S0001 ;
-   bdo:workPartTreeIndex  "01.03" ;
-   bdo:workPartType  bdr:WorkText ;
-   bdo:workTitle  []  ;
-   adm:logEntry  []  .
+bdr:W22084  bdo:workHasPart  bdr:W22084_S0011 , bdr:W22084_S0002 , bdr:W22084_S0004 , bdr:W22084_S0014 , bdr:W22084_S0001 , bdr:W22084_S0007 , bdr:W22084_S0009 , bdr:W22084_S0013 , bdr:W22084_S0006 , bdr:W22084_S0012 , bdr:W22084_S0003 , bdr:W22084_S0008 , bdr:W22084_S0005 , bdr:W22084_S0010 .
 
-bdr:W22084_S0001  a  bdo:Work ;
-   skos:prefLabel  "'dul ba/"@bo-x-ewts ;
-   bdo:workHasPart  bdr:W22084_0001 , bdr:W22084_0002 , bdr:W22084_0003 , bdr:W22084_0004 , bdr:W22084_0005 , bdr:W22084_0006 , bdr:W22084_0007 , bdr:W22084_0007A ;
-   bdo:workPartIndex  1 ;
-   bdo:workPartOf  bdr:W22084 ;
-   bdo:workPartTreeIndex  "01" ;
-   bdo:workPartType  bdr:WorkSection .
+bdr:I22084  bdo:itemForWork  bdr:W22084 .
+
+bdr:W22084_0001  a             bdo:Work ;
+        bdo:workColophon       "'dul ba gzhi rdzogs so/ thub dbang zla ba'i zhal nas byung gyur pa/ gsung gi me tog tshar pa yid 'od rnams/ lta ba ngan zlog rnyi ba med pa yi/ rang bzhin yun ring skye dgu'i nang gnas shogag /kha che'i mkhan po sa rba dz+nyA de ba dang / rgya gar gyi mkhan po bi d+yA ka ra pra b+ha dang / kha che'i mkhan po d+ha rmA ka ra dang / lo tsA ba ban de dpal gyi lhun pos bsgyur cing / rgya gar gyi mkhan po bi d+yA ka ra pra b+ha dang / zhu chen gyi lo ts+tsha ba ban de dpal brtsegs kyis bsgyur cing zhus te gtan la phab pa'o/ bzod pa dka' thub dam pa bzod pa ni/ mya ngan 'da' ba mchog ces sangs rgyas gsung / rab tu byung gzhan la gnod pa dang / gzhan la 'tshe ba dge spyod ma yin no/ ye d+ha rmA he tu pra b+ha bA he tun+he ShAn+ta thA ga to h+ya ba data/ te ShAny+tsa yo ni ro d+ha i baM bA dI ma hA shra ma naH/"@bo-x-ewts ;
+        bdo:workExpressionOf   bdr:W0RKT0001 ;
+        bdo:workKaTenSiglaD    "1" ;
+        bdo:workLocation       [ bdo:workLocationEndLine    5 ;
+                                 bdo:workLocationEndPage    605 ;
+                                 bdo:workLocationEndVolume  4 ;
+                                 bdo:workLocationLine       1 ;
+                                 bdo:workLocationPage       4 ;
+                                 bdo:workLocationVolume     1 ;
+                                 bdo:workLocationWork       bdr:W22084
+                               ] ;
+        bdo:workPartIndex      1 ;
+        bdo:workPartOf         bdr:W22084_S0001 ;
+        bdo:workPartTreeIndex  "01.01" ;
+        bdo:workPartType       bdr:WorkText ;
+        bdo:workTitle          bdr:W22084_0001_TT624791697304 , bdr:W22084_0001_TT032447359b40 ;
+        skos:prefLabel         "bi na ya bastu"@sa-x-ewts , "'dul ba gzhi/"@bo-x-ewts .

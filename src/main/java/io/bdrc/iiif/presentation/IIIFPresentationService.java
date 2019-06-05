@@ -26,6 +26,7 @@ import io.bdrc.auth.Access;
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.rdf.RdfConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
+import io.bdrc.iiif.presentation.models.AccessType;
 import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
 import io.bdrc.iiif.presentation.models.WorkInfo;
@@ -66,10 +67,9 @@ public class IIIFPresentationService {
 		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(volumeId, requiresVolumeOutline);
 		Access acc = (Access)ctx.getProperty("access");
 		if (acc == null) { acc = new Access();}
-		final String accessType = getShortName(vi.access.getUri());
-//	    if (accessType == null || !acc.hasResourceAccess(accessType)) {
-//	        return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
-//	    }
+	    if (vi.access == null || !acc.hasResourceAccess(vi.access.getUri())) {
+	        return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
+	    }
 		if (vi.iiifManifest != null) {
 		    logger.info("redirect manifest request for ID {} to {}", identifier, vi.iiifManifest.toString());
 	        return Response.status(302) // maybe 303 or 307 would be better?
@@ -85,8 +85,7 @@ public class IIIFPresentationService {
         };
         //At this point the resource is accessible but we don't whether it is public or restricted
         //and we don't know either if the user is authenticated or not
-        boolean open=accessType.equals(RdfConstants.OPEN);
-        if(open) {
+        if(vi.access == AccessType.OPEN) {
             return Response.ok(stream).header("Cache-Control", "public,max-age="+AuthProps.getProperty("max-age")).build();
         } else {
             return Response.ok(stream).header("Cache-Control", "private,max-age="+AuthProps.getProperty("max-age")).build();
@@ -139,20 +138,20 @@ public class IIIFPresentationService {
             continuous = Boolean.parseBoolean(cont);
         }
         final Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);
-        String accessType = "";
+        AccessType access = AccessType.RESTR_BDRC;
         final int subType = id.getSubType();
         switch(subType) {
             case Identifier.COLLECTION_ID_ITEM:
             case Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE:
-                accessType = getShortName(ItemInfoService.getItemInfo(id.getItemId()).access.getUri());
+                access = ItemInfoService.getItemInfo(id.getItemId()).access;
                 break;
             case Identifier.COLLECTION_ID_WORK_IN_ITEM:
                 WorkInfo winf = WorkInfoService.getWorkInfo(id.getWorkId());
-                accessType = getShortName(winf.rootAccess);
+                access = winf.rootAccess;
                 break;
             case Identifier.COLLECTION_ID_WORK_OUTLINE:
                 WorkInfo winf1=WorkInfoService.getWorkInfo(id.getWorkId());
-                accessType = getShortName(winf1.rootAccess);
+                access = winf1.rootAccess;
                 break;
         }
         Access acc = (Access)ctx.getProperty("access");
@@ -162,9 +161,8 @@ public class IIIFPresentationService {
 //        }
         //At this point the resource is accessible but we don't whether it is public or restricted
         //and we don't know either if the user is authenticated or not
-        boolean open = accessType.equals(RdfConstants.OPEN);
         int maxAgeSeconds = Integer.parseInt(AuthProps.getProperty("max-age"))/1000;
-        if (open) {
+        if (access == AccessType.OPEN) {
             return Response.ok().cacheControl(CacheControl.valueOf("public, max-age="+maxAgeSeconds))
                     .entity(CollectionService.getCollectionForIdentifier(id,continuous)).build();
         } else {

@@ -1,10 +1,10 @@
 package io.bdrc.iiif.presentation.models;
 
 import static io.bdrc.iiif.presentation.AppConstants.ADM;
+import static io.bdrc.iiif.presentation.AppConstants.TMPPREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.BDO;
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
-import static io.bdrc.iiif.presentation.AppConstants.TMPPREFIX;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,6 +30,8 @@ public class VolumeInfo {
     
     @JsonProperty("access")
     public AccessType access;
+    @JsonProperty("restrictedInChina")
+    public Boolean restrictedInChina;
     @JsonProperty("license")
     public LicenseType license;
     @JsonProperty("workId")
@@ -40,12 +42,8 @@ public class VolumeInfo {
     public String imageList;
     @JsonProperty("totalPages")
     public Integer totalPages;
-    @JsonProperty("pagesText")
-    public Integer pagesText = null;
     @JsonProperty("pagesIntroTbrc")
     public Integer pagesIntroTbrc = 0;
-    @JsonProperty("pagesIntro")
-    public Integer pagesIntro = null;
     @JsonProperty("volumeNumber")
     public Integer volumeNumber = 1;
     @JsonProperty("imageGroup")
@@ -67,9 +65,7 @@ public class VolumeInfo {
         if(sol.contains("?imageList")) {this.imageList = sol.get("?imageList").asLiteral().getString();}
         if(sol.contains("?volumeNumber")) {this.volumeNumber = sol.get("?volumeNumber").asLiteral().getInt();}
         if(sol.contains("?totalPages")) {this.totalPages = sol.get("?totalPages").asLiteral().getInt();}
-        if(sol.contains("?pagesText")) {this.pagesText = sol.get("?pagesText").asLiteral().getInt();}
         if(sol.contains("?pagesIntroTbrc")) {this.pagesIntroTbrc = sol.get("?pagesIntroTbrc").asLiteral().getInt();}
-        if(sol.contains("?pagesIntro")) {this.pagesIntro = sol.get("?pagesIntro").asLiteral().getInt();}
         if (sol.contains("imageGroup")) {this.imageGroup = sol.getLiteral("imageGroup").getString();}
         if (sol.contains("iiifManifest")) {
             final String manifestURIString = sol.getResource("iiifManifest").getURI();
@@ -106,7 +102,7 @@ public class VolumeInfo {
             this.imageList = imageListS.getString();
         }
         
-        final Statement imageGroupS = volume.getProperty(m.getProperty(ADM, "legacyImageGroupRID"));
+        final Statement imageGroupS = volume.getProperty(m.getProperty(TMPPREFIX, "legacyImageGroupRID"));
         if (imageGroupS != null) {
             this.imageGroup = imageGroupS.getString();
         }
@@ -134,24 +130,14 @@ public class VolumeInfo {
         if (volumePagesTbrcIntroS != null) {
             this.pagesIntroTbrc = volumePagesTbrcIntroS.getInt();
         }
-
-        final Statement volumePagesIntroS = volume.getProperty(m.getProperty(BDO, "volumePagesIntroS"));
-        if (volumePagesIntroS != null) {
-            this.pagesIntro = volumePagesIntroS.getInt();
-        }
-
-        final Statement volumePagesTextS = volume.getProperty(m.getProperty(BDO, "volumePagesTextS"));
-        if (volumePagesTextS != null) {
-            this.pagesText = volumePagesTextS.getInt();
-        }
         
-        final Resource work = item.getPropertyResourceValue(m.getProperty(BDO, "itemImageAssetForWork"));
+        final Resource work = item.getPropertyResourceValue(m.getProperty(BDO, "itemForWork"));
         if (work == null) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: no associated work");
         }
         this.workId = work.getURI();
         
-        final Resource access = work.getPropertyResourceValue(m.getProperty(ADM, "access"));
+        final Resource access = volume.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootAccess"));
         if (access != null) {
             this.access = AccessType.fromString(access.getURI());
         } else {
@@ -159,9 +145,16 @@ public class VolumeInfo {
             this.access = AccessType.fromString(BDR+"AccessRestrictedByTbrc");
         }
 
-        final Resource license = work.getPropertyResourceValue(m.getProperty(ADM, "license"));
+        final Resource license = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootLicense"));
         if (license != null) {
             this.license = LicenseType.fromString(license.getURI());
+        }
+
+        final Statement restrictedInChinaS = volume.getProperty(m.getProperty(TMPPREFIX, "rootRestrictedInChina"));
+        if (restrictedInChinaS == null) {
+            this.restrictedInChina = true;
+        } else {
+            this.restrictedInChina = restrictedInChinaS.getBoolean();
         }
         
         this.partInfo = WorkInfo.getParts(m, work);
@@ -218,16 +211,8 @@ public class VolumeInfo {
         return totalPages;
     }
 
-    public Integer getPagesText() {
-        return pagesText;
-    }
-
     public Integer getPagesIntroTbrc() {
         return pagesIntroTbrc;
-    }
-
-    public Integer getPagesIntro() {
-        return pagesIntro;
     }
 
     public String getImageGroup() {

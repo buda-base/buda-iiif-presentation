@@ -1,23 +1,44 @@
 @prefix :      <http://purl.bdrc.io/ontology/core/> .
 @prefix bdr:   <http://purl.bdrc.io/resource/> .
+@prefix bd:    <http://www.bigdata.com/rdf#> .
+@prefix bdg:   <http://purl.bdrc.io/graph/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix tmp:   <http://purl.bdrc.io/ontology/tmp/> .
 @prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
+@prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
 
 bdr:V22083_I3773  :volumeNumber  66 .
 
-bdr:I22083  a                   :Item , :ItemImageAsset ;
-        adm:gitRevision         "20d96cbcccdf81020275982c0a63db08e2700584" ;
-        adm:status              bdr:StatusReleased ;
-        :itemForWork            bdr:W22083 ;
-        :itemHasVolume          bdr:V22083_I3773 , bdr:V22083_I3745 , bdr:V22083_I3709 ;
-        :itemImageAssetForWork  bdr:W22083 ;
-        :itemVolumes            109 .
+bdr:I22083  a              bdo:Item , bdo:ItemImageAsset ;
+        bdo:isRoot         true ;
+        bdo:itemForWork    bdr:W22083 ;
+        :itemHasVolume     bdr:V22083_I3773 , bdr:V22083_I3745 , bdr:V22083_I3709 ;
+        bdo:itemVolumes    103 .
 
 bdr:V22083_I3745  :volumeNumber  38 .
 
 bdr:V22083_I3709  :volumeNumber  2 .
 
-bdr:W22083  adm:access  bdr:AccessOpen ;
-        adm:license     bdr:LicensePublicDomain ;
-        skos:prefLabel  "bka' 'gyur (stog pho brang bris ma/）"@bo-x-ewts .
+<http://purl.bdrc.io/admindata/I22083>
+        a                      adm:AdminData ;
+        adm:access             <http://purl.bdrc.io/admindata/AccessOpen> ;
+        adm:adminAbout         bdr:I22083 ;
+        adm:contentLegal       <http://purl.bdrc.io/admindata/LD_BDRC_PD> ;
+        adm:facetIndex         310 ;
+        adm:gitPath            "12/I22083.trig" ;
+        adm:gitRepo            <http://purl.bdrc.io/admindata/GR0003> ;
+        adm:gitRevision        "1ef7cec76c101b4a15361c2c15c8dfa8e4bdce56" ;
+        adm:graphId            bdg:I22083 ;
+        adm:metadataLegal      <http://purl.bdrc.io/admindata/LD_BDRC_Open> ;
+        adm:restrictedInChina  false ;
+        adm:status             <http://purl.bdrc.io/admindata/StatusReleased> ;
+        bdo:isRoot             true .
 
+<http://purl.bdrc.io/admindata/LD_BDRC_PD>
+        a               adm:LegalData ;
+        adm:license     <http://purl.bdrc.io/admindata/LicensePublicDomain> ;
+        adm:provider    <http://purl.bdrc.io/admindata/CP021> ;
+        adm:termsOfUse  <http://purl.bdrc.io/admindata/TermsOfUseBDRCGeneral> ;
+        skos:prefLabel  "Provided by BDRC, Public domain"@en .
