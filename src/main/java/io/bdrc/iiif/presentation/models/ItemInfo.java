@@ -6,7 +6,9 @@ import java.util.List;
 import static io.bdrc.iiif.presentation.AppConstants.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 
@@ -68,6 +70,8 @@ public class ItemInfo {
     public String workId;
     @JsonProperty("access")
     public AccessType access;
+    @JsonProperty("restrictedInChina")
+    public Boolean restrictedInChina;
     @JsonProperty("license")
     public LicenseType license;
     @JsonProperty("volumes")
@@ -75,17 +79,39 @@ public class ItemInfo {
     
     public ItemInfo() {}
     
+    public static final Property adminAbout = ResourceFactory.createProperty(ADM+"adminAbout");
+    
+    public static Resource getAdminForResource(final Model m, final Resource r) {
+        final StmtIterator si = m.listStatements(null, adminAbout, r);
+        while (si.hasNext()) {
+            Statement st = si.next();
+            return st.getSubject();
+        }
+        return null;
+    }
+    
     public ItemInfo(final Model m, String itemId) throws BDRCAPIException {
         // the model is supposed to come from the IIIFPres_itemGraph graph query
         if (itemId.startsWith("bdr:"))
             itemId = BDR+itemId.substring(4);
         final Resource item = m.getResource(itemId);
-        final Resource work = item.getPropertyResourceValue(m.getProperty(BDO, "itemForWork"));
-        if (work == null)
-            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: missing work");
-        this.workId = work.getURI();
-        final Resource workAccess = work.getPropertyResourceValue(m.getProperty(ADM, "access"));
-        final Resource workLicense = work.getPropertyResourceValue(m.getProperty(ADM, "license"));
+        this.workId = item.getPropertyResourceValue(m.getProperty(BDO, "itemForWork")).getURI();
+        final Resource itemAdmin =  getAdminForResource(m, item);
+        if (itemAdmin == null) {
+            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no admin data for item");
+        }
+        final Resource workAccess = itemAdmin.getPropertyResourceValue(m.getProperty(ADM, "access"));
+        final Statement restrictedInChinaS = itemAdmin.getProperty(m.getProperty(ADM, "restrictedInChina"));
+        if (restrictedInChinaS == null) {
+            this.restrictedInChina = true;
+        } else {
+            this.restrictedInChina = restrictedInChinaS.getBoolean();
+        }
+        final Resource legalData = itemAdmin.getPropertyResourceValue(m.getProperty(ADM, "contentLegal"));
+        if (legalData == null) {
+            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no legal data for item admin data");
+        }
+        final Resource workLicense = legalData.getPropertyResourceValue(m.getProperty(ADM, "license"));
         if (workAccess == null || workLicense == null)
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no access or license");
         this.access = AccessType.fromString(workAccess.getURI());
