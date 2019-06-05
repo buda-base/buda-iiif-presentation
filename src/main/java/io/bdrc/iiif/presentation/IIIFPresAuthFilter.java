@@ -20,14 +20,14 @@ import io.bdrc.auth.model.Endpoint;
 @PreMatching
 public class IIIFPresAuthFilter implements ContainerRequestFilter {
 
-    public final static Logger log=LoggerFactory.getLogger(IIIFPresAuthFilter.class.getName());
+    public final static Logger log = LoggerFactory.getLogger(IIIFPresAuthFilter.class.getName());
 
     @Override
     public void filter(final ContainerRequestContext ctx) throws IOException {
         final String token = getToken(ctx.getHeaderString("Authorization"));
         if (token != null) {
-            //User is logged on
-            //Getting his profile
+            // User is logged on
+            // Getting his profile
             final TokenValidation validation = new TokenValidation(token);
             final UserProfile prof = validation.getUser();
             ctx.setProperty("access", new Access(prof, new Endpoint()));
@@ -36,11 +36,8 @@ public class IIIFPresAuthFilter implements ContainerRequestFilter {
         }
     }
 
-
     void abort(ContainerRequestContext ctx) {
-        ctx.abortWith(Response.status(Response.Status.FORBIDDEN)
-                .entity("access to this resource is restricted")
-                .build());
+        ctx.abortWith(Response.status(Response.Status.FORBIDDEN).entity("access to this resource is restricted").build());
     }
 
     String getToken(final String header) {
@@ -48,8 +45,7 @@ public class IIIFPresAuthFilter implements ContainerRequestFilter {
             if (header != null) {
                 return header.split(" ")[1];
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             log.error(ex.getMessage());
             return null;
         }
