@@ -116,6 +116,12 @@ public class WorkInfo {
         if (root_access != null) {
             this.rootAccess = AccessType.fromString(root_access.getURI());
         }
+        final Statement restrictedInChinaS = work.getProperty(m.getProperty(TMPPREFIX, "rootRestrictedInChina"));
+        if (restrictedInChinaS == null) {
+            this.rootRestrictedInChina = true;
+        } else {
+            this.rootRestrictedInChina = restrictedInChinaS.getBoolean();
+        }
         final Resource access = work.getPropertyResourceValue(m.getProperty(ADM, "access"));
         if (access != null) {
             this.rootAccess = AccessType.fromString(access.getURI());

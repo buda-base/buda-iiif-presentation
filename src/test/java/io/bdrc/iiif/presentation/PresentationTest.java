@@ -158,7 +158,7 @@ public class PresentationTest {
                 .lang(RDFLanguages.TTL);
                 //.canonicalLiterals(true);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
-        m.write(System.out, "TTL");
+        //m.write(System.out, "TTL");
         final ItemInfo ii = new ItemInfo(m, "bdr:I22073");
         if (wi.hasLocation) {
             CollectionService.addManifestsForLocation(collection, wi, ii, false);

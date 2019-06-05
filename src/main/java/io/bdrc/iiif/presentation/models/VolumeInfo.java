@@ -1,10 +1,10 @@
 package io.bdrc.iiif.presentation.models;
 
 import static io.bdrc.iiif.presentation.AppConstants.ADM;
+import static io.bdrc.iiif.presentation.AppConstants.TMPPREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.BDO;
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
-import static io.bdrc.iiif.presentation.AppConstants.TMPPREFIX;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -102,7 +102,7 @@ public class VolumeInfo {
             this.imageList = imageListS.getString();
         }
         
-        final Statement imageGroupS = volume.getProperty(m.getProperty(ADM, "legacyImageGroupRID"));
+        final Statement imageGroupS = volume.getProperty(m.getProperty(TMPPREFIX, "legacyImageGroupRID"));
         if (imageGroupS != null) {
             this.imageGroup = imageGroupS.getString();
         }
@@ -131,13 +131,13 @@ public class VolumeInfo {
             this.pagesIntroTbrc = volumePagesTbrcIntroS.getInt();
         }
         
-        final Resource work = item.getPropertyResourceValue(m.getProperty(BDO, "itemImageAssetForWork"));
+        final Resource work = item.getPropertyResourceValue(m.getProperty(BDO, "itemForWork"));
         if (work == null) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: no associated work");
         }
         this.workId = work.getURI();
         
-        final Resource access = work.getPropertyResourceValue(m.getProperty(ADM, "access"));
+        final Resource access = volume.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootAccess"));
         if (access != null) {
             this.access = AccessType.fromString(access.getURI());
         } else {
@@ -145,9 +145,16 @@ public class VolumeInfo {
             this.access = AccessType.fromString(BDR+"AccessRestrictedByTbrc");
         }
 
-        final Resource license = work.getPropertyResourceValue(m.getProperty(ADM, "license"));
+        final Resource license = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootLicense"));
         if (license != null) {
             this.license = LicenseType.fromString(license.getURI());
+        }
+
+        final Statement restrictedInChinaS = volume.getProperty(m.getProperty(TMPPREFIX, "rootRestrictedInChina"));
+        if (restrictedInChinaS == null) {
+            this.restrictedInChina = true;
+        } else {
+            this.restrictedInChina = restrictedInChinaS.getBoolean();
         }
         
         this.partInfo = WorkInfo.getParts(m, work);
