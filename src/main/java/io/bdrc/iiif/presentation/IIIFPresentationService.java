@@ -67,7 +67,7 @@ public class IIIFPresentationService {
         if (acc == null) {
             acc = new Access();
         }
-        if (vi.access == null || !acc.hasResourceAccess(vi.access.getUri())) {
+        if (vi.access == null || !acc.hasResourceAccess(getShortName(vi.access.getUri()))) {
             return Response.status(403).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
         }
         if (vi.iiifManifest != null) {
