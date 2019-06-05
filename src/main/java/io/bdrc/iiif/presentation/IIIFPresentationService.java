@@ -68,7 +68,7 @@ public class IIIFPresentationService {
 		Access acc = (Access)ctx.getProperty("access");
 		if (acc == null) { acc = new Access();}
 	    if (vi.access == null || !acc.hasResourceAccess(vi.access.getUri())) {
-	        return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
+	        return Response.status(403).entity("\"Insufficient rights ("+vi.access+")\"").header("Cache-Control", "no-cache").build();
 	    }
 		if (vi.iiifManifest != null) {
 		    logger.info("redirect manifest request for ID {} to {}", identifier, vi.iiifManifest.toString());
