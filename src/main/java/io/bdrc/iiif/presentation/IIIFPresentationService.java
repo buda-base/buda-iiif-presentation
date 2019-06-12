@@ -62,7 +62,7 @@ public class IIIFPresentationService {
 		if (volumeId == null) {
 		    volumeId = wi.firstVolumeId;
 		    if (volumeId == null)
-		        return Response.status(404).entity("Cannot find volume ID").header("Cache-Control", "no-cache").build();
+		        return Response.status(404).entity("\"Cannot find volume ID\"").header("Cache-Control", "no-cache").build();
 		}
 		final VolumeInfo vi = VolumeInfoService.getVolumeInfo(volumeId, requiresVolumeOutline);
 		Access acc = (Access)ctx.getProperty("access");
@@ -106,7 +106,7 @@ public class IIIFPresentationService {
 //            return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
 //        }
         if (vi.iiifManifest != null) {
-            return Response.status(404).entity("Cannot serve canvas for external manifests").header("Cache-Control", "no-cache").build();
+            return Response.status(404).entity("\"Cannot serve canvas for external manifests\"").header("Cache-Control", "no-cache").build();
         }
         final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgseqnum, id.getVolumeId());
         final StreamingOutput stream = new StreamingOutput() {

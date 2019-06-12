@@ -35,6 +35,8 @@ public class WorkInfo {
     public AccessType rootAccess = null;
     @JsonProperty("rootRestrictedInChina")
     public Boolean rootRestrictedInChina = false;
+    @JsonProperty("rootStatus")
+    public String rootStatus = null;
     @JsonProperty("isRoot")
     public Boolean isRoot = false;
     @JsonProperty("rootWorkId")
@@ -121,6 +123,12 @@ public class WorkInfo {
             this.rootRestrictedInChina = true;
         } else {
             this.rootRestrictedInChina = restrictedInChinaS.getBoolean();
+        }
+        final Statement rootStatusS = work.getProperty(m.getProperty(TMPPREFIX, "rootStatus"));
+        if (rootStatusS == null) {
+            this.rootStatus = "";
+        } else {
+            this.rootStatus = rootStatusS.getResource().getURI();
         }
         final Resource access = work.getPropertyResourceValue(m.getProperty(ADM, "access"));
         if (access != null) {

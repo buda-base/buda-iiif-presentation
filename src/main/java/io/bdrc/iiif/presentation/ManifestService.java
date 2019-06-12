@@ -146,13 +146,13 @@ public class ManifestService {
         final String volumeNum = Integer.toString(volumeNumber);
         if (wi == null || wi.labels == null || wi.labels.isEmpty()) {
             label.addValue(ManifestService.getLocaleFor("en"), "volume "+volumeNum);
-            label.addValue(ManifestService.getLocaleFor("bo-x-ewts"), "pod"+volumeNum+"/");
+            label.addValue(ManifestService.getLocaleFor("bo-x-ewts"), "pod/_"+volumeNum);
             return label;
         }
         for (LangString ls : wi.labels) {
             if (ls.language != null) {
                 if (ls.language.equals("bo-x-ewts"))
-                    label.addValue(ManifestService.getLocaleFor(ls.language), ls.value+"_(pod"+volumeNum+")");
+                    label.addValue(ManifestService.getLocaleFor(ls.language), ls.value+"_(pod/_"+volumeNum+")");
                 else
                     label.addValue(ManifestService.getLocaleFor(ls.language), ls.value);
             } else {
@@ -186,9 +186,28 @@ public class ManifestService {
             mainSeq.setViewingHints(VIEWING_HINTS);
         }
         int nbPagesIntro = vi.pagesIntroTbrc;
+        int bPage;
+        int ePage;
+        if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID) {
+            bPage = 1+nbPagesIntro;
+            ePage = vi.totalPages;
+            if (wi != null && wi.location != null) {
+                if (wi.location.bvolnum > vi.volumeNumber)
+                    throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked starts after this volume");
+                // if bvolnum < vi.volumeNumber, we already have bPage correctly set to 1+nbPagesIntro
+                if (wi.location.bvolnum == vi.volumeNumber)
+                    bPage = wi.location.bpagenum;
+                if (wi.location.evolnum < vi.volumeNumber)
+                    throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked ends before this volume");
+               // if evolnum > vi.volumeNumber, we already have bPage correctly set to vi.totalPages
+                if (wi.location.evolnum == vi.volumeNumber && wi.location.epagenum != -1)
+                    ePage = wi.location.epagenum;
+            }
+        } else {
+            bPage = id.getBPageNum() == null ? 1+nbPagesIntro : id.getBPageNum().intValue();
+            ePage = id.getEPageNum() == null ? vi.totalPages : id.getEPageNum().intValue();
+        }
         // PDF / zip download
-        int bPage = id.getBPageNum() == null ? 1+nbPagesIntro : id.getBPageNum().intValue();
-        int ePage = id.getEPageNum() == null ? vi.totalPages : id.getEPageNum().intValue();
         final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage); 
         manifest.setRenderings(oc);
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {

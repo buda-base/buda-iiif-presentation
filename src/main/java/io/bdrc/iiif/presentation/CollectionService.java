@@ -34,6 +34,7 @@ public class CollectionService {
         switch(id.getSubType()) {
         case Identifier.COLLECTION_ID_ITEM:
         case Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE:
+        case Identifier.COLLECTION_ID_WORK_IN_ITEM:
             return getCollectionForItem(getCommonCollection(id), id,continuous);
         case Identifier.COLLECTION_ID_WORK_OUTLINE:
             return getCollectionForOutline(getCommonCollection(id), id,continuous);
@@ -132,7 +133,7 @@ public class CollectionService {
                     manifestUrl = vi.iiifManifest;
                 } else {
                     manifestUrl = IIIFPresPrefix+manifestId+"/manifest";
-                    if(continuous) {
+                    if (continuous) {
                         manifestUrl += "?continuous=true";
                     }
                 }
@@ -145,7 +146,13 @@ public class CollectionService {
     }
 
     public static Collection getCollectionForItem(final Collection collection, final Identifier id, final boolean continuous) throws BDRCAPIException {
-        final ItemInfo ii = ItemInfoService.getItemInfo(id.getItemId());
+        final ItemInfo ii;
+        if (id.getItemId() != null) {
+            final WorkInfo wi = WorkInfoService.getWorkInfo(id.getWorkId());
+            ii = ItemInfoService.getItemInfo(wi.itemId);
+        } else {
+            ii = ItemInfoService.getItemInfo(id.getItemId());
+        }
         logger.info("building item collection for ID {}", id.getId());
         collection.addLabel(id.getItemId());
         final String volPrefix = id.getSubType() == Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE ? "vo:" : "v:";

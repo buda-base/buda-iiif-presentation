@@ -1,6 +1,5 @@
 package io.bdrc.iiif.presentation.models;
 
-import static io.bdrc.iiif.presentation.AppConstants.ADM;
 import static io.bdrc.iiif.presentation.AppConstants.TMPPREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.BDO;
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
