@@ -147,7 +147,7 @@ public class CollectionService {
 
     public static Collection getCollectionForItem(final Collection collection, final Identifier id, final boolean continuous) throws BDRCAPIException {
         final ItemInfo ii;
-        if (id.getItemId() != null) {
+        if (id.getItemId() == null) {
             final WorkInfo wi = WorkInfoService.getWorkInfo(id.getWorkId());
             ii = ItemInfoService.getItemInfo(wi.itemId);
         } else {
