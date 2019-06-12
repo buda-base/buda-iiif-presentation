@@ -219,9 +219,9 @@ public class ManifestService {
 
     public static List<OtherContent> getRenderings(final String volumeId, final int bPage, final int ePage) {
         final String fullId = volumeId+"::"+bPage+"-"+ePage;
-        final OtherContent oct = new OtherContent(PDF_URL_PREFIX+"v:"+fullId,"application/pdf");
+        final OtherContent oct = new OtherContent(PDF_URL_PREFIX+"v:"+fullId, "application/pdf");
         oct.setLabel(new PropertyValue("Download as PDF"));
-        final OtherContent oct1 = new OtherContent(ZIP_URL_PREFIX+"v:"+fullId,"application/zip");
+        final OtherContent oct1 = new OtherContent(ZIP_URL_PREFIX+"v:"+fullId, "application/zip");
         oct1.setLabel(new PropertyValue("Download as ZIP"));
         final ArrayList<OtherContent> ct = new ArrayList<>();
         ct.add(oct);
