@@ -113,7 +113,33 @@ public class PresentationTest {
         //IIIFApiObjectMapperProvider.writer.writeValue(fout, mnf);
     }
 
-
+    @Test
+    public void volumeManifestWorkVolTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+        Model m = ModelFactory.createDefaultModel();
+        RDFParserBuilder pb = RDFParser.create()
+                .source(TESTDIR+"volumeOutline.ttl")
+                .lang(RDFLanguages.TTL);
+                //.canonicalLiterals(true);
+        pb.parse(StreamRDFLib.graph(m.getGraph()));
+        final VolumeInfo vi = new VolumeInfo(m, "bdr:V22084_I0890");
+        //om.writeValue(System.out, vi);
+        final Identifier id = new Identifier("wv:bdr:W22084_0002::bdr:V22084_I0890", Identifier.MANIFEST_ID);
+        final String cacheKey = "W22084/0890";
+        final List<ImageInfo> ii = getTestImageList("W22084-0890.json");
+        CacheAccess<String, Object> cache = ServiceCache.CACHE;
+        cache.put(cacheKey, ii);
+        m = ModelFactory.createDefaultModel();
+        pb = RDFParser.create()
+                .source(TESTDIR+"workGraphNoItem_location.ttl")
+                .lang(RDFLanguages.TTL);
+        pb.parse(StreamRDFLib.graph(m.getGraph()));
+        final WorkInfo wi = new WorkInfo(m, "bdr:W22084_0002");
+        //om.writeValue(System.out, wi);
+        final Manifest mnf = ManifestService.getManifestForIdentifier(id, vi, false, wi, id.getVolumeId());
+        //final File fout = new File("/tmp/manifestLocation.json"); 
+        //IIIFApiObjectMapperProvider.writer.writeValue(fout, mnf);
+    }
+    
     @Test
     public void virtualWork() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
         Model m = ModelFactory.createDefaultModel();
