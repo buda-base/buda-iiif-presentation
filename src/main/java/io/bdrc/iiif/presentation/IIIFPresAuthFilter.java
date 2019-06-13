@@ -2,9 +2,11 @@ package io.bdrc.iiif.presentation;
 
 import java.io.IOException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
@@ -22,9 +24,13 @@ public class IIIFPresAuthFilter implements ContainerRequestFilter {
 
     public final static Logger log = LoggerFactory.getLogger(IIIFPresAuthFilter.class.getName());
 
+    @Context
+    private HttpServletRequest req;
+
     @Override
     public void filter(final ContainerRequestContext ctx) throws IOException {
         final String token = getToken(ctx.getHeaderString("Authorization"));
+        ctx.setProperty("isFromChina", new Boolean(GeoLocation.isFromChina(req)));
         if (token != null) {
             // User is logged on
             // Getting his profile
