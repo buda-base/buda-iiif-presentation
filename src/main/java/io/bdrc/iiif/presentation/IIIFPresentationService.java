@@ -41,6 +41,7 @@ public class IIIFPresentationService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/2.1.1/{identifier}/manifest")
     public Response getManifest(@PathParam("identifier") final String identifier, ContainerRequestContext ctx, @Context UriInfo info) throws BDRCAPIException {
+        boolean isFromChina = ((Boolean) ctx.getProperty("isFromChina")).booleanValue();
         MultivaluedMap<String, String> hm = info.getQueryParameters();
         String cont = hm.getFirst("continuous");
         boolean continuous = false;
@@ -63,11 +64,13 @@ public class IIIFPresentationService {
                 return Response.status(404).entity("\"Cannot find volume ID\"").header("Cache-Control", "no-cache").build();
         }
         final VolumeInfo vi = VolumeInfoService.getVolumeInfo(volumeId, requiresVolumeOutline);
+        boolean forbidden = vi.restrictedInChina && isFromChina;
         Access acc = (Access) ctx.getProperty("access");
         if (acc == null) {
             acc = new Access();
         }
-        if (vi.access == null || !acc.hasResourceAccess(getShortName(vi.access.getUri()))) {
+
+        if (vi.access == null || !acc.hasResourceAccess(getShortName(vi.access.getUri())) || forbidden) {
             return Response.status(403).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
         }
         if (vi.iiifManifest != null) {
@@ -96,16 +99,18 @@ public class IIIFPresentationService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/2.1.1/{identifier}/canvas/{imgseqnum}")
     public Response getCanvas(@PathParam("identifier") final String identifier, @PathParam("imgseqnum") final String imgseqnum, final ContainerRequestContext ctx) throws BDRCAPIException {
+        boolean isFromChina = ((Boolean) ctx.getProperty("isFromChina")).booleanValue();
         final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
         final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), false); // not entirely sure about the false
+        boolean forbidden = vi.restrictedInChina && isFromChina;
         Access acc = (Access) ctx.getProperty("access");
         if (acc == null) {
             acc = new Access();
         }
         final String accessType = getShortName(vi.access.getUri());
-//        if(accessType == null || !acc.hasResourceAccess(accessType)) {
-//            return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
-//        }
+        if (accessType == null || !acc.hasResourceAccess(accessType) || forbidden) {
+            return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
+        }
         if (vi.iiifManifest != null) {
             return Response.status(404).entity("\"Cannot serve canvas for external manifests\"").header("Cache-Control", "no-cache").build();
         }
@@ -131,6 +136,7 @@ public class IIIFPresentationService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/2.1.1/collection/{identifier}")
     public Response getCollection(@PathParam("identifier") final String identifier, final ContainerRequestContext ctx, @Context UriInfo info) throws BDRCAPIException {
+        boolean isFromChina = ((Boolean) ctx.getProperty("isFromChina")).booleanValue();
         MultivaluedMap<String, String> hm = info.getQueryParameters();
         String cont = hm.getFirst("continuous");
         boolean continuous = false;
@@ -138,6 +144,8 @@ public class IIIFPresentationService {
             continuous = Boolean.parseBoolean(cont);
         }
         final Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);
+        final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), false);
+        boolean forbidden = vi.restrictedInChina && isFromChina;
         AccessType access = AccessType.RESTR_BDRC;
         final int subType = id.getSubType();
         switch (subType) {
@@ -158,9 +166,9 @@ public class IIIFPresentationService {
         if (acc == null) {
             acc = new Access();
         }
-//        if (!acc.hasResourceAccess(accessType)) {
-//            throw new BDRCAPIException(403, AppConstants.GENERIC_LDS_ERROR, "Insufficient rights");
-//        }
+        if (forbidden) {
+            throw new BDRCAPIException(403, AppConstants.GENERIC_LDS_ERROR, "Insufficient rights");
+        }
         // At this point the resource is accessible but we don't whether it is public or
         // restricted
         // and we don't know either if the user is authenticated or not
