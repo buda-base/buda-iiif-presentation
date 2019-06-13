@@ -107,24 +107,9 @@ public class ManifestService {
         }
     }
     
-    public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList, final VolumeInfo vi, final String volumeId) throws BDRCAPIException {
+    public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList, final VolumeInfo vi, final String volumeId, final int beginIndex, final int endIndex) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence(IIIFPresPrefix+id.getId()+"/sequence/main");
-        final int imageTotal = imageInfoList.size();
         // all indices start at 1
-        int nbPagesIntro = vi.pagesIntroTbrc;
-        final int beginIndex = (id.getBPageNum() == null) ? 1+nbPagesIntro : id.getBPageNum();
-        if (beginIndex > imageTotal) {
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you asked a manifest for an image number that is greater than the total number of images");
-        }
-        Integer ePageNum = id.getEPageNum();
-        int endIndex = imageTotal;
-        if (ePageNum != null) {
-            if (ePageNum > imageTotal) {
-                ePageNum = imageTotal;
-                logger.warn("user asked manifest for id {}, which has an end image ({}) larger than the total number of images ({})", id, ePageNum, imageTotal-1);
-            }
-            endIndex = ePageNum;
-        }
         mainSeq.setViewingDirection(getViewingDirection(imageInfoList));
         for (int imgSeqNum = beginIndex ; imgSeqNum <= endIndex ; imgSeqNum++) {
             // imgSeqNum starts at 1
@@ -180,11 +165,6 @@ public class ManifestService {
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         manifest.addLogo(IIIF_IMAGE_PREFIX+"static::logo.png/full/max/0/default.png");
         manifest.setLabel(getLabel(vi.volumeNumber, wi, true)); // TODO: the final true shouldn't always be true
-        final Sequence mainSeq = getSequenceFrom(id, imageInfoList, vi, volumeId);
-        mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
-        if (continuous) {
-            mainSeq.setViewingHints(VIEWING_HINTS);
-        }
         int nbPagesIntro = vi.pagesIntroTbrc;
         int bPage;
         int ePage;
@@ -206,6 +186,11 @@ public class ManifestService {
         } else {
             bPage = id.getBPageNum() == null ? 1+nbPagesIntro : id.getBPageNum().intValue();
             ePage = id.getEPageNum() == null ? vi.totalPages : id.getEPageNum().intValue();
+        }
+        final Sequence mainSeq = getSequenceFrom(id, imageInfoList, vi, volumeId, bPage, ePage);
+        mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
+        if (continuous) {
+            mainSeq.setViewingHints(VIEWING_HINTS);
         }
         // PDF / zip download
         final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage); 
