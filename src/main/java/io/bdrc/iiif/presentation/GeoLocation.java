@@ -39,8 +39,9 @@ public class GeoLocation {
     public static boolean isFromChina(HttpServletRequest request) {
         boolean accessible = false;
         String addr = request.getHeader("X-Real-IP");
+        System.out.println("Address in header :" + request.getHeader("X-Real-IP"));
         String test = GeoLocation.getCountryName(addr);
-        System.out.println("For address :" + request.getRemoteAddr() + " country name is: " + test);
+        System.out.println("For address :" + request.getHeader("X-Real-IP") + " country name is: " + test);
         if (test == null || CHINA.equalsIgnoreCase(test)) {
             accessible = true;
         }
