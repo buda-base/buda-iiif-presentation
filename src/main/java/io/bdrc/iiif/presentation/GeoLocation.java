@@ -6,6 +6,9 @@ import java.net.InetAddress;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CountryResponse;
@@ -18,6 +21,7 @@ public class GeoLocation {
     private static DatabaseReader dbReader;
     public static final String GEO_CACHE_KEY = "GeoDB";
     private static final String CHINA = "China";
+    private static final Logger log = LoggerFactory.getLogger(GeoLocation.class);
 
     public static String getCountryName(String ip) {
         try {
@@ -39,7 +43,7 @@ public class GeoLocation {
     public static boolean isFromChina(HttpServletRequest request) {
         boolean accessible = false;
         String addr = request.getHeader("X-Real-IP");
-        System.out.println("Address in header :" + request.getHeader("X-Real-IP"));
+        log.info("Address in header X-Real-IP: {}", request.getHeader("X-Real-IP"));
         String test = GeoLocation.getCountryName(addr);
         System.out.println("For address :" + request.getHeader("X-Real-IP") + " country name is: " + test);
         if (test == null || CHINA.equalsIgnoreCase(test)) {
