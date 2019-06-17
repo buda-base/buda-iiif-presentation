@@ -119,13 +119,11 @@ public class PresentationTest {
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
         cache.put(cacheKey, ii);
         m = ModelFactory.createDefaultModel();
-        // pb =
-        // RDFParser.create().source(TESTDIR+"workGraphNoItem_location.ttl").lang(RDFLanguages.TTL);
-        // pb.parse(StreamRDFLib.graph(m.getGraph()));
-        // final WorkInfo wi = new WorkInfo(m, "bdr:W22084_0002");
+        pb = RDFParser.create().source(TESTDIR + "workGraphNoItem_location.ttl").lang(RDFLanguages.TTL);
+        pb.parse(StreamRDFLib.graph(m.getGraph()));
+        final WorkInfo wi = new WorkInfo(m, "bdr:W22084_0002");
         // om.writeValue(System.out, wi);
-        // final Manifest mnf = ManifestService.getManifestForIdentifier(id, vi, false,
-        // wi, id.getVolumeId());
+        final Manifest mnf = ManifestService.getManifestForIdentifier(id, vi, false, wi, id.getVolumeId());
         // final File fout = new File("/tmp/manifestLocation.json");
         // IIIFApiObjectMapperProvider.writer.writeValue(fout, mnf);
     }
