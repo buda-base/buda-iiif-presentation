@@ -1,0 +1,54 @@
+@prefix :      <http://purl.bdrc.io/ontology/core/> .
+@prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
+@prefix adr:   <http://purl.bdrc.io/resource-auth/> .
+@prefix as:    <http://www.w3.org/ns/activitystreams#> .
+@prefix aut:   <http://purl.bdrc.io/ontology/ext/auth/> .
+@prefix bda:   <http://purl.bdrc.io/admindata/> .
+@prefix bdac:  <http://purl.bdrc.io/anncollection/> .
+@prefix bdan:  <http://purl.bdrc.io/annotation/> .
+@prefix bdd:   <http://purl.bdrc.io/data/> .
+@prefix bdg:   <http://purl.bdrc.io/graph/> .
+@prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
+@prefix bdr:   <http://purl.bdrc.io/resource/> .
+@prefix bf:    <http://id.loc.gov/ontologies/bibframe/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dila:  <http://authority.dila.edu.tw/person/?fromInner=> .
+@prefix f:     <java:io.bdrc.ldspdi.sparql.functions.> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix iiif2: <http://iiif.io/api/presentation/2#> .
+@prefix iiif3: <http://iiif.io/api/presentation/3#> .
+@prefix ldp:   <http://www.w3.org/ns/ldp#> .
+@prefix oa:    <http://www.w3.org/ns/oa#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rsh:   <http://purl.bdrc.io/shacl/core/shape/> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix tbr:   <http://purl.bdrc.io/ontology/toberemoved/> .
+@prefix text:  <http://jena.apache.org/text#> .
+@prefix tmp:   <http://purl.bdrc.io/ontology/tmp/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+bdr:W22084_0002  a  bdo:Work ;
+   skos:prefLabel  "so sor thar ba'i mdo/"@bo-x-ewts , "pra ti mo k+Sha sU tra"@sa-x-ewts ;
+   bdo:workColophon  "so sor thar ba'i mdo rdzogs s+ho/ dbang phyug dam pa'i mnga' bdag dpal lha btsan po'i bka' lung gis 'phags pa gzhi thams cad yod par smra ba'i 'dul ba 'dzin ba slob dpon dzin mi tra dang / zhus chen gyi lo tsA ba ban de cog ro klu'i rgyal mtshan gyis bsgyur cing zhus te gtan la phab pa/"@bo-x-ewts ;
+   bdo:workExpressionOf  bdr:W0RKT0002 ;
+   bdo:workKaTenSiglaD  "2" ;
+   bdo:workLocation  [ bdo:workLocationEndLine  7 ;
+                       bdo:workLocationEndPage  42 ;
+                       bdo:workLocationLine  1 ;
+                       bdo:workLocationPage  4 ;
+                       bdo:workLocationVolume  5 ;
+                       bdo:workLocationWork  bdr:W22084
+                     ] ;
+   bdo:workPartIndex  2 ;
+   bdo:workPartOf  bdr:W22084_S0001 ;
+   bdo:workPartTreeIndex  "01.02" ;
+   bdo:workPartType  bdr:WorkText ;
+   bdo:workTitle  bdr:W22084_0002_TT73d7d9d87489 , bdr:W22084_0002_TTd390e2386427 ;
+   tmp:inItem    bdr:I22084 ;
+   tmp:rootAccess  bda:AccessOpen ;
+   tmp:rootLicense  bda:LicensePublicDomain ;
+   tmp:rootRestrictedInChina  false .
