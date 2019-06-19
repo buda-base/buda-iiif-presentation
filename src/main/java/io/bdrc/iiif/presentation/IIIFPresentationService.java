@@ -28,6 +28,7 @@ import io.bdrc.auth.rdf.RdfConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.AccessType;
 import io.bdrc.iiif.presentation.models.Identifier;
+import io.bdrc.iiif.presentation.models.ItemInfo;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
 import io.bdrc.iiif.presentation.models.WorkInfo;
 
@@ -108,7 +109,7 @@ public class IIIFPresentationService {
             acc = new Access();
         }
         final String accessType = getShortName(vi.access.getUri());
-        if (accessType == null || !acc.hasResourceAccess(accessType) || forbidden) {
+        if (forbidden || accessType == null || !acc.hasResourceAccess(accessType)) {
             return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
         }
         if (vi.iiifManifest != null) {
@@ -136,7 +137,6 @@ public class IIIFPresentationService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/2.1.1/collection/{identifier}")
     public Response getCollection(@PathParam("identifier") final String identifier, final ContainerRequestContext ctx, @Context UriInfo info) throws BDRCAPIException {
-        boolean isFromChina = ((Boolean) ctx.getProperty("isFromChina")).booleanValue();
         MultivaluedMap<String, String> hm = info.getQueryParameters();
         String cont = hm.getFirst("continuous");
         boolean continuous = false;
@@ -144,30 +144,37 @@ public class IIIFPresentationService {
             continuous = Boolean.parseBoolean(cont);
         }
         final Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);
-        final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), false);
-        boolean forbidden = vi.restrictedInChina && isFromChina;
         AccessType access = AccessType.RESTR_BDRC;
+        boolean restrictedInChina = true;
         final int subType = id.getSubType();
+        String itemId = null;
         switch (subType) {
         case Identifier.COLLECTION_ID_ITEM:
         case Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE:
-            access = ItemInfoService.getItemInfo(id.getItemId()).access;
+            final ItemInfo ii = ItemInfoService.getItemInfo(id.getItemId());
+            access = ii.access;
+            restrictedInChina = ii.restrictedInChina;
+            itemId = id.getItemId();
             break;
         case Identifier.COLLECTION_ID_WORK_IN_ITEM:
-            WorkInfo winf = WorkInfoService.getWorkInfo(id.getWorkId());
+            final WorkInfo winf = WorkInfoService.getWorkInfo(id.getWorkId());
             access = winf.rootAccess;
+            restrictedInChina = winf.rootRestrictedInChina;
+            itemId = id.getItemId();
             break;
         case Identifier.COLLECTION_ID_WORK_OUTLINE:
-            WorkInfo winf1 = WorkInfoService.getWorkInfo(id.getWorkId());
+            final WorkInfo winf1 = WorkInfoService.getWorkInfo(id.getWorkId());
             access = winf1.rootAccess;
+            restrictedInChina = winf1.rootRestrictedInChina;
+            itemId = winf1.itemId;
             break;
+        }
+        if (restrictedInChina && ((Boolean) ctx.getProperty("isFromChina")).booleanValue()) {
+            throw new BDRCAPIException(403, AppConstants.GENERIC_LDS_ERROR, "Insufficient rights");
         }
         Access acc = (Access) ctx.getProperty("access");
         if (acc == null) {
             acc = new Access();
-        }
-        if (forbidden) {
-            throw new BDRCAPIException(403, AppConstants.GENERIC_LDS_ERROR, "Insufficient rights");
         }
         // At this point the resource is accessible but we don't whether it is public or
         // restricted
