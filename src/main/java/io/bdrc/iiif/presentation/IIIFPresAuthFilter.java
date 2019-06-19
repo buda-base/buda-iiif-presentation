@@ -30,7 +30,6 @@ public class IIIFPresAuthFilter implements ContainerRequestFilter {
     @Override
     public void filter(final ContainerRequestContext ctx) throws IOException {
         final String token = getToken(ctx.getHeaderString("Authorization"));
-        ctx.setProperty("isFromChina", new Boolean(GeoLocation.isFromChina(req)));
         if (token != null) {
             // User is logged on
             // Getting his profile
@@ -46,15 +45,11 @@ public class IIIFPresAuthFilter implements ContainerRequestFilter {
         ctx.abortWith(Response.status(Response.Status.FORBIDDEN).entity("access to this resource is restricted").build());
     }
 
-    String getToken(final String header) {
-        try {
-            if (header != null) {
-                return header.split(" ")[1];
-            }
-        } catch (Exception ex) {
-            log.error(ex.getMessage());
+    public static String getToken(final String header) {
+        if (header == null || !header.startsWith("Bearer ")) {
+            log.error("invalid Authorization header: {}", header);
             return null;
         }
-        return null;
+        return header.substring(7);
     }
 }

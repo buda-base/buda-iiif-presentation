@@ -50,16 +50,11 @@ public class IIIFPresAuthTestFilter implements ContainerRequestFilter {
                 .build());
     }
 
-    String getToken(final String header) {
-        try {
-            if (header != null) {
-                return header.split(" ")[1];
-            }
-        }
-        catch (Exception ex) {
-            log.error(ex.getMessage());
+    static String getToken(final String header) {
+        if (header == null || !header.startsWith("Bearer ")) {
+            log.error("invalid Authorization header: {}", header);
             return null;
         }
-        return null;
+        return header.substring(7);
     }
 }

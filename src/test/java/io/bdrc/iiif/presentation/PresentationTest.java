@@ -2,6 +2,7 @@ package io.bdrc.iiif.presentation;
 
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix_coll;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +45,11 @@ public class PresentationTest {
         ServiceCache.init();
     }
 
+    @Test
+    public void accessHeaderTest() {
+        assertTrue("123".equals(IIIFPresAuthFilter.getToken("Bearer 123")));
+    }
+    
     @Test
     public void itemInfoModelTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
         Model m = ModelFactory.createDefaultModel();
@@ -100,7 +106,7 @@ public class PresentationTest {
         final List<ImageInfo> ii = getTestImageList("W22084-0890.json");
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
         cache.put(cacheKey, ii);
-        final Manifest mnf = ManifestService.getManifestForIdentifier(id, vi, false, null, id.getVolumeId());
+        final Manifest mnf = ManifestService.getManifestForIdentifier(id, vi, false, null, id.getVolumeId(), false);
         // final File fout = new File("/tmp/manifestOutline.json");
         // IIIFApiObjectMapperProvider.writer.writeValue(fout, mnf);
     }
@@ -123,7 +129,7 @@ public class PresentationTest {
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final WorkInfo wi = new WorkInfo(m, "bdr:W22084_0002");
         // om.writeValue(System.out, wi);
-        final Manifest mnf = ManifestService.getManifestForIdentifier(id, vi, false, wi, id.getVolumeId());
+        final Manifest mnf = ManifestService.getManifestForIdentifier(id, vi, false, wi, id.getVolumeId(), false);
         // final File fout = new File("/tmp/manifestLocation.json");
         // IIIFApiObjectMapperProvider.writer.writeValue(fout, mnf);
     }

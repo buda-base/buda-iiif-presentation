@@ -65,7 +65,7 @@ public class IIIFPresentationService {
                 return Response.status(404).entity("\"Cannot find volume ID\"").header("Cache-Control", "no-cache").build();
         }
         final VolumeInfo vi = VolumeInfoService.getVolumeInfo(volumeId, requiresVolumeOutline);
-        if (vi.restrictedInChina && ((Boolean) ctx.getProperty("isFromChina")).booleanValue()) {
+        if (vi.restrictedInChina && GeoLocation.isFromChina(ctx)) {
             return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
         }
         Access acc = (Access) ctx.getProperty("access");
@@ -82,7 +82,7 @@ public class IIIFPresentationService {
             return Response.status(302) // maybe 303 or 307 would be better?
                     .header("Location", vi.iiifManifest).build();
         }
-        final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, wi, volumeId);
+        final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, wi, volumeId, al == AccessLevel.FAIR_USE);
         final StreamingOutput stream = new StreamingOutput() {
             @Override
             public void write(final OutputStream os) throws IOException, WebApplicationException {
@@ -102,7 +102,7 @@ public class IIIFPresentationService {
     public Response getCanvas(@PathParam("identifier") final String identifier, @PathParam("imgseqnum") final String imgseqnum, final ContainerRequestContext ctx) throws BDRCAPIException {
         final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
         final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), false); // not entirely sure about the false
-        if (vi.restrictedInChina && ((Boolean) ctx.getProperty("isFromChina")).booleanValue()) {
+        if (vi.restrictedInChina && GeoLocation.isFromChina(ctx)) {
             return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
         }
         Access acc = (Access) ctx.getProperty("access");
@@ -113,6 +113,11 @@ public class IIIFPresentationService {
         final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.itemId);
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS){
             return Response.status(403).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
+        }
+        if (al == AccessLevel.FAIR_USE) {
+            int imgseqnumI = Integer.parseInt(imgseqnum);
+            if (imgseqnumI > 20 && imgseqnumI < (vi.totalPages - 20))
+                return Response.status(403).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
         }
         if (vi.iiifManifest != null) {
             return Response.status(404).entity("\"Cannot serve canvas for external manifests\"").header("Cache-Control", "no-cache").build();
@@ -171,7 +176,7 @@ public class IIIFPresentationService {
             itemId = winf1.itemId;
             break;
         }
-        if (restrictedInChina && ((Boolean) ctx.getProperty("isFromChina")).booleanValue()) {
+        if (restrictedInChina && GeoLocation.isFromChina(ctx)) {
             throw new BDRCAPIException(403, AppConstants.GENERIC_LDS_ERROR, "Insufficient rights");
         }
         Access acc = (Access) ctx.getProperty("access");
