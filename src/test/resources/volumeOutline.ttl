@@ -21,6 +21,7 @@ bdr:V22084_I0890  a                bdo:VolumeImageAsset ;
         bdo:volumePagesText        584 ;
         bdo:volumePagesTotal       586 ;
         tmp:legacyImageGroupRID    "I0890" ;
+        tmp:rootStatus             <http://purl.bdrc.io/admindata/StatusReleased> ;
         tmp:rootAccess             <http://purl.bdrc.io/admindata/AccessOpen> ;
         tmp:rootLicense            <http://purl.bdrc.io/admindata/LicensePublicDomain> ;
         tmp:rootRestrictedInChina  false .

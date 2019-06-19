@@ -33,6 +33,8 @@ public class VolumeInfo {
     public Boolean restrictedInChina = false;
     @JsonProperty("license")
     public LicenseType license;
+    @JsonProperty("status")
+    public String statusUri;
     @JsonProperty("workId")
     public String workId;
     @JsonProperty("itemId")
@@ -58,6 +60,7 @@ public class VolumeInfo {
     public VolumeInfo(final QuerySolution sol) {
         logger.debug("creating VolumeInfo for solution {}", sol.toString());
         this.access = AccessType.fromString(sol.getResource("access").getURI());
+        this.statusUri = sol.getResource("status").getURI();
         this.license = LicenseType.fromString(sol.getResource("license").getURI());
         this.workId = sol.getResource("workId").getURI();
         this.itemId = sol.getResource("itemId").getURI();
@@ -156,7 +159,15 @@ public class VolumeInfo {
             logger.warn("cannot find model access for {}", workId);
             this.access = AccessType.fromString(BDR + "AccessRestrictedByTbrc");
         }
-
+        
+        final Resource status = volume.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootStatus"));
+        if (access != null) {
+            this.statusUri = status.getURI();
+        } else {
+            logger.warn("cannot find model status for {}", workId);
+            this.statusUri = null;
+        }
+        
         final Resource license = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootLicense"));
         if (license != null) {
             this.license = LicenseType.fromString(license.getURI());

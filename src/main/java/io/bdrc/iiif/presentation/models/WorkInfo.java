@@ -126,7 +126,7 @@ public class WorkInfo {
         }
         final Statement rootStatusS = work.getProperty(m.getProperty(TMPPREFIX, "rootStatus"));
         if (rootStatusS == null) {
-            this.rootStatus = "";
+            this.rootStatus = null;
         } else {
             this.rootStatus = rootStatusS.getResource().getURI();
         }

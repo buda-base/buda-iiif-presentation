@@ -50,5 +50,6 @@ bdr:W22084_0002  a  bdo:Work ;
    bdo:workTitle  bdr:W22084_0002_TT73d7d9d87489 , bdr:W22084_0002_TTd390e2386427 ;
    tmp:inItem    bdr:I22084 ;
    tmp:rootAccess  bda:AccessOpen ;
+   tmp:rootStatus  bda:StatusReleased ;
    tmp:rootLicense  bda:LicensePublicDomain ;
    tmp:rootRestrictedInChina  false .

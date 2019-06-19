@@ -72,6 +72,8 @@ public class ItemInfo {
     public AccessType access;
     @JsonProperty("restrictedInChina")
     public Boolean restrictedInChina;
+    @JsonProperty("statusUri")
+    public String statusUri;
     @JsonProperty("license")
     public LicenseType license;
     @JsonProperty("volumes")
@@ -100,7 +102,13 @@ public class ItemInfo {
         if (itemAdmin == null) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no admin data for item");
         }
-        final Resource workAccess = itemAdmin.getPropertyResourceValue(m.getProperty(ADM, "access"));
+        final Resource itemStatus = itemAdmin.getPropertyResourceValue(m.getProperty(ADM, "status"));
+        if (itemStatus == null) {
+            this.statusUri = null;
+        } else {
+            this.statusUri = itemStatus.getURI();
+        }
+        final Resource itemAccess = itemAdmin.getPropertyResourceValue(m.getProperty(ADM, "access"));
         final Statement restrictedInChinaS = itemAdmin.getProperty(m.getProperty(ADM, "restrictedInChina"));
         if (restrictedInChinaS == null) {
             this.restrictedInChina = true;
@@ -112,9 +120,9 @@ public class ItemInfo {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no legal data for item admin data");
         }
         final Resource workLicense = legalData.getPropertyResourceValue(m.getProperty(ADM, "license"));
-        if (workAccess == null || workLicense == null)
+        if (itemAccess == null || workLicense == null)
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no access or license");
-        this.access = AccessType.fromString(workAccess.getURI());
+        this.access = AccessType.fromString(itemAccess.getURI());
         this.license = LicenseType.fromString(workLicense.getURI());
         final StmtIterator volumesItr = item.listProperties(m.getProperty(BDO, "itemHasVolume"));
         if (!volumesItr.hasNext())

@@ -24,10 +24,7 @@
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
 
 bdr:W22073  a                         bdo:Work ;
-        adm:access                    bdr:AccessOpen ;
         adm:gitRevision               "bcb4e78b3e0fb098b897e5d7668c0a6efeab8848" ;
-        adm:license                   bdr:LicensePublicDomain ;
-        adm:status                    bdr:StatusReleased ;
         bdo:itemBDRCHoldingStatement  "tbrc holds digitally scanned images, tiffs and pdf files" ;
         bdo:workBiblioNote            "reproduced photographically from the 1980 lhasa Tibetan people's publishing house edition"@en ;
         bdo:workCatalogInfo           "An episode of the Gesar epic. On the conquest of Hor."@en ;
@@ -47,5 +44,7 @@ bdr:W22073  a                         bdo:Work ;
         bdo:workScanInfo              "Scanned at Tibetan Buddhist Resource Center, 1430 Massachusetts Avenue, Cambridge, MA 02138, USA. Comments: 6/2014"@en ;
         tmp:firstVolume               bdr:V22073_I1KG17892 ;
         tmp:inItem                    bdr:I22073 ;
-        tmp:rootAccess                bdr:AccessOpen ;
+        tmp:rootAccess                <http://purl.bdrc.io/admindata/AccessOpen> ;
+        tmp:rootLicense               <http://purl.bdrc.io/admindata/LicensePublicDomain> ;
+        tmp:rootStatus                <http://purl.bdrc.io/admindata/StatusReleased> ;
         skos:prefLabel                "hor gling g.yul 'gyed/"@bo-x-ewts .

@@ -67,6 +67,7 @@ bdr:WSL001_P005  a                 bdo:VirtualWork , bdo:Work ;
         bdo:workPartIndex          5 ;
         bdo:workPartOf             bdr:WSL001 ;
         tmp:inItem                 bdr:I19997 ;
+        tmp:rootStatus             <http://purl.bdrc.io/admindata/StatusReleased> ;
         tmp:rootAccess             <http://purl.bdrc.io/admindata/AccessOpen> ;
         tmp:rootLicense            <http://purl.bdrc.io/admindata/LicensePublicDomain> ;
         tmp:rootRestrictedInChina  false ;
