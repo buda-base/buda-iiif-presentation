@@ -75,7 +75,7 @@ public class IIIFPresentationService {
         final String statusShortName = getShortName(vi.statusUri);
         final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.itemId);
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS){
-            return Response.status(403).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
+            return Response.status(acc.isUserLoggedIn() ? 403 : 401).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
         }
         if (vi.iiifManifest != null) {
             logger.info("redirect manifest request for ID {} to {}", identifier, vi.iiifManifest.toString());
@@ -108,16 +108,17 @@ public class IIIFPresentationService {
         Access acc = (Access) ctx.getProperty("access");
         if (acc == null)
             acc = new Access();
+        final boolean logged = acc.isUserLoggedIn();
         final String accessShortName = getShortName(vi.access.getUri());
         final String statusShortName = getShortName(vi.statusUri);
         final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.itemId);
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS){
-            return Response.status(403).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
+            return Response.status(logged ? 403 : 401).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
         }
         if (al == AccessLevel.FAIR_USE) {
             int imgseqnumI = Integer.parseInt(imgseqnum);
             if (imgseqnumI > 20 && imgseqnumI < (vi.totalPages - 20))
-                return Response.status(403).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
+                return Response.status(logged ? 403 : 401).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
         }
         if (vi.iiifManifest != null) {
             return Response.status(404).entity("\"Cannot serve canvas for external manifests\"").header("Cache-Control", "no-cache").build();
@@ -182,12 +183,11 @@ public class IIIFPresentationService {
         Access acc = (Access) ctx.getProperty("access");
         if (acc == null)
             acc = new Access();
-
         final String accessShortName = getShortName(access.getUri());
         final String statusShortName = getShortName(statusUri);
         final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, itemId);
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS){
-            return Response.status(403).entity("\"Insufficient rights\"").header("Cache-Control", "no-cache").build();
+            return Response.status(acc.isUserLoggedIn() ? 403 : 401).entity("\"Insufficient rights\"").header("Cache-Control", "no-cache").build();
         }
         int maxAgeSeconds = Integer.parseInt(AuthProps.getProperty("max-age")) / 1000;
         if (access == AccessType.OPEN) {
