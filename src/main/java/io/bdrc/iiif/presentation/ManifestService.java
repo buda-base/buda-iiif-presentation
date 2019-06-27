@@ -107,22 +107,79 @@ public class ManifestService {
         }
     }
     
-    public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList, final VolumeInfo vi, final String volumeId, final int beginIndex, final int endIndex, final boolean FairUse) throws BDRCAPIException {
+    public static Canvas addOneCanvas(final int imgSeqNum, final Identifier id, final List<ImageInfo> imageInfoList, final VolumeInfo vi, final String volumeId, final Sequence mainSeq) {
+        final ImageInfo imageInfo = imageInfoList.get(imgSeqNum-1);
+        final Integer size = imageInfo.size;
+        if (size != null && size > 1000000)
+            return null;
+        final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi);
+        mainSeq.addCanvas(canvas);
+        return canvas;
+    }
+    
+    public static Canvas addCopyrightCanvas(final Sequence mainSeq, final String volumeId) {
+        final String canvasUri = IIIFPresPrefix+"vi:"+volumeId+"/canvas"+"/"+AppConstants.COPYRIGHT_PAGE_CANVAS_ID;
+        final Canvas canvas = new Canvas(canvasUri);
+        canvas.setWidth(AppConstants.COPYRIGHT_PAGE_W);
+        canvas.setHeight(AppConstants.COPYRIGHT_PAGE_H);
+        final String imageServiceUrl = IIIF_IMAGE_PREFIX+AppConstants.COPYRIGHT_PAGE_IMG_ID;
+        ImageApiProfile profile = ImageApiProfile.LEVEL_ZERO;
+        final BDRCPresentationImageService imgServ = new BDRCPresentationImageService(imageServiceUrl, profile);
+        final String imgUrl;
+        if (AppConstants.COPYRIGHT_PAGE_IS_PNG) {
+            imgUrl = imageServiceUrl+"/full/max/0/default.png";
+            imgServ.setPreferredFormats(pngHint);
+        } else {
+            imgUrl = imageServiceUrl+"/full/max/0/default.jpg";
+        }
+        imgServ.setHeight(AppConstants.COPYRIGHT_PAGE_W);
+        imgServ.setWidth(AppConstants.COPYRIGHT_PAGE_W);
+        final ImageContent img = new ImageContent(imgUrl);
+        img.addService(imgServ);
+        img.setWidth(AppConstants.COPYRIGHT_PAGE_W);
+        img.setHeight(AppConstants.COPYRIGHT_PAGE_W);
+        canvas.addImage(img);
+        return canvas;
+    }
+    
+    public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList, final VolumeInfo vi, final String volumeId, final int beginIndex, final int endIndex, final boolean fairUse) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence(IIIFPresPrefix+id.getId()+"/sequence/main");
         // all indices start at 1
         mainSeq.setViewingDirection(getViewingDirection(imageInfoList));
-        for (int imgSeqNum = beginIndex ; imgSeqNum <= endIndex ; imgSeqNum++) {
-            // imgSeqNum starts at 1
-            final ImageInfo imageInfo = imageInfoList.get(imgSeqNum-1);
-            final Integer size = imageInfo.size;
-            if (size != null && size > 1000000)
-                continue;
-            final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi);
-            mainSeq.addCanvas(canvas);
-            if (imgSeqNum == beginIndex) {
-                mainSeq.setStartCanvas(canvas.getIdentifier());
+        Canvas firstCanvas = null;
+        if (!fairUse) {
+            for (int imgSeqNum = beginIndex ; imgSeqNum <= endIndex ; imgSeqNum++) {
+                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq);
+                if (firstCanvas == null)
+                    firstCanvas = thisCanvas;
+            }
+        } else {
+            final int firstUnaccessiblePage = AppConstants.FAIRUSE_PAGES_S+vi.pagesIntroTbrc+1;
+            final int lastUnaccessiblePage = vi.totalPages-AppConstants.FAIRUSE_PAGES_E;
+            // first part: min(firstUnaccessiblePage+1,beginIndex) to min(endIndex,firstUnaccessiblePage+1)
+            for (int imgSeqNum = Math.min(firstUnaccessiblePage, beginIndex) ; imgSeqNum <= Math.min(endIndex, firstUnaccessiblePage-1) ; imgSeqNum++) {
+                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq);
+                if (firstCanvas == null)
+                    firstCanvas = thisCanvas;
+            }
+            // then copyright page, if :
+            //  beginIndex > FAIRUSE_PAGES_S+tbrcintro and beginIndex < vi.totalPages-FAIRUSE_PAGES_E
+            // or
+            // endIndex > FAIRUSE_PAGES_S+tbrcintro and endIndex < vi.totalPages-FAIRUSE_PAGES_E
+            if ((beginIndex >= firstUnaccessiblePage && beginIndex <= lastUnaccessiblePage) ||
+                    (endIndex >= firstUnaccessiblePage && endIndex <= lastUnaccessiblePage)) {
+                final Canvas thisCanvas = addCopyrightCanvas(mainSeq, volumeId);
+                if (firstCanvas == null)
+                    firstCanvas = thisCanvas;
+            }
+            // last part: max(beginIndex,lastUnaccessiblePage) to max(endIndex,lastUnaccessiblePage)
+            for (int imgSeqNum = Math.max(lastUnaccessiblePage+1, beginIndex) ; imgSeqNum <= Math.max(endIndex, lastUnaccessiblePage) ; imgSeqNum++) {
+                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq);
+                if (firstCanvas == null)
+                    firstCanvas = thisCanvas;
             }
         }
+        mainSeq.setStartCanvas(firstCanvas.getIdentifier());
         return mainSeq;
     }
     

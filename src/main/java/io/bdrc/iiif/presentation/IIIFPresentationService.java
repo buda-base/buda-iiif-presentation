@@ -117,7 +117,7 @@ public class IIIFPresentationService {
         }
         if (al == AccessLevel.FAIR_USE) {
             int imgseqnumI = Integer.parseInt(imgseqnum);
-            if (imgseqnumI > 20 && imgseqnumI < (vi.totalPages - 20))
+            if (imgseqnumI > (AppConstants.FAIRUSE_PAGES_S+vi.pagesIntroTbrc) && imgseqnumI < (vi.totalPages - AppConstants.FAIRUSE_PAGES_E))
                 return Response.status(logged ? 403 : 401).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
         }
         if (vi.iiifManifest != null) {

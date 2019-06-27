@@ -35,5 +35,14 @@ public class AppConstants {
 
     public static final int GENERIC_LDS_ERROR = 5008;
     public static final int GENERIC_CACHE_ERROR = 5009;
+    
+    public static final int FAIRUSE_PAGES_S = 20;
+    public static final int FAIRUSE_PAGES_E = 20;
+    
+    public static final String COPYRIGHT_PAGE_IMG_ID = "static::error-copyright.png";
+    public static final String COPYRIGHT_PAGE_CANVAS_ID = "static::error-copyright";
+    public static final int COPYRIGHT_PAGE_W = 923;
+    public static final int COPYRIGHT_PAGE_H = 202;
+    public static final boolean COPYRIGHT_PAGE_IS_PNG = true;
 
 }
