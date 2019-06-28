@@ -275,12 +275,12 @@ public class ManifestService {
         final Range r = new Range(IIIFPresPrefix+"vo:"+id.getVolumeId()+"/range/top", "Table of Contents");
         r.setViewingHints("top");
         for (final PartInfo part : vi.partInfo) {
-            addSubRangeToRange(m, r, id, part, vi, volumeId, imageInfoList);
+            addSubRangeToRange(m, r, id, part, vi, volumeId, imageInfoList, fairUse);
         }
         m.addRange(r);
     }
     
-    public static void addSubRangeToRange(final Manifest m, final Range r, final Identifier id, final PartInfo part, final VolumeInfo vi, final String volumeId, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
+    public static void addSubRangeToRange(final Manifest m, final Range r, final Identifier id, final PartInfo part, final VolumeInfo vi, final String volumeId, final List<ImageInfo> imageInfoList, final boolean fairUse) throws BDRCAPIException {
         final String rangeUri = IIIFPresPrefix+"vo:"+volumeId+"/range/w:"+part.partId;
         final Range subRange = new Range(rangeUri);
         final PropertyValue labels = getPropForLabels(part.labels);
@@ -296,15 +296,36 @@ public class ManifestService {
             int ePage = vi.totalPages;
             if (loc.evolnum != null && loc.evolnum == vi.volumeNumber && loc.epagenum != null)
                 ePage = loc.epagenum;
-            for (int seqNum = bPage ; seqNum <= ePage ; seqNum ++) {
-                // imgSeqNum starts at 1
-                final String canvasUri = getCanvasUri(imageInfoList.get(seqNum-1).filename, volumeId, seqNum);
-                subRange.addCanvas(canvasUri);
+            if (!fairUse) {
+                for (int seqNum = bPage ; seqNum <= ePage ; seqNum ++) {
+                    // imgSeqNum starts at 1
+                    final String canvasUri = getCanvasUri(imageInfoList.get(seqNum-1).filename, volumeId, seqNum);
+                    subRange.addCanvas(canvasUri);
+                }
+            } else {
+                final int firstUnaccessiblePage = AppConstants.FAIRUSE_PAGES_S+vi.pagesIntroTbrc+1;
+                final int lastUnaccessiblePage = vi.totalPages-AppConstants.FAIRUSE_PAGES_E;
+                // first part: min(firstUnaccessiblePage+1,beginIndex) to min(endIndex,firstUnaccessiblePage+1)
+                for (int imgSeqNum = Math.min(firstUnaccessiblePage, bPage) ; imgSeqNum <= Math.min(ePage, firstUnaccessiblePage-1) ; imgSeqNum++) {
+                    final String canvasUri = getCanvasUri(imageInfoList.get(imgSeqNum-1).filename, volumeId, imgSeqNum);
+                    subRange.addCanvas(canvasUri);
+                }
+                // then copyright page, if either beginIndex or endIndex is
+                //   > FAIRUSE_PAGES_S+tbrcintro   and    < vi.totalPages-FAIRUSE_PAGES_E
+                if ((bPage >= firstUnaccessiblePage && bPage <= lastUnaccessiblePage) ||
+                        (ePage >= firstUnaccessiblePage && ePage <= lastUnaccessiblePage)) {
+                    subRange.addCanvas(IIIFPresPrefix+"vi:"+volumeId+"/canvas"+"/"+AppConstants.COPYRIGHT_PAGE_CANVAS_ID);
+                }
+                // last part: max(beginIndex,lastUnaccessiblePage) to max(endIndex,lastUnaccessiblePage)
+                for (int imgSeqNum = Math.max(lastUnaccessiblePage+1, bPage) ; imgSeqNum <= Math.max(ePage, lastUnaccessiblePage) ; imgSeqNum++) {
+                    final String canvasUri = getCanvasUri(imageInfoList.get(imgSeqNum-1).filename, volumeId, imgSeqNum);
+                    subRange.addCanvas(canvasUri);
+                }
             }
         }
         if (part.subparts != null) {
             for (final PartInfo subpart : part.subparts) {
-                addSubRangeToRange(m, subRange, id, subpart, vi, volumeId, imageInfoList);
+                addSubRangeToRange(m, subRange, id, subpart, vi, volumeId, imageInfoList, fairUse);
             }
         }
         m.addRange(subRange);

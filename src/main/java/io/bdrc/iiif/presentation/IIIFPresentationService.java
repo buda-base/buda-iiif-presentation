@@ -28,7 +28,6 @@ import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.auth.Access;
 import io.bdrc.auth.Access.AccessLevel;
 import io.bdrc.auth.AuthProps;
-import io.bdrc.auth.rdf.RdfConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.AccessType;
 import io.bdrc.iiif.presentation.models.Identifier;
