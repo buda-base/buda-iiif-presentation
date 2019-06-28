@@ -120,7 +120,7 @@ public class ImageInfoListService {
         }
         imageInfoList = getFromS3(workLocalId, imageGroupId);
         if (imageInfoList == null)
-            return null;
+            throw new BDRCAPIException(500, AppConstants.GENERIC_LDS_ERROR, "Cannot retrieve image list from s3");
         cache.put(cacheKey, imageInfoList);
         return imageInfoList;
     }

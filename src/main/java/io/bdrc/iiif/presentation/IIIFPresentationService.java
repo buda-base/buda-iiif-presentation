@@ -1,7 +1,10 @@
 package io.bdrc.iiif.presentation;
 
+import static io.bdrc.iiif.presentation.AppConstants.BDR_len;
+
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -29,6 +32,7 @@ import io.bdrc.auth.rdf.RdfConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.AccessType;
 import io.bdrc.iiif.presentation.models.Identifier;
+import io.bdrc.iiif.presentation.models.ImageInfo;
 import io.bdrc.iiif.presentation.models.ItemInfo;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
 import io.bdrc.iiif.presentation.models.WorkInfo;
@@ -98,8 +102,9 @@ public class IIIFPresentationService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/2.1.1/{identifier}/canvas/{imgseqnum}")
-    public Response getCanvas(@PathParam("identifier") final String identifier, @PathParam("imgseqnum") final String imgseqnum, final ContainerRequestContext ctx) throws BDRCAPIException {
+    @Path("/2.1.1/{identifier}/canvas/{filename}")
+    public Response getCanvas(@PathParam("identifier") final String identifier, @PathParam("filename") final String filename, final ContainerRequestContext ctx) throws BDRCAPIException {
+        // TODO: adjust to new filename in the path (requires file name lookup in the image list)
         final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
         final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), false); // not entirely sure about the false
         if (vi.restrictedInChina && GeoLocation.isFromChina(ctx)) {
@@ -115,15 +120,18 @@ public class IIIFPresentationService {
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS){
             return Response.status(logged ? 403 : 401).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
         }
-        if (al == AccessLevel.FAIR_USE) {
-            int imgseqnumI = Integer.parseInt(imgseqnum);
-            if (imgseqnumI > (AppConstants.FAIRUSE_PAGES_S+vi.pagesIntroTbrc) && imgseqnumI < (vi.totalPages - AppConstants.FAIRUSE_PAGES_E))
-                return Response.status(logged ? 403 : 401).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
-        }
         if (vi.iiifManifest != null) {
             return Response.status(404).entity("\"Cannot serve canvas for external manifests\"").header("Cache-Control", "no-cache").build();
         }
-        final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgseqnum, id.getVolumeId());
+        final List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(vi.workId.substring(BDR_len), vi.imageGroup);
+        final Integer imgSeqNum = ManifestService.getFileNameSeqNum(imageInfoList, filename);
+        if (imgSeqNum == null)
+            throw new BDRCAPIException(500, AppConstants.GENERIC_LDS_ERROR, "Cannot find filename in the S3 image list");
+        if (al == AccessLevel.FAIR_USE) {
+            if (imgSeqNum > (AppConstants.FAIRUSE_PAGES_S+vi.pagesIntroTbrc) && imgSeqNum < (vi.totalPages - AppConstants.FAIRUSE_PAGES_E))
+                return Response.status(logged ? 403 : 401).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
+        }
+        final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgSeqNum, id.getVolumeId(), imageInfoList);
         final StreamingOutput stream = new StreamingOutput() {
             @Override
             public void write(final OutputStream os) throws IOException, WebApplicationException {
