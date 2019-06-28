@@ -106,9 +106,9 @@ public class PresentationTest {
         final List<ImageInfo> ii = getTestImageList("W22084-0890.json");
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
         cache.put(cacheKey, ii);
-        final Manifest mnf = ManifestService.getManifestForIdentifier(id, vi, false, null, id.getVolumeId(), false);
-        // final File fout = new File("/tmp/manifestOutline.json");
-        // IIIFApiObjectMapperProvider.writer.writeValue(fout, mnf);
+        final Manifest mnf = ManifestService.getManifestForIdentifier(id, vi, false, null, id.getVolumeId(), true);
+        //final File fout = new File("/tmp/manifestOutline.json");
+        //IIIFApiObjectMapperProvider.writer.writeValue(fout, mnf);
     }
 
     @Test

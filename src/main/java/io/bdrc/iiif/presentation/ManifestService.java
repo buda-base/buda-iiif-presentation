@@ -118,7 +118,7 @@ public class ManifestService {
     }
     
     public static Canvas addCopyrightCanvas(final Sequence mainSeq, final String volumeId) {
-        final String canvasUri = IIIFPresPrefix+"vi:"+volumeId+"/canvas"+"/"+AppConstants.COPYRIGHT_PAGE_CANVAS_ID;
+        final String canvasUri = IIIFPresPrefix+"v:"+volumeId+"/canvas"+"/"+AppConstants.COPYRIGHT_PAGE_CANVAS_ID;
         final Canvas canvas = new Canvas(canvasUri);
         canvas.setWidth(AppConstants.COPYRIGHT_PAGE_W);
         canvas.setHeight(AppConstants.COPYRIGHT_PAGE_H);
@@ -139,6 +139,7 @@ public class ManifestService {
         img.setWidth(AppConstants.COPYRIGHT_PAGE_W);
         img.setHeight(AppConstants.COPYRIGHT_PAGE_W);
         canvas.addImage(img);
+        mainSeq.addCanvas(canvas);
         return canvas;
     }
     
@@ -165,7 +166,8 @@ public class ManifestService {
             // then copyright page, if either beginIndex or endIndex is
             //   > FAIRUSE_PAGES_S+tbrcintro   and    < vi.totalPages-FAIRUSE_PAGES_E
             if ((beginIndex >= firstUnaccessiblePage && beginIndex <= lastUnaccessiblePage) ||
-                    (endIndex >= firstUnaccessiblePage && endIndex <= lastUnaccessiblePage)) {
+                    (endIndex >= firstUnaccessiblePage && endIndex <= lastUnaccessiblePage) ||
+                    (beginIndex < firstUnaccessiblePage && endIndex > lastUnaccessiblePage)) {
                 final Canvas thisCanvas = addCopyrightCanvas(mainSeq, volumeId);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
@@ -313,8 +315,9 @@ public class ManifestService {
                 // then copyright page, if either beginIndex or endIndex is
                 //   > FAIRUSE_PAGES_S+tbrcintro   and    < vi.totalPages-FAIRUSE_PAGES_E
                 if ((bPage >= firstUnaccessiblePage && bPage <= lastUnaccessiblePage) ||
-                        (ePage >= firstUnaccessiblePage && ePage <= lastUnaccessiblePage)) {
-                    subRange.addCanvas(IIIFPresPrefix+"vi:"+volumeId+"/canvas"+"/"+AppConstants.COPYRIGHT_PAGE_CANVAS_ID);
+                        (ePage >= firstUnaccessiblePage && ePage <= lastUnaccessiblePage) ||
+                        (bPage < firstUnaccessiblePage && ePage > lastUnaccessiblePage)) {
+                    subRange.addCanvas(IIIFPresPrefix+"v:"+volumeId+"/canvas"+"/"+AppConstants.COPYRIGHT_PAGE_CANVAS_ID);
                 }
                 // last part: max(beginIndex,lastUnaccessiblePage) to max(endIndex,lastUnaccessiblePage)
                 for (int imgSeqNum = Math.max(lastUnaccessiblePage+1, bPage) ; imgSeqNum <= Math.max(ePage, lastUnaccessiblePage) ; imgSeqNum++) {
