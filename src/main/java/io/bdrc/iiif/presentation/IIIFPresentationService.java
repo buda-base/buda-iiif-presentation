@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -42,10 +43,23 @@ public class IIIFPresentationService {
     private static final Logger logger = LoggerFactory.getLogger(IIIFPresentationService.class);
     static final int ACCESS_CONTROL_MAX_AGE_IN_SECONDS = 24 * 60 * 60;
 
+    // no robots on manifests
+    @GET
+    @Path("/robots.txt")
+    public Response getRobots() {
+        StreamingOutput stream = new StreamingOutput() {
+            @Override
+            public void write(OutputStream os) throws IOException, WebApplicationException {
+                os.write("User-agent: *\nDisallow: /".getBytes());
+            }
+        };
+        return Response.ok(stream, MediaType.TEXT_PLAIN_TYPE).build();
+}
+    
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/2.1.1/{identifier}/manifest")
-    public Response getManifest(@PathParam("identifier") final String identifier, ContainerRequestContext ctx, @Context UriInfo info) throws BDRCAPIException {
+    @Path("/{version : ([0-9\\.]+/)?}{identifier}/manifest")
+    public Response getManifest(@PathParam("identifier") final String identifier, @PathParam("version") final String version, ContainerRequestContext ctx, @Context UriInfo info) throws BDRCAPIException {
         MultivaluedMap<String, String> hm = info.getQueryParameters();
         String cont = hm.getFirst("continuous");
         boolean continuous = false;
@@ -101,8 +115,8 @@ public class IIIFPresentationService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/2.1.1/{identifier}/canvas/{filename}")
-    public Response getCanvas(@PathParam("identifier") final String identifier, @PathParam("filename") final String filename, final ContainerRequestContext ctx) throws BDRCAPIException {
+    @Path("/{version : ([0-9\\.]+/)?}{identifier}/canvas/{filename}")
+    public Response getCanvas(@PathParam("identifier") final String identifier, @PathParam("version") final String version, @PathParam("filename") final String filename, final ContainerRequestContext ctx) throws BDRCAPIException {
         // TODO: adjust to new filename in the path (requires file name lookup in the image list)
         final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
         final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), false); // not entirely sure about the false
@@ -146,8 +160,8 @@ public class IIIFPresentationService {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/2.1.1/collection/{identifier}")
-    public Response getCollection(@PathParam("identifier") final String identifier, final ContainerRequestContext ctx, @Context UriInfo info) throws BDRCAPIException {
+    @Path("/{version : ([0-9\\.]+/)?}collection/{identifier}")
+    public Response getCollection(@PathParam("identifier") final String identifier, @PathParam("version") final String version, final ContainerRequestContext ctx, @Context UriInfo info) throws BDRCAPIException {
         MultivaluedMap<String, String> hm = info.getQueryParameters();
         String cont = hm.getFirst("continuous");
         boolean continuous = false;

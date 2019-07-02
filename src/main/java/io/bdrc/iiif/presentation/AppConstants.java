@@ -6,18 +6,19 @@ public class AppConstants {
     public static final String BDO = "http://purl.bdrc.io/ontology/core/";
     public static final String ADM = "http://purl.bdrc.io/ontology/admin/";
     public static final String TMPPREFIX = "http://purl.bdrc.io/ontology/tmp/";
-    public static final String IIIFPresPrefix = "http://presentation.bdrc.io/2.1.1/";
+
+    // used to create the urls for canvases, manifests, etc. should be canonical
+    // at least for canvases (so that the annotation can target the uri)
+    public static final String IIIFPresPrefix = "https://presentation.bdrc.io/";
     public static final String IIIFPresPrefix_coll = IIIFPresPrefix + "collection/";
 
-    public static final String LDS_QUERYPREFIX = "http://buda1.bdrc.io/";
+    public static final String LDS_QUERYPREFIX = "http://purl.bdrc.io/";
     public static final String LDS_WORKGRAPH_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_workGraph_noItem";
     public static final String LDS_ITEMGRAPH_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_itemGraph";
     public static final String LDS_VOLUME_QUERY = LDS_QUERYPREFIX + "query/table/IIIFPres_volumeInfo";
     public static final String LDS_VOLUME_OUTLINE_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_volumeOutline";
 
-    // public static final String IIIF_IMAGE_PREFIX =
-    // "http://iiif.bdrc.io/image/v2/";
-    public static final String IIIF_IMAGE_PREFIX = "http://iiif.bdrc.io/";
+    public static final String IIIF_IMAGE_PREFIX = "https://iiif.bdrc.io/";
     public static final String PDF_URL_PREFIX = IIIF_IMAGE_PREFIX + "download/pdf/";
     public static final String ZIP_URL_PREFIX = IIIF_IMAGE_PREFIX + "download/zip/";
 
