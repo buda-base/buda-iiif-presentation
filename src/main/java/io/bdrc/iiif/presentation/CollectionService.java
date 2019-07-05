@@ -77,7 +77,7 @@ public class CollectionService {
     public static PropertyValue getLabels(String workId, WorkInfo wi) {
         final PropertyValue label = new PropertyValue();
         if (wi.labels == null || wi.labels.isEmpty()) {
-            label.addValue(getPrefixedForm(workId));
+            label.addValue(workId);
             return label;
         }
         for (LangString ls : wi.labels) {
