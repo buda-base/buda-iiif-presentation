@@ -138,6 +138,8 @@ public class CollectionService {
                     }
                 }
                 final Manifest manifest = new Manifest(manifestUrl);
+                System.err.println(manifest);
+                System.err.println(vi);
                 manifest.setLabel(ManifestService.getLabel(vi.volumeNumber, wi, needsVolumeIndication));
                 collection.addManifest(manifest);
             }
