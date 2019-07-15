@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -54,8 +53,19 @@ public class IIIFPresentationService {
             }
         };
         return Response.ok(stream, MediaType.TEXT_PLAIN_TYPE).build();
-}
-    
+    }
+
+    @GET
+    @Path("/clearcache")
+    public String clearCache() {
+        logger.info("clearing cache >>");
+        if (ServiceCache.clearCache()) {
+            return "OK";
+        } else {
+            return "ERROR";
+        }
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{version : ([0-9\\.]+/)?}{identifier}/manifest")
@@ -91,7 +101,7 @@ public class IIIFPresentationService {
         final String accessShortName = getShortName(vi.access.getUri());
         final String statusShortName = getShortName(vi.statusUri);
         final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.itemId);
-        if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS){
+        if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
             return Response.status(acc.isUserLoggedIn() ? 403 : 401).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
         }
         if (vi.iiifManifest != null) {
@@ -117,7 +127,8 @@ public class IIIFPresentationService {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{version : ([0-9\\.]+/)?}{identifier}/canvas/{filename}")
     public Response getCanvas(@PathParam("identifier") final String identifier, @PathParam("version") final String version, @PathParam("filename") final String filename, final ContainerRequestContext ctx) throws BDRCAPIException {
-        // TODO: adjust to new filename in the path (requires file name lookup in the image list)
+        // TODO: adjust to new filename in the path (requires file name lookup in the
+        // image list)
         final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
         final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), false); // not entirely sure about the false
         if (vi.restrictedInChina && GeoLocation.isFromChina(ctx)) {
@@ -130,7 +141,7 @@ public class IIIFPresentationService {
         final String accessShortName = getShortName(vi.access.getUri());
         final String statusShortName = getShortName(vi.statusUri);
         final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.itemId);
-        if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS){
+        if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
             return Response.status(logged ? 403 : 401).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
         }
         if (vi.iiifManifest != null) {
@@ -141,7 +152,7 @@ public class IIIFPresentationService {
         if (imgSeqNum == null)
             throw new BDRCAPIException(500, AppConstants.GENERIC_LDS_ERROR, "Cannot find filename in the S3 image list");
         if (al == AccessLevel.FAIR_USE) {
-            if (imgSeqNum > (AppConstants.FAIRUSE_PAGES_S+vi.pagesIntroTbrc) && imgSeqNum < (vi.totalPages - AppConstants.FAIRUSE_PAGES_E))
+            if (imgSeqNum > (AppConstants.FAIRUSE_PAGES_S + vi.pagesIntroTbrc) && imgSeqNum < (vi.totalPages - AppConstants.FAIRUSE_PAGES_E))
                 return Response.status(logged ? 403 : 401).entity("\"Insufficient rights (" + vi.access + ")\"").header("Cache-Control", "no-cache").build();
         }
         final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgSeqNum, id.getVolumeId(), imageInfoList);
@@ -207,7 +218,7 @@ public class IIIFPresentationService {
         final String accessShortName = getShortName(access.getUri());
         final String statusShortName = getShortName(statusUri);
         final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, itemId);
-        if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS){
+        if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
             return Response.status(acc.isUserLoggedIn() ? 403 : 401).entity("\"Insufficient rights\"").header("Cache-Control", "no-cache").build();
         }
         int maxAgeSeconds = Integer.parseInt(AuthProps.getProperty("max-age")) / 1000;
