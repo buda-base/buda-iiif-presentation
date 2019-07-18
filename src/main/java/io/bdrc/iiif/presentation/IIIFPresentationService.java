@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.util.List;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -55,7 +56,7 @@ public class IIIFPresentationService {
         return Response.ok(stream, MediaType.TEXT_PLAIN_TYPE).build();
     }
 
-    @GET
+    @POST
     @Path("/clearcache")
     public String clearCache() {
         logger.info("clearing cache >>");
