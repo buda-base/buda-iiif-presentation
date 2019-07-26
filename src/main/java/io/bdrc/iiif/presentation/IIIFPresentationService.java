@@ -186,6 +186,7 @@ public class IIIFPresentationService {
         final int subType = id.getSubType();
         String itemId = null;
         String statusUri = null;
+        boolean isVirtual = false;
         switch (subType) {
         case Identifier.COLLECTION_ID_ITEM:
         case Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE:
@@ -198,6 +199,7 @@ public class IIIFPresentationService {
         case Identifier.COLLECTION_ID_WORK_IN_ITEM:
             final WorkInfo winf = WorkInfoService.getWorkInfo(id.getWorkId());
             access = winf.rootAccess;
+            isVirtual = winf.isVirtual;
             statusUri = winf.rootStatus;
             restrictedInChina = winf.rootRestrictedInChina;
             itemId = id.getItemId();
@@ -205,6 +207,7 @@ public class IIIFPresentationService {
         case Identifier.COLLECTION_ID_WORK_OUTLINE:
             final WorkInfo winf1 = WorkInfoService.getWorkInfo(id.getWorkId());
             access = winf1.rootAccess;
+            isVirtual = winf1.isVirtual;
             statusUri = winf1.rootStatus;
             restrictedInChina = winf1.rootRestrictedInChina;
             itemId = winf1.itemId;
@@ -231,6 +234,9 @@ public class IIIFPresentationService {
     }
 
     public static String getShortName(final String st) {
+        if (st == null || st.isEmpty()) {
+            return null;
+        }
         return st.substring(st.lastIndexOf("/") + 1);
     }
 

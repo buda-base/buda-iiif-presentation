@@ -61,6 +61,8 @@ public class WorkInfo {
     // prefixed
     @JsonProperty("itemId")
     public String itemId = null;
+    @JsonProperty("isVirtual")
+    public boolean isVirtual = false;
 
     public WorkInfo() {}
 
@@ -87,16 +89,11 @@ public class WorkInfo {
         }
         final Triple isVirtualWorkT = new Triple(work.asNode(), RDF.type.asNode(), m.getResource(BDO+"VirtualWork").asNode());
         ext = m.getGraph().find(isVirtualWorkT);
-        boolean isVirtual = false;
         if (ext.hasNext()) {
-            isVirtual = true;
+            this.isVirtual = true;
         }
         final Resource partOf = work.getPropertyResourceValue(m.getProperty(BDO, "workPartOf"));
-        if (partOf == null) {
-            this.isRoot = true;
-        } else {
-            this.isRoot = false;
-        }
+        this.isRoot = (partOf == null);
         Resource item = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "inItem"));
         if (item == null) {
             this.hasLocation = false;
@@ -127,6 +124,9 @@ public class WorkInfo {
         final Statement rootStatusS = work.getProperty(m.getProperty(TMPPREFIX, "rootStatus"));
         if (rootStatusS == null) {
             this.rootStatus = null;
+            if (this.isVirtual) {
+                this.rootStatus = "http://purl.bdrc.io/admindata/StatusReleased";
+            }
         } else {
             this.rootStatus = rootStatusS.getResource().getURI();
         }
@@ -135,7 +135,7 @@ public class WorkInfo {
             this.rootAccess = AccessType.fromString(access.getURI());
         }
         if (this.rootAccess == null) {
-            if (isVirtual) {
+            if (this.isVirtual) {
                 this.rootAccess = AccessType.OPEN;
             } else {
                 logger.warn("cannot find model access for {}", workId);
