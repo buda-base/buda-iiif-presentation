@@ -216,6 +216,9 @@ public class WorkInfo {
                 if (location != null)
                     partInfo.location = new Location(m, location);
                 partInfo.labels = getLabels(m, part);
+                if (partInfo.labels == null) {
+                    partInfo.labels = getLabels(m, linkTo);
+                }
                 partInfo.subparts = getParts(m, part);
                 if (location != null || partInfo.labels != null || partInfo.subparts != null)
                     parts.add(partInfo);
