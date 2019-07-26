@@ -138,7 +138,6 @@ public class PresentationTest {
     public void virtualWork() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualwork.ttl").lang(RDFLanguages.TTL);
-        // .canonicalLiterals(true);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final WorkInfo wi = new WorkInfo(m, "bdr:WSL001_P005");
         final Identifier id = new Identifier("wio:bdr:WSL001_P005", Identifier.COLLECTION_ID);
@@ -158,13 +157,36 @@ public class PresentationTest {
     }
 
     @Test
+    public void virtualWorkPart() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+        Model m = ModelFactory.createDefaultModel();
+        RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualworkpart.ttl").lang(RDFLanguages.TTL);
+        pb.parse(StreamRDFLib.graph(m.getGraph()));
+        final WorkInfo wi = new WorkInfo(m, "bdr:WSL001");
+        //om.writeValue(System.out, wi);
+        final Identifier id = new Identifier("wio:bdr:WSL001", Identifier.COLLECTION_ID);
+        final Collection collection = CollectionService.getCommonCollection(id);
+        collection.setLabel(CollectionService.getLabels(id.getWorkId(), wi));
+        if (wi.parts != null) {
+            for (final PartInfo pi : wi.parts) {
+                final String collectionId = "wio:" + pi.partId;
+                final Collection subcollection = new Collection(IIIFPresPrefix_coll + collectionId);
+                final PropertyValue labels = ManifestService.getPropForLabels(pi.labels);
+                subcollection.setLabel(labels);
+                collection.addCollection(subcollection);
+            }
+        }
+        //final File fout = new File("/tmp/virtualWorkpart.json");
+        //IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
+    }
+    
+    @Test
     public void wioTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-wio.ttl").lang(RDFLanguages.TTL);
         // .canonicalLiterals(true);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final WorkInfo wi = new WorkInfo(m, "bdr:W22073");
-        System.out.println(wi.itemId);
+        //System.out.println(wi.itemId);
         final Identifier id = new Identifier("wio:bdr:W22073", Identifier.COLLECTION_ID);
         final Collection collection = CollectionService.getCommonCollection(id);
         collection.setLabel(CollectionService.getLabels(id.getWorkId(), wi));

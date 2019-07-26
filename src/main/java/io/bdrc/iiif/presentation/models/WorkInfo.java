@@ -204,7 +204,7 @@ public class WorkInfo {
                     partInfo = new PartInfo(partId, null);
                 else
                     partInfo = new PartInfo(partId, partIndexS.getInt());
-                final Resource linkTo = work.getPropertyResourceValue(m.getProperty(BDO, "linkTo"));
+                final Resource linkTo = part.getPropertyResourceValue(m.getProperty(BDO, "workLinkTo"));
                 if (linkTo != null) {
                     partInfo.linkTo = "bdr:"+linkTo.getLocalName();
                     final Resource linkToType = linkTo.getPropertyResourceValue(RDF.type);
@@ -216,11 +216,11 @@ public class WorkInfo {
                 if (location != null)
                     partInfo.location = new Location(m, location);
                 partInfo.labels = getLabels(m, part);
-                if (partInfo.labels == null) {
+                if (partInfo.labels == null && linkTo != null) {
                     partInfo.labels = getLabels(m, linkTo);
                 }
                 partInfo.subparts = getParts(m, part);
-                if (location != null || partInfo.labels != null || partInfo.subparts != null)
+                if (location != null || partInfo.labels != null || partInfo.subparts != null || partInfo.linkTo != null)
                     parts.add(partInfo);
             }
             Collections.sort(parts);

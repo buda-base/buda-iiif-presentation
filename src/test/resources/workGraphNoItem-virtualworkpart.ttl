@@ -1,0 +1,22 @@
+@prefix :      <http://purl.bdrc.io/ontology/core/> .
+@prefix bdr:   <http://purl.bdrc.io/resource/> .
+@prefix bd:    <http://www.bigdata.com/rdf#> .
+@prefix bdg:   <http://purl.bdrc.io/graph/> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix tmp:   <http://purl.bdrc.io/ontology/tmp/> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
+@prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
+
+bdr:W19997  a                         bdo:Work , bdo:PublishedWork ;
+        skos:prefLabel                "dkar mdzes khul gyi dgon sde so so'i lo rgyus gsal bar bshad pa/"@bo-x-ewts .
+
+bdr:WSL001_P005  a                 bdo:VirtualWork , bdo:Work ;
+        bdo:workLinkTo             bdr:W19997 ;
+        bdo:workPartIndex          5 ;
+        bdo:workPartOf             bdr:WSL001  .
+
+bdr:WSL001  a                 bdo:VirtualWork , bdo:Work ;
+        bdo:workHasPart            bdr:WSL001_P005 ;
+        skos:prefLabel             "དཀར་མཛེས་ཁུལ་གྱི་དགོན་སྡེ་སོ་སོའི་ལོ་རྒྱུས་གསལ་བར་བཤད་པ།"@bo .
