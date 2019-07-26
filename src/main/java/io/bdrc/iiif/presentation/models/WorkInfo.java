@@ -159,6 +159,7 @@ public class WorkInfo {
             if (this.labels == null) {
                 this.labels = getLabels(m, linkTo);
             }
+            this.isRoot = (linkTo.getPropertyResourceValue(m.getProperty(BDO, "workPartOf")) == null);
         }
         
         // creator labels
@@ -216,10 +217,13 @@ public class WorkInfo {
                 if (location != null)
                     partInfo.location = new Location(m, location);
                 partInfo.labels = getLabels(m, part);
+                partInfo.subparts = getParts(m, part);
                 if (partInfo.labels == null && linkTo != null) {
                     partInfo.labels = getLabels(m, linkTo);
                 }
-                partInfo.subparts = getParts(m, part);
+                if (partInfo.subparts == null && linkTo != null) {
+                    partInfo.subparts = getParts(m, linkTo);
+                }
                 if (location != null || partInfo.labels != null || partInfo.subparts != null || partInfo.linkTo != null)
                     parts.add(partInfo);
             }

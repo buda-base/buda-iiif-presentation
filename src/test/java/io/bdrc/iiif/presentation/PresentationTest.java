@@ -140,6 +140,7 @@ public class PresentationTest {
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualwork.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final WorkInfo wi = new WorkInfo(m, "bdr:WSL001_P005");
+        //om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:WSL001_P005", Identifier.COLLECTION_ID);
         final Collection collection = CollectionService.getCommonCollection(id);
         collection.setLabel(CollectionService.getLabels(id.getWorkId(), wi));
