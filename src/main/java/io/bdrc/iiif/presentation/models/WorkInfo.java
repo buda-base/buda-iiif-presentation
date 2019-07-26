@@ -156,6 +156,9 @@ public class WorkInfo {
             if (this.parts == null) {
                 this.parts = getParts(m, linkTo);
             }
+            if (this.labels == null) {
+                this.labels = getLabels(m, linkTo);
+            }
         }
         
         // creator labels
