@@ -81,9 +81,9 @@ public class IIIFPresentationService {
         Identifier id = null;
         try {
             id = new Identifier(identifier, Identifier.MANIFEST_ID);
-        } catch (IdentifierException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            throw new BDRCAPIException(e);
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e.getMessage());
         }
         boolean requiresVolumeOutline = false;
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
@@ -142,7 +142,7 @@ public class IIIFPresentationService {
             id = new Identifier(identifier, Identifier.MANIFEST_ID);
         } catch (IdentifierException e) {
             e.printStackTrace();
-            throw new BDRCAPIException(e);
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e.getMessage());
         }
         final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), false); // not entirely sure about the false
         if (vi.restrictedInChina && GeoLocation.isFromChina(ctx)) {
@@ -198,7 +198,7 @@ public class IIIFPresentationService {
             id = new Identifier(identifier, Identifier.COLLECTION_ID);
         } catch (IdentifierException e) {
             e.printStackTrace();
-            throw new BDRCAPIException(e);
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e.getMessage());
         }
         AccessType access = AccessType.RESTR_BDRC;
         boolean restrictedInChina = true;

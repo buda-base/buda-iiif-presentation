@@ -6,8 +6,6 @@ import java.io.StringWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.bdrc.libraries.IdentifierException;
-
 public class BDRCAPIException extends Exception {
     private static final Logger logger = LoggerFactory.getLogger(Exception.class);
     private static final long serialVersionUID = -5379981810772284216L;
@@ -54,21 +52,6 @@ public class BDRCAPIException extends Exception {
         e.printStackTrace(pw);
         this.developerMessage = sw.toString();
         this.link = null;
-        if (status == 500) {
-            logger.error("error status {}, code {}", status, code, e);
-        }
-    }
-
-    public BDRCAPIException(IdentifierException e) {
-        super(e.getMessage());
-        this.status = e.getStatus();
-        this.code = e.getCode();
-        this.message = e.getMessage();
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        e.printStackTrace(pw);
-        this.developerMessage = sw.toString();
-        this.link = e.getLink();
         if (status == 500) {
             logger.error("error status {}, code {}", status, code, e);
         }
