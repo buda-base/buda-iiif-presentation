@@ -28,12 +28,13 @@ import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.ImageInfo;
 import io.bdrc.iiif.presentation.models.ItemInfo;
 import io.bdrc.iiif.presentation.models.PartInfo;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
 import io.bdrc.iiif.presentation.models.WorkInfo;
+import io.bdrc.libraries.Identifier;
+import io.bdrc.libraries.IdentifierException;
 
 public class PresentationTest {
 
@@ -49,7 +50,7 @@ public class PresentationTest {
     public void accessHeaderTest() {
         assertTrue("123".equals(IIIFPresAuthFilter.getToken("Bearer 123")));
     }
-    
+
     @Test
     public void itemInfoModelTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
         Model m = ModelFactory.createDefaultModel();
@@ -95,7 +96,7 @@ public class PresentationTest {
     }
 
     @Test
-    public void volumeManifestOutlineTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+    public void volumeManifestOutlineTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "volumeOutline.ttl").lang(RDFLanguages.TTL);
         // .canonicalLiterals(true);
@@ -107,12 +108,12 @@ public class PresentationTest {
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
         cache.put(cacheKey, ii);
         final Manifest mnf = ManifestService.getManifestForIdentifier(id, vi, false, null, id.getVolumeId(), true);
-        //final File fout = new File("/tmp/manifestOutline.json");
-        //IIIFApiObjectMapperProvider.writer.writeValue(fout, mnf);
+        // final File fout = new File("/tmp/manifestOutline.json");
+        // IIIFApiObjectMapperProvider.writer.writeValue(fout, mnf);
     }
 
     @Test
-    public void volumeManifestWorkVolTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+    public void volumeManifestWorkVolTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "volumeOutline.ttl").lang(RDFLanguages.TTL);
         // .canonicalLiterals(true);
@@ -135,12 +136,12 @@ public class PresentationTest {
     }
 
     @Test
-    public void virtualWork() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+    public void virtualWork() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualwork.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final WorkInfo wi = new WorkInfo(m, "bdr:WSL001_P005");
-        //om.writeValue(System.out, wi);
+        // om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:WSL001_P005", Identifier.COLLECTION_ID);
         final Collection collection = CollectionService.getCommonCollection(id);
         collection.setLabel(CollectionService.getLabels(id.getWorkId(), wi));
@@ -158,12 +159,12 @@ public class PresentationTest {
     }
 
     @Test
-    public void virtualWorkPart() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+    public void virtualWorkPart() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualworkpart.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final WorkInfo wi = new WorkInfo(m, "bdr:WSL001");
-        //om.writeValue(System.out, wi);
+        // om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:WSL001", Identifier.COLLECTION_ID);
         final Collection collection = CollectionService.getCommonCollection(id);
         collection.setLabel(CollectionService.getLabels(id.getWorkId(), wi));
@@ -176,18 +177,18 @@ public class PresentationTest {
                 collection.addCollection(subcollection);
             }
         }
-        //final File fout = new File("/tmp/virtualWorkpart.json");
-        //IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
+        // final File fout = new File("/tmp/virtualWorkpart.json");
+        // IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
     }
-    
+
     @Test
-    public void wioTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+    public void wioTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-wio.ttl").lang(RDFLanguages.TTL);
         // .canonicalLiterals(true);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final WorkInfo wi = new WorkInfo(m, "bdr:W22073");
-        //System.out.println(wi.itemId);
+        // System.out.println(wi.itemId);
         final Identifier id = new Identifier("wio:bdr:W22073", Identifier.COLLECTION_ID);
         final Collection collection = CollectionService.getCommonCollection(id);
         collection.setLabel(CollectionService.getLabels(id.getWorkId(), wi));

@@ -31,11 +31,12 @@ import io.bdrc.auth.Access.AccessLevel;
 import io.bdrc.auth.AuthProps;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.models.AccessType;
-import io.bdrc.iiif.presentation.models.Identifier;
 import io.bdrc.iiif.presentation.models.ImageInfo;
 import io.bdrc.iiif.presentation.models.ItemInfo;
 import io.bdrc.iiif.presentation.models.VolumeInfo;
 import io.bdrc.iiif.presentation.models.WorkInfo;
+import io.bdrc.libraries.Identifier;
+import io.bdrc.libraries.IdentifierException;
 
 @Path("/")
 public class IIIFPresentationService {
@@ -77,7 +78,13 @@ public class IIIFPresentationService {
         if (cont != null) {
             continuous = Boolean.parseBoolean(cont);
         }
-        final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
+        Identifier id = null;
+        try {
+            id = new Identifier(identifier, Identifier.MANIFEST_ID);
+        } catch (IdentifierException e) {
+            e.printStackTrace();
+            throw new BDRCAPIException(e);
+        }
         boolean requiresVolumeOutline = false;
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
             requiresVolumeOutline = true;
@@ -130,7 +137,13 @@ public class IIIFPresentationService {
     public Response getCanvas(@PathParam("identifier") final String identifier, @PathParam("version") final String version, @PathParam("filename") final String filename, final ContainerRequestContext ctx) throws BDRCAPIException {
         // TODO: adjust to new filename in the path (requires file name lookup in the
         // image list)
-        final Identifier id = new Identifier(identifier, Identifier.MANIFEST_ID);
+        Identifier id = null;
+        try {
+            id = new Identifier(identifier, Identifier.MANIFEST_ID);
+        } catch (IdentifierException e) {
+            e.printStackTrace();
+            throw new BDRCAPIException(e);
+        }
         final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), false); // not entirely sure about the false
         if (vi.restrictedInChina && GeoLocation.isFromChina(ctx)) {
             return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
@@ -180,7 +193,13 @@ public class IIIFPresentationService {
         if (cont != null) {
             continuous = Boolean.parseBoolean(cont);
         }
-        final Identifier id = new Identifier(identifier, Identifier.COLLECTION_ID);
+        Identifier id = null;
+        try {
+            id = new Identifier(identifier, Identifier.COLLECTION_ID);
+        } catch (IdentifierException e) {
+            e.printStackTrace();
+            throw new BDRCAPIException(e);
+        }
         AccessType access = AccessType.RESTR_BDRC;
         boolean restrictedInChina = true;
         final int subType = id.getSubType();

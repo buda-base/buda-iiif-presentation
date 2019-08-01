@@ -84,7 +84,7 @@
         <dependency>
           <groupId>io.bdrc.libraries</groupId>
           <artifactId>bdrc-libraries</artifactId>
-          <version>0.4.6</version>
+          <version>0.4.7</version>
         </dependency>
         <dependency><!-- next two: deprected from Java 9: https://stackoverflow.com/questions/46493613/what-is-the-replacement-for-javax-activation-package-in-java-9 -->
             <groupId>com.sun.activation</groupId>
