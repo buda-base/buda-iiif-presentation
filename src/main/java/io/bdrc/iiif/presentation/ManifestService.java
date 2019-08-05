@@ -195,7 +195,7 @@ public class ManifestService {
         }
         for (LangString ls : wi.labels) {
             if (ls.language != null) {
-                if (ls.language.equals("bo-x-ewts"))
+                if (ls.language.equals("bo-x-ewts") && needsVolumeIndication)
                     label.addValue(ManifestService.getLocaleFor(ls.language), ls.value + "_(pod/_" + volumeNum + ")");
                 else
                     label.addValue(ManifestService.getLocaleFor(ls.language), ls.value);

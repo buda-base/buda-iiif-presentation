@@ -44,6 +44,7 @@ public class CollectionService {
         }
     }
 
+    // not used anymore but quite convenient
     public static void addManifestsForLocation(final Collection c, final WorkInfo wi, final ItemInfo ii, final boolean continuous) {
         if (!wi.hasLocation)
             return;
@@ -66,6 +67,26 @@ public class CollectionService {
                     sb.append(volumeePage);
             }
             sb.append("/manifest");
+            if (continuous) {
+                sb.append("?continuous=true");
+            }
+            final Manifest m = new Manifest(sb.toString());
+            m.setLabel(ManifestService.getLabel(i, wi, needsVolumeIndication));
+            c.addManifest(m);
+        }
+    }
+    
+    public static void addManifestsForWorkInVolumes(final Collection c, final WorkInfo wi, final ItemInfo ii, final boolean continuous, final String workId) {
+        if (!wi.hasLocation)
+            return;
+        final Location loc = wi.location;
+        final boolean needsVolumeIndication = loc.evolnum - loc.bvolnum > 2;
+        for (int i = loc.bvolnum; i <= loc.evolnum; i++) {
+            VolumeInfoSmall vi = ii.getVolumeNumber(i);
+            if (vi == null)
+                continue;
+            final StringBuilder sb = new StringBuilder();
+            sb.append(IIIFPresPrefix + "wv:" + workId + "::" + vi.getPrefixedUri() + "/manifest");
             if (continuous) {
                 sb.append("?continuous=true");
             }
@@ -124,7 +145,8 @@ public class CollectionService {
             return collection;
         }
         if (wi.hasLocation) {
-            addManifestsForLocation(collection, wi, ii, continuous);
+            // addManifestsForLocation(collection, wi, ii, continuous);
+            addManifestsForWorkInVolumes(collection, wi, ii, continuous, id.getWorkId());
         } else if (wi.isRoot) {
             final String volPrefix = "v:";
             boolean needsVolumeIndication = ii.volumes.size() > 1;
