@@ -9,10 +9,10 @@ public class AppConstants {
 
     // used to create the urls for canvases, manifests, etc. should be canonical
     // at least for canvases (so that the annotation can target the uri)
-    public static final String IIIFPresPrefix = "https://presentation.bdrc.io/";
+    public static final String IIIFPresPrefix = "https://iiifpres.bdrc.io/";
     public static final String IIIFPresPrefix_coll = IIIFPresPrefix + "collection/";
 
-    public static final String LDS_QUERYPREFIX = "http://purl.bdrc.io/";
+    public static final String LDS_QUERYPREFIX = "https://purl.bdrc.io/";
     public static final String LDS_WORKGRAPH_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_workGraph_noItem";
     public static final String LDS_ITEMGRAPH_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_itemGraph";
     public static final String LDS_VOLUME_QUERY = LDS_QUERYPREFIX + "query/table/IIIFPres_volumeInfo";

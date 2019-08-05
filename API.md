@@ -13,13 +13,13 @@ The URIs are composed of segments that we will first define:
 
 Collection URIs implemented on BUDA are:
 
-- `{scheme}://presentation.bdrc.io/2.1.1/collection/wio:{workId}::{itemId}` (`::{itemId}` is optional) a collection listing the parts of the work as subcollections and the corresponding volumes as manifests, this is probably what you're looking for ([example](http://presentation.bdrc.io/2.1.1/collection/wio:bdr:W22084))
-- `{scheme}://presentation.bdrc.io/2.1.1/collection/wi:{workId}::{itemId}` (`::{itemId}` is optional) a collection listing the volumes corresponding to a work as manifests ([example](http://presentation.bdrc.io/2.1.1/collection/wi:bdr:W22084))
-- `{scheme}://presentation.bdrc.io/2.1.1/collection/i:{itemId}` a collection with the volumes of an item as manifests ([example](http://presentation.bdrc.io/2.1.1/collection/i:bdr:I22084))
+- `{scheme}://iiifpres.bdrc.io/2.1.1/collection/wio:{workId}::{itemId}` (`::{itemId}` is optional) a collection listing the parts of the work as subcollections and the corresponding volumes as manifests, this is probably what you're looking for ([example](http://iiifpres.bdrc.io/2.1.1/collection/wio:bdr:W22084))
+- `{scheme}://iiifpres.bdrc.io/2.1.1/collection/wi:{workId}::{itemId}` (`::{itemId}` is optional) a collection listing the volumes corresponding to a work as manifests ([example](http://iiifpres.bdrc.io/2.1.1/collection/wi:bdr:W22084))
+- `{scheme}://iiifpres.bdrc.io/2.1.1/collection/i:{itemId}` a collection with the volumes of an item as manifests ([example](http://iiifpres.bdrc.io/2.1.1/collection/i:bdr:I22084))
 
 ### Manifests
 
 The manifest URIs implemented on BUDA are:
 
-- `{scheme}://presentation.bdrc.io/2.1.1/v:{volumeid}::{imageNumRange}/manifest` for the manifest of a volume ([example for page 3 and 4 of a volume](http://presentation.bdrc.io/2.1.1/v:bdr:V22084_I0886::3-4/manifest))
-- `{scheme}://presentation.bdrc.io/2.1.1/wv:{workid}::{volumeId}/manifest` for the range of a volume corresponding to a work (usually a part of the work) ([example](http://presentation.bdrc.io/2.1.1/wv:bdr:W22084_0193::bdr:V22084_I0946/manifest))
+- `{scheme}://iiifpres.bdrc.io/2.1.1/v:{volumeid}::{imageNumRange}/manifest` for the manifest of a volume ([example for page 3 and 4 of a volume](http://iiifpres.bdrc.io/2.1.1/v:bdr:V22084_I0886::3-4/manifest))
+- `{scheme}://iiifpres.bdrc.io/2.1.1/wv:{workid}::{volumeId}/manifest` for the range of a volume corresponding to a work (usually a part of the work) ([example](http://iiifpres.bdrc.io/2.1.1/wv:bdr:W22084_0193::bdr:V22084_I0946/manifest))
