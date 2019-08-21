@@ -38,7 +38,8 @@ public class CollectionService {
         case Identifier.COLLECTION_ID_WORK_IN_ITEM:
             return getCollectionForItem(getCommonCollection(id), id, continuous);
         case Identifier.COLLECTION_ID_WORK_OUTLINE:
-            return getCollectionForOutline(getCommonCollection(id), id, continuous);
+            final WorkInfo wi = WorkInfoService.getWorkInfo(id.getWorkId());
+            return getCollectionForOutline(getCommonCollection(id), id, wi, continuous);
         default:
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
@@ -121,8 +122,7 @@ public class CollectionService {
         return collection;
     }
 
-    public static Collection getCollectionForOutline(final Collection collection, final Identifier id, final boolean continuous) throws BDRCAPIException {
-        final WorkInfo wi = WorkInfoService.getWorkInfo(id.getWorkId());
+    public static Collection getCollectionForOutline(final Collection collection, final Identifier id, final WorkInfo wi, final boolean continuous) throws BDRCAPIException {
         final ItemInfo ii;
         logger.info("building outline collection for ID {}", id.getId());
         collection.setLabel(getLabels(id.getWorkId(), wi));

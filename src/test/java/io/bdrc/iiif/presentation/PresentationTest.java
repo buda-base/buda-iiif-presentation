@@ -182,6 +182,19 @@ public class PresentationTest {
     }
 
     @Test
+    public void virtualWorkLocation() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
+        Model m = ModelFactory.createDefaultModel();
+        RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualworklocation.ttl").lang(RDFLanguages.TTL);
+        pb.parse(StreamRDFLib.graph(m.getGraph()));
+        final WorkInfo wi = new WorkInfo(m, "bdr:W1ERI0009001_01_01_01");
+        //om.writeValue(System.out, wi);
+        final Identifier id = new Identifier("wio:bdr:W1ERI0009001_01_01_01", Identifier.COLLECTION_ID);
+        final Collection collection = CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id), id, wi, false);
+        //final File fout = new File("/tmp/virtualWorkLocation.json");
+        //IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
+    }
+    
+    @Test
     public void wioTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-wio.ttl").lang(RDFLanguages.TTL);

@@ -1,0 +1,70 @@
+@prefix :      <http://purl.bdrc.io/ontology/core/> .
+@prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
+@prefix adr:   <http://purl.bdrc.io/resource-auth/> .
+@prefix as:    <http://www.w3.org/ns/activitystreams#> .
+@prefix aut:   <http://purl.bdrc.io/ontology/ext/auth/> .
+@prefix bda:   <http://purl.bdrc.io/admindata/> .
+@prefix bdac:  <http://purl.bdrc.io/anncollection/> .
+@prefix bdan:  <http://purl.bdrc.io/annotation/> .
+@prefix bdd:   <http://purl.bdrc.io/data/> .
+@prefix bdg:   <http://purl.bdrc.io/graph/> .
+@prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
+@prefix bdr:   <http://purl.bdrc.io/resource/> .
+@prefix bf:    <http://id.loc.gov/ontologies/bibframe/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dila:  <http://authority.dila.edu.tw/person/?fromInner=> .
+@prefix f:     <java:io.bdrc.ldspdi.sparql.functions.> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix iiif2: <http://iiif.io/api/presentation/2#> .
+@prefix iiif3: <http://iiif.io/api/presentation/3#> .
+@prefix ldp:   <http://www.w3.org/ns/ldp#> .
+@prefix oa:    <http://www.w3.org/ns/oa#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rsh:   <http://purl.bdrc.io/shacl/core/shape/> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix tbr:   <http://purl.bdrc.io/ontology/toberemoved/> .
+@prefix text:  <http://jena.apache.org/text#> .
+@prefix tmp:   <http://purl.bdrc.io/ontology/tmp/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+bdr:W1ERI0009001_01_01_01
+        a                          bdo:Work , bdo:VirtualWork ;
+        bdo:workLocation           [ bdo:workLocationEndPage    318 ;
+                                     bdo:workLocationEndVolume  1 ;
+                                     bdo:workLocationPage       33 ;
+                                     bdo:workLocationVolume     1 ;
+                                     bdo:workLocationWork       bdr:W23221
+                                   ] ;
+        bdo:workPartIndex          1 ;
+        bdo:workPartOf             bdr:W1ERI0009001_01_01 ;
+        tmp:inItem                 bdr:I23221 ;
+        tmp:rootAccess             bda:AccessOpen ;
+        tmp:rootLicense            bda:LicensePublicDomain ;
+        tmp:rootRestrictedInChina  false ;
+        tmp:rootStatus             bda:StatusReleased ;
+        skos:prefLabel             "སྡོམ་གསུམ་རྣམ་ངེས་མཆན་འགྲེལ་རིག་འཛིན་འཇུག་ངོགས།"@bo .
+
+bdr:W23221  a                         bdo:Work , bdo:PublishedWork ;
+        bdo:creator                   bdr:CR57B61DA00F63 , bdr:CR8FDEE08EB425 ;
+        bdo:isRoot                    true ;
+        bdo:itemBDRCHoldingStatement  "1" ;
+        bdo:note                      bdr:NTB3BD4DEDB2B1 ;
+        bdo:workAuthorshipStatement   "gu Na/"@bo-x-ewts ;
+        bdo:workBiblioNote            "includes the root text of the sdom gsum rnam nges"@en ;
+        bdo:workCatalogInfo           "Treatise according to Nyingma tradition on the three disciplines, i.e. those of Vinaya, bodhisattva, and tantrika. Written by Ngari Panchen Pema Wangyal. Includes annotations by Khenpo Yongga."@en ;
+        bdo:workEvent                 bdr:EV1C0E02F3E289 ;
+        bdo:workExtentStatement       "30, 285 p." ;
+        bdo:workGenre                 bdr:T304 ;
+        bdo:workHasItem               bdr:I23221 ;
+        bdo:workHollis                "014258858" ;
+        bdo:workIsAbout               bdr:T201 ;
+        bdo:workLangScript            bdr:BoTibt ;
+        bdo:workNumberOfVolumes       1 ;
+        bdo:workPublisherLocation     "[bylakuppe]"@en ;
+        bdo:workPublisherName         "snga 'gyur mtho slob mdo sngags rig pa'i 'byung gnas/"@bo-x-ewts ;
+        bdo:workTitle                 bdr:TTC1062A23A3D0 , bdr:TTC23879BE12E1 , bdr:TT7AC3CDA407E9 ;
+        skos:prefLabel                "sdom pa gsum rnam par nges pa'i mchan 'grel rig pa 'dzin pa'i 'jug ngogs/"@bo-x-ewts .
