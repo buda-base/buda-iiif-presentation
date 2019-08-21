@@ -159,6 +159,11 @@ public class WorkInfo {
             if (this.labels == null) {
                 this.labels = getLabels(m, linkTo);
             }
+            if (!this.hasLocation) {
+                final Resource location = linkTo.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
+                if (location != null)
+                    readLocation(m, location);
+            }
             this.isRoot = (linkTo.getPropertyResourceValue(m.getProperty(BDO, "workPartOf")) == null);
         }
         

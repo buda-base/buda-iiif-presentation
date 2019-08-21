@@ -166,19 +166,22 @@ public class PresentationTest {
         final WorkInfo wi = new WorkInfo(m, "bdr:WSL001");
         // om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:WSL001", Identifier.COLLECTION_ID);
-        final Collection collection = CollectionService.getCommonCollection(id);
-        collection.setLabel(CollectionService.getLabels(id.getWorkId(), wi));
-        if (wi.parts != null) {
-            for (final PartInfo pi : wi.parts) {
-                final String collectionId = "wio:" + pi.partId;
-                final Collection subcollection = new Collection(IIIFPresPrefix_coll + collectionId);
-                final PropertyValue labels = ManifestService.getPropForLabels(pi.labels);
-                subcollection.setLabel(labels);
-                collection.addCollection(subcollection);
-            }
-        }
-        // final File fout = new File("/tmp/virtualWorkpart.json");
-        // IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
+        //final Collection collection = CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id), id, wi, false);
+        //final File fout = new File("/tmp/virtualWorkpart.json");
+        //IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
+    }
+    
+    @Test
+    public void virtualWorkLinktoPart() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
+        Model m = ModelFactory.createDefaultModel();
+        RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualworklinktopart.ttl").lang(RDFLanguages.TTL);
+        pb.parse(StreamRDFLib.graph(m.getGraph()));
+        final WorkInfo wi = new WorkInfo(m, "bdr:W1ERI0009001_01_02_02");
+        //om.writeValue(System.out, wi);
+        final Identifier id = new Identifier("wio:bdr:W1ERI0009001_01_02_02", Identifier.COLLECTION_ID);
+        //final Collection collection = CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id), id, wi, false);
+        //final File fout = new File("/tmp/virtualWorkLinkToPart.json");
+        //IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
     }
 
     @Test
@@ -189,7 +192,7 @@ public class PresentationTest {
         final WorkInfo wi = new WorkInfo(m, "bdr:W1ERI0009001_01_01_01");
         //om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:W1ERI0009001_01_01_01", Identifier.COLLECTION_ID);
-        final Collection collection = CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id), id, wi, false);
+        //final Collection collection = CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id), id, wi, false);
         //final File fout = new File("/tmp/virtualWorkLocation.json");
         //IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
     }
