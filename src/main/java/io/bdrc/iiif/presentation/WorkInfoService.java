@@ -6,6 +6,9 @@ import static io.bdrc.iiif.presentation.AppConstants.LDS_WORKGRAPH_QUERY;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.jcs.access.CacheAccess;
 import org.apache.commons.jcs.access.exception.CacheException;
@@ -77,4 +80,65 @@ public class WorkInfoService {
         return resWorkInfo;
     }
 
+    public static final Map<String,CompletableFuture<WorkInfo>> futures = new ConcurrentHashMap<>();
+    
+    /* Function returning a CompletableFuture and thus allowing many different calls
+     * to iiif-presentation to try to access a non-cached WorkInfo at the same time
+     * while doing only one request. 
+     * 
+     * What it prevents is the following case. We assume that we're using a naive
+     * function, not this one. let's say an API call to lds-pdi takes
+     * 100ms. Let's say we ask for all the volumes of the Kangyur at the same time to
+     * iiif-presentation (something which actually happens). This means that the following
+     * happens:
+     *  - first request to iiif-presentation: 
+     *      no workinfo cached, making a request to lds-pdi, takes 100ms
+     *  - second request to iiif-presentation (2ms after the first one):
+     *      the call to lds-pdi hasn't finished yet, so there is still no cache,
+     *      so making another request to lds-pdi
+     *  - etc.
+     *  
+     *  which can lead to a large load of requests to lds-pdi, making all the requests
+     *  much longer and stressing lds-pdi.
+     *  
+     *  With this function the following happens (conceptually):
+     *   - first request to iiif-presentation:
+     *       no workinfo cached, making adding the request to lds-pdi in the map of requests
+     *   - second request to iiif-presentation:
+     *       no workinfo cached, but we see that the maps of requests contains
+     *       one request for this resource, so we just wait for it to return
+     *   - etc.
+     *   
+     *  which means just one request is made instead of 100.
+     * 
+     */
+    public static CompletableFuture<WorkInfo> getWorkInfoAsync(final String workId) {
+        WorkInfo resWorkInfo = (WorkInfo)cache.get(workId);
+        if (resWorkInfo != null) {
+            logger.debug("found workInfo in cache for "+workId);
+            CompletableFuture<WorkInfo> resCached = new CompletableFuture<>();
+            resCached.complete(resWorkInfo);
+            return resCached;
+        }
+        // unintuitive way to perform the (necessary) atomic operation in the list
+        CompletableFuture<WorkInfo> res = new CompletableFuture<>(); 
+        CompletableFuture<WorkInfo> resFromList = futures.putIfAbsent(workId, res);
+        if (resFromList != null) {
+            // this is the case of all the threads trying to access the resource
+            // except the first one
+            return resFromList;
+        }
+        try {
+            final Model workInfoModel = fetchLdsWorkInfoModel(workId);
+            resWorkInfo = new WorkInfo(workInfoModel, workId);
+        } catch (BDRCAPIException e) {
+            res.completeExceptionally(e);
+            return res;
+        }
+        cache.put(workId, resWorkInfo);
+        res.complete(resWorkInfo);
+        futures.remove(workId);
+        return res;
+    }
+    
 }
