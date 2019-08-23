@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -216,7 +217,12 @@ public class ManifestService {
         }
         final String workLocalId = vi.workId.substring(BDR_len);
         logger.info("building manifest for ID {}", id.getId());
-        final List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(workLocalId, vi.imageGroup);
+        List<ImageInfo> imageInfoList;
+        try {
+            imageInfoList = ImageInfoListService.Instance.getAsync(workLocalId, vi.imageGroup).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
+        }
         final Manifest manifest = new Manifest(IIIFPresPrefix + id.getId() + "/manifest");
         manifest.setAttribution(attribution);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");

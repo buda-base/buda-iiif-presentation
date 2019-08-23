@@ -9,11 +9,10 @@ import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-import org.apache.commons.jcs.access.CacheAccess;
-import org.apache.commons.jcs.access.exception.CacheException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,20 +25,19 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdrc.auth.AuthProps;
-import io.bdrc.iiif.presentation.AppConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.ImageInfo;
 
-public class ImageInfoListService {
+public class ImageInfoListService extends ConcurrentResourceService<List<ImageInfo>> {
 
     final static ObjectMapper mapper = new ObjectMapper();
     final static String bucketName = "archive.tbrc.org";
     private static AmazonS3 s3Client = null;
     static MessageDigest md;
-    private static CacheAccess<String, Object> cache = null;
     static private final ObjectMapper om;
     private static final Logger logger = LoggerFactory.getLogger(ImageInfoListService.class);
     private static final Charset utf8 = Charset.forName("UTF-8");
+    public static final ImageInfoListService Instance = new ImageInfoListService();
 
     static {
         om = new ObjectMapper();
@@ -47,11 +45,6 @@ public class ImageInfoListService {
             md = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
             logger.error("this shouldn't happen!", e);
-        }
-        try {
-            cache = ServiceCache.CACHE;
-        } catch (CacheException e) {
-            logger.error("cache initialization error, this shouldn't happen!", e);
         }
     }
 
@@ -76,13 +69,26 @@ public class ImageInfoListService {
         return "Works/"+md5firsttwo+"/"+workLocalId+"/images/"+workLocalId+"-"+imageGroupId+"/dimensions.json";
     }
 
-    private static List<ImageInfo> getFromS3(final String workLocalId, final String imageGroupId) throws BDRCAPIException  {
+    public static final Pattern oldImageGroupPattern = Pattern.compile("^I\\d{4}$");
+    // for image groups like I\d\d\d\d, the s3 key doesn't contain the I (ex: I0886 -> 0886)
+    public static String getS3ImageGroupId(final String dataImageGroupId) {
+        if (oldImageGroupPattern.matcher(dataImageGroupId).matches())
+            return dataImageGroupId.substring(1);
+        return dataImageGroupId;
+    }
+
+    public final CompletableFuture<List<ImageInfo>> getAsync(final String workLocalId, final String imageGroupId) throws BDRCAPIException {
+        final String s3key = getKey(workLocalId, imageGroupId);
+        return getAsync(s3key);
+    }
+    
+    @Override
+    final List<ImageInfo> getFromApi(final String s3key) throws BDRCAPIException {
         final AmazonS3 s3Client = getClient();
-        final String key = getKey(workLocalId, imageGroupId);
-        logger.info("fetching s3 key {}", key);
+        logger.info("fetching s3 key {}", s3key);
         final S3Object object;
         try {
-            object = s3Client.getObject(new GetObjectRequest(bucketName, key));
+            object = s3Client.getObject(new GetObjectRequest(bucketName, s3key));
         } catch (AmazonS3Exception e) {
             if (e.getErrorCode().equals("NoSuchKey")) {
                 throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "sorry, BDRC did not complete the data migration for this Work");
@@ -100,29 +106,5 @@ public class ImageInfoListService {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
         }
     }
-
-    public static final Pattern oldImageGroupPattern = Pattern.compile("^I\\d{4}$");
-    // for image groups like I\d\d\d\d, the s3 key doesn't contain the I (ex: I0886 -> 0886)
-    public static String getS3ImageGroupId(final String dataImageGroupId) {
-        if (oldImageGroupPattern.matcher(dataImageGroupId).matches())
-            return dataImageGroupId.substring(1);
-        return dataImageGroupId;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<ImageInfo> getImageInfoList(final String workLocalId, String imageGroupId) throws BDRCAPIException {
-        logger.debug("getting imageInfoList for {}, {}", workLocalId, imageGroupId);
-        imageGroupId = getS3ImageGroupId(imageGroupId);
-        final String cacheKey = workLocalId+'/'+imageGroupId;
-        List<ImageInfo> imageInfoList = (List<ImageInfo>)cache.get(cacheKey);
-        if (imageInfoList != null) {
-            logger.debug("found in cache");
-            return imageInfoList;
-        }
-        imageInfoList = getFromS3(workLocalId, imageGroupId);
-        if (imageInfoList == null)
-            throw new BDRCAPIException(500, AppConstants.GENERIC_LDS_ERROR, "Cannot retrieve image list from s3");
-        cache.put(cacheKey, imageInfoList);
-        return imageInfoList;
-    }
+    
 }

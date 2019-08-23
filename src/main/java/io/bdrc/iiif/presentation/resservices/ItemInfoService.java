@@ -6,8 +6,6 @@ import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.jcs.access.CacheAccess;
-import org.apache.commons.jcs.access.exception.CacheException;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -24,20 +22,13 @@ import io.bdrc.iiif.presentation.AppConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.ItemInfo;
 
-public class ItemInfoService {
+public class ItemInfoService extends ConcurrentResourceService<ItemInfo> {
     private static final Logger logger = LoggerFactory.getLogger(ItemInfoService.class);
+    
+    public static final ItemInfoService Instance = new ItemInfoService();
 
-    private static CacheAccess<String, Object> cache = null;
-
-    static {
-        try {
-            cache = ServiceCache.CACHE;
-        } catch (CacheException e) {
-            logger.error("cache initialization error, this shouldn't happen!", e);
-        }
-    }
-
-    private static ItemInfo fetchLdsVolumeInfo(final String itemId) throws BDRCAPIException {
+    @Override
+    final ItemInfo getFromApi(final String itemId) throws BDRCAPIException {
         logger.debug("fetch itemInfo on LDS for {}", itemId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
         final ItemInfo resItemInfo;
@@ -63,19 +54,6 @@ public class ItemInfoService {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
         }
         logger.debug("found itemInfo: {}", resItemInfo);
-        return resItemInfo;
-    }
-
-    public static ItemInfo getItemInfo(final String itemId) throws BDRCAPIException {
-        ItemInfo resItemInfo = (ItemInfo)cache.get(itemId);
-        if (resItemInfo != null) {
-            logger.debug("found itemInfo in cache for "+itemId);
-            return resItemInfo;
-        }
-        resItemInfo = fetchLdsVolumeInfo(itemId);
-        if (resItemInfo == null)
-            return null;
-        cache.put(itemId, resItemInfo);
         return resItemInfo;
     }
 }

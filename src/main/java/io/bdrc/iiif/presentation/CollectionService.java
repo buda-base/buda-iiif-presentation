@@ -145,9 +145,17 @@ public class CollectionService {
             }
         }
         if (id.getItemId() != null) {
-            ii = ItemInfoService.getItemInfo(id.getItemId());
+            try {
+                ii = ItemInfoService.Instance.getAsync(id.getItemId()).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
+            }
         } else if (wi.itemId != null) {
-            ii = ItemInfoService.getItemInfo(wi.itemId);
+            try {
+                ii = ItemInfoService.Instance.getAsync(wi.itemId).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
+            }
         } else {
             // TODO: exception of wi.parts == null ? currently an empty collection is
             // returned
@@ -179,11 +187,12 @@ public class CollectionService {
     }
 
     public static Collection getCollectionForItem(final Collection collection, final Identifier id, final WorkInfo wi, final boolean continuous) throws BDRCAPIException {
+        final String itemId = (id.getItemId() == null) ? wi.itemId : id.getItemId();
         final ItemInfo ii;
-        if (id.getItemId() == null) {
-            ii = ItemInfoService.getItemInfo(wi.itemId);
-        } else {
-            ii = ItemInfoService.getItemInfo(id.getItemId());
+        try {
+            ii = ItemInfoService.Instance.getAsync(itemId).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
         }
         logger.info("building item collection for ID {}", id.getId());
         collection.addLabel(id.getItemId());

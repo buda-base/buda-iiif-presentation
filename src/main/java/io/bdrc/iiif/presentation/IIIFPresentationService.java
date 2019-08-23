@@ -100,7 +100,7 @@ public class IIIFPresentationService {
             try {
                 wi = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
             } catch (InterruptedException | ExecutionException e) {
-                throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+                throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
         }
         String volumeId = id.getVolumeId();
@@ -109,7 +109,12 @@ public class IIIFPresentationService {
             if (volumeId == null)
                 return Response.status(404).entity("\"Cannot find volume ID\"").header("Cache-Control", "no-cache").build();
         }
-        final VolumeInfo vi = VolumeInfoService.getVolumeInfo(volumeId, requiresVolumeOutline);
+        VolumeInfo vi;
+        try {
+            vi = VolumeInfoService.Instance.getAsync(volumeId).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+        }
         if (vi.restrictedInChina && GeoLocation.isFromChina(ctx)) {
             return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
         }
@@ -153,7 +158,12 @@ public class IIIFPresentationService {
         } catch (IdentifierException e) {
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
-        final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), false); // not entirely sure about the false
+        VolumeInfo vi;
+        try {
+            vi = VolumeInfoService.Instance.getAsync(id.getVolumeId()).get();
+        } catch (InterruptedException | ExecutionException e1) {
+            throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
+        } // not entirely sure about the false
         if (vi.restrictedInChina && GeoLocation.isFromChina(ctx)) {
             return Response.status(403).entity("Insufficient rights").header("Cache-Control", "no-cache").build();
         }
@@ -170,7 +180,12 @@ public class IIIFPresentationService {
         if (vi.iiifManifest != null) {
             return Response.status(404).entity("\"Cannot serve canvas for external manifests\"").header("Cache-Control", "no-cache").build();
         }
-        final List<ImageInfo> imageInfoList = ImageInfoListService.getImageInfoList(vi.workId.substring(BDR_len), vi.imageGroup);
+        List<ImageInfo> imageInfoList;
+        try {
+            imageInfoList = ImageInfoListService.Instance.getAsync(vi.workId.substring(BDR_len), vi.imageGroup).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+        }
         final Integer imgSeqNum = ManifestService.getFileNameSeqNum(imageInfoList, filename);
         if (imgSeqNum == null)
             throw new BDRCAPIException(500, AppConstants.GENERIC_LDS_ERROR, "Cannot find filename in the S3 image list");
@@ -218,7 +233,12 @@ public class IIIFPresentationService {
         switch (subType) {
         case Identifier.COLLECTION_ID_ITEM:
         case Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE:
-            final ItemInfo ii = ItemInfoService.getItemInfo(id.getItemId());
+            ItemInfo ii;
+            try {
+                ii = ItemInfoService.Instance.getAsync(id.getItemId()).get();
+            } catch (InterruptedException | ExecutionException e1) {
+                throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
+            }
             access = ii.access;
             statusUri = ii.statusUri;
             restrictedInChina = ii.restrictedInChina;
@@ -229,7 +249,7 @@ public class IIIFPresentationService {
             try {
                 winf = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
             } catch (InterruptedException | ExecutionException e) {
-                throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+                throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
             access = winf.rootAccess;
             isVirtual = winf.isVirtual;
@@ -241,8 +261,8 @@ public class IIIFPresentationService {
             WorkInfo winf1;
             try {
                 winf1 = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+            } catch (InterruptedException | ExecutionException e2) {
+                throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e2);
             }
             access = winf1.rootAccess;
             isVirtual = winf1.isVirtual;
