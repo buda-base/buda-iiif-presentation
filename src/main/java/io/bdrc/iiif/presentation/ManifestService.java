@@ -36,6 +36,7 @@ import io.bdrc.iiif.presentation.resmodels.Location;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
 import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
 import io.bdrc.iiif.presentation.resmodels.WorkInfo;
+import io.bdrc.iiif.presentation.resmodels.WorkOutline;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.libraries.Identifier;
 
@@ -208,7 +209,7 @@ public class ManifestService {
         return label;
     }
 
-    public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi, boolean continuous, final WorkInfo wi, final String volumeId, final boolean fairUse) throws BDRCAPIException {
+    public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi, boolean continuous, final WorkInfo wi, final String volumeId, final boolean fairUse, final WorkOutline wo) throws BDRCAPIException {
         if (id.getType() != Identifier.MANIFEST_ID || (id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE)) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
@@ -261,7 +262,7 @@ public class ManifestService {
         final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
         manifest.setRenderings(oc);
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
-            addRangesToManifest(manifest, id, vi, volumeId, fairUse, imageInfoList);
+            addRangesToManifest(manifest, id, vi, volumeId, fairUse, imageInfoList, wo);
         }
         manifest.addSequence(mainSeq);
         return manifest;
@@ -279,18 +280,24 @@ public class ManifestService {
         return ct;
     }
 
-    public static void addRangesToManifest(final Manifest m, final Identifier id, final VolumeInfo vi, final String volumeId, final boolean fairUse, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
-        if (vi.partInfo == null)
+    public static void addRangesToManifest(final Manifest m, final Identifier id, final VolumeInfo vi, final String volumeId, final boolean fairUse, final List<ImageInfo> imageInfoList, final WorkOutline wo) throws BDRCAPIException {
+        if (wo == null || wo.rootPi == null)
+            return;
+        final PartInfo volumeRoot = WorkOutline.getRootPiForVolumeR(wo.rootPi, vi.volumeNumber);
+        if (volumeRoot == null)
             return;
         final Range r = new Range(IIIFPresPrefix + "vo:" + id.getVolumeId() + "/range/top", "Table of Contents");
         r.setViewingHints("top");
-        for (final PartInfo part : vi.partInfo) {
+        for (final PartInfo part : volumeRoot.subparts) {
             addSubRangeToRange(m, r, id, part, vi, volumeId, imageInfoList, fairUse);
         }
         m.addRange(r);
     }
 
     public static void addSubRangeToRange(final Manifest m, final Range r, final Identifier id, final PartInfo part, final VolumeInfo vi, final String volumeId, final List<ImageInfo> imageInfoList, final boolean fairUse) throws BDRCAPIException {
+        // do not add ranges where there is no location nor subparts
+        if (part.location == null && part.subparts == null)
+            return;
         final String rangeUri = IIIFPresPrefix + "vo:" + volumeId + "/range/w:" + part.partId;
         final Range subRange = new Range(rangeUri);
         final PropertyValue labels = getPropForLabels(part.labels);

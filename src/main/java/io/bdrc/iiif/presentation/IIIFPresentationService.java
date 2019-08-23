@@ -36,11 +36,13 @@ import io.bdrc.iiif.presentation.resmodels.ImageInfo;
 import io.bdrc.iiif.presentation.resmodels.ItemInfo;
 import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
 import io.bdrc.iiif.presentation.resmodels.WorkInfo;
+import io.bdrc.iiif.presentation.resmodels.WorkOutline;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.iiif.presentation.resservices.ItemInfoService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
 import io.bdrc.iiif.presentation.resservices.VolumeInfoService;
 import io.bdrc.iiif.presentation.resservices.WorkInfoService;
+import io.bdrc.iiif.presentation.resservices.WorkOutlineService;
 import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
 
@@ -132,7 +134,17 @@ public class IIIFPresentationService {
             return Response.status(302) // maybe 303 or 307 would be better?
                     .header("Location", vi.iiifManifest).build();
         }
-        final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, wi, volumeId, al == AccessLevel.FAIR_USE);
+        final WorkOutline wo;
+        if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
+            try {
+                wo = WorkOutlineService.Instance.getAsync(vi.workId).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+            }
+        } else {
+            wo = null;
+        }
+        final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, wi, volumeId, al == AccessLevel.FAIR_USE, wo);
         final StreamingOutput stream = new StreamingOutput() {
             @Override
             public void write(final OutputStream os) throws IOException, WebApplicationException {
