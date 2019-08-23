@@ -1,4 +1,4 @@
-package io.bdrc.iiif.presentation.models;
+package io.bdrc.iiif.presentation.resmodels;
 
 import java.util.List;
 

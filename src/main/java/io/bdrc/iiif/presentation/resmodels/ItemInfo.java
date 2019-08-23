@@ -1,4 +1,4 @@
-package io.bdrc.iiif.presentation.models;
+package io.bdrc.iiif.presentation.resmodels;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,7 +6,6 @@ import java.util.List;
 import static io.bdrc.iiif.presentation.AppConstants.*;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;

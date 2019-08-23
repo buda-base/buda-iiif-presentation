@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.rdf.RdfAuthModel;
+import io.bdrc.iiif.presentation.resservices.ServiceCache;
 
 @ApplicationPath("/")
 @Provider

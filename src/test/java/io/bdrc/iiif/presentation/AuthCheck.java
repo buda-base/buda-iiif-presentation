@@ -23,6 +23,7 @@ import com.auth0.client.auth.AuthAPI;
 
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.rdf.RdfAuthModel;
+import io.bdrc.iiif.presentation.resservices.ServiceCache;
 
 public class AuthCheck extends JerseyTest{
 

@@ -1,4 +1,4 @@
-package io.bdrc.iiif.presentation.models;
+package io.bdrc.iiif.presentation.resmodels;
 
 import static io.bdrc.iiif.presentation.AppConstants.BDO;
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.bdrc.iiif.presentation.VolumeInfoService;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
+import io.bdrc.iiif.presentation.resservices.VolumeInfoService;
 import io.bdrc.libraries.ImageListIterator;
 
 public class VolumeInfo {

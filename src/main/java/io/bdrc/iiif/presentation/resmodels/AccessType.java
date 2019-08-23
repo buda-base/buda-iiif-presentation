@@ -1,4 +1,4 @@
-package io.bdrc.iiif.presentation.models;
+package io.bdrc.iiif.presentation.resmodels;
 
 public enum AccessType {
     FAIR_USE("http://purl.bdrc.io/admindata/AccessFairUse"),

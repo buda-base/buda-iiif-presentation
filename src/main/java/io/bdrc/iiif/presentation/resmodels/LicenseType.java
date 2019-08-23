@@ -1,4 +1,4 @@
-package io.bdrc.iiif.presentation.models;
+package io.bdrc.iiif.presentation.resmodels;
 
 public enum LicenseType {
     COPYRIGHTED("http://purl.bdrc.io/admindata/LicenseCopyrighted"),

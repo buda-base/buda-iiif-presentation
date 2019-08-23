@@ -1,4 +1,4 @@
-package io.bdrc.iiif.presentation;
+package io.bdrc.iiif.presentation.resservices;
 
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 
@@ -26,8 +26,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdrc.auth.AuthProps;
+import io.bdrc.iiif.presentation.AppConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.models.ImageInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInfo;
 
 public class ImageInfoListService {
 

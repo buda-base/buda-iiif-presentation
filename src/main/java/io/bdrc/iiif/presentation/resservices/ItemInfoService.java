@@ -1,4 +1,4 @@
-package io.bdrc.iiif.presentation;
+package io.bdrc.iiif.presentation.resservices;
 
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
@@ -20,8 +20,9 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdrc.iiif.presentation.AppConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.models.ItemInfo;
+import io.bdrc.iiif.presentation.resmodels.ItemInfo;
 
 public class ItemInfoService {
     private static final Logger logger = LoggerFactory.getLogger(ItemInfoService.class);

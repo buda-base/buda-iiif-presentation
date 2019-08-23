@@ -28,13 +28,14 @@ import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import de.digitalcollections.iiif.model.sharedcanvas.Range;
 import de.digitalcollections.iiif.model.sharedcanvas.Sequence;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.models.BDRCPresentationImageService;
-import io.bdrc.iiif.presentation.models.ImageInfo;
-import io.bdrc.iiif.presentation.models.LangString;
-import io.bdrc.iiif.presentation.models.Location;
-import io.bdrc.iiif.presentation.models.PartInfo;
-import io.bdrc.iiif.presentation.models.VolumeInfo;
-import io.bdrc.iiif.presentation.models.WorkInfo;
+import io.bdrc.iiif.presentation.resmodels.BDRCPresentationImageService;
+import io.bdrc.iiif.presentation.resmodels.ImageInfo;
+import io.bdrc.iiif.presentation.resmodels.LangString;
+import io.bdrc.iiif.presentation.resmodels.Location;
+import io.bdrc.iiif.presentation.resmodels.PartInfo;
+import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
+import io.bdrc.iiif.presentation.resmodels.WorkInfo;
+import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.libraries.Identifier;
 
 public class ManifestService {

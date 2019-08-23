@@ -28,11 +28,13 @@ import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.models.ImageInfo;
-import io.bdrc.iiif.presentation.models.ItemInfo;
-import io.bdrc.iiif.presentation.models.PartInfo;
-import io.bdrc.iiif.presentation.models.VolumeInfo;
-import io.bdrc.iiif.presentation.models.WorkInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInfo;
+import io.bdrc.iiif.presentation.resmodels.ItemInfo;
+import io.bdrc.iiif.presentation.resmodels.PartInfo;
+import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
+import io.bdrc.iiif.presentation.resmodels.WorkInfo;
+import io.bdrc.iiif.presentation.resservices.ServiceCache;
+import io.bdrc.iiif.presentation.resservices.VolumeInfoService;
 import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
 

@@ -5,6 +5,8 @@ import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix_coll;
 
+import java.util.concurrent.ExecutionException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,12 +14,14 @@ import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.models.ItemInfo;
-import io.bdrc.iiif.presentation.models.ItemInfo.VolumeInfoSmall;
-import io.bdrc.iiif.presentation.models.LangString;
-import io.bdrc.iiif.presentation.models.Location;
-import io.bdrc.iiif.presentation.models.PartInfo;
-import io.bdrc.iiif.presentation.models.WorkInfo;
+import io.bdrc.iiif.presentation.resmodels.ItemInfo;
+import io.bdrc.iiif.presentation.resmodels.LangString;
+import io.bdrc.iiif.presentation.resmodels.Location;
+import io.bdrc.iiif.presentation.resmodels.PartInfo;
+import io.bdrc.iiif.presentation.resmodels.WorkInfo;
+import io.bdrc.iiif.presentation.resmodels.ItemInfo.VolumeInfoSmall;
+import io.bdrc.iiif.presentation.resservices.ItemInfoService;
+import io.bdrc.iiif.presentation.resservices.WorkInfoService;
 import io.bdrc.libraries.Identifier;
 
 public class CollectionService {
@@ -32,13 +36,18 @@ public class CollectionService {
     }
 
     public static Collection getCollectionForIdentifier(final Identifier id, boolean continuous) throws BDRCAPIException {
+        final WorkInfo wi;
+        try {
+            wi = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+        }
         switch (id.getSubType()) {
         case Identifier.COLLECTION_ID_ITEM:
         case Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE:
         case Identifier.COLLECTION_ID_WORK_IN_ITEM:
-            return getCollectionForItem(getCommonCollection(id), id, continuous);
+            return getCollectionForItem(getCommonCollection(id), id, wi, continuous);
         case Identifier.COLLECTION_ID_WORK_OUTLINE:
-            final WorkInfo wi = WorkInfoService.getWorkInfo(id.getWorkId());
             return getCollectionForOutline(getCommonCollection(id), id, wi, continuous);
         default:
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
@@ -169,10 +178,9 @@ public class CollectionService {
         return collection;
     }
 
-    public static Collection getCollectionForItem(final Collection collection, final Identifier id, final boolean continuous) throws BDRCAPIException {
+    public static Collection getCollectionForItem(final Collection collection, final Identifier id, final WorkInfo wi, final boolean continuous) throws BDRCAPIException {
         final ItemInfo ii;
         if (id.getItemId() == null) {
-            final WorkInfo wi = WorkInfoService.getWorkInfo(id.getWorkId());
             ii = ItemInfoService.getItemInfo(wi.itemId);
         } else {
             ii = ItemInfoService.getItemInfo(id.getItemId());

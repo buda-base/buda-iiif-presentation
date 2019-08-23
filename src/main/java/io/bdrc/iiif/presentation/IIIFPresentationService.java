@@ -5,6 +5,7 @@ import static io.bdrc.iiif.presentation.AppConstants.BDR_len;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -30,11 +31,16 @@ import io.bdrc.auth.Access;
 import io.bdrc.auth.Access.AccessLevel;
 import io.bdrc.auth.AuthProps;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.models.AccessType;
-import io.bdrc.iiif.presentation.models.ImageInfo;
-import io.bdrc.iiif.presentation.models.ItemInfo;
-import io.bdrc.iiif.presentation.models.VolumeInfo;
-import io.bdrc.iiif.presentation.models.WorkInfo;
+import io.bdrc.iiif.presentation.resmodels.AccessType;
+import io.bdrc.iiif.presentation.resmodels.ImageInfo;
+import io.bdrc.iiif.presentation.resmodels.ItemInfo;
+import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
+import io.bdrc.iiif.presentation.resmodels.WorkInfo;
+import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
+import io.bdrc.iiif.presentation.resservices.ItemInfoService;
+import io.bdrc.iiif.presentation.resservices.ServiceCache;
+import io.bdrc.iiif.presentation.resservices.VolumeInfoService;
+import io.bdrc.iiif.presentation.resservices.WorkInfoService;
 import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
 
@@ -83,7 +89,7 @@ public class IIIFPresentationService {
             id = new Identifier(identifier, Identifier.MANIFEST_ID);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e.getMessage());
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
         boolean requiresVolumeOutline = false;
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
@@ -91,7 +97,11 @@ public class IIIFPresentationService {
         }
         WorkInfo wi = null;
         if (id.getWorkId() != null) {
-            wi = WorkInfoService.getWorkInfo(id.getWorkId());
+            try {
+                wi = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+            }
         }
         String volumeId = id.getVolumeId();
         if (volumeId == null) {
@@ -141,8 +151,7 @@ public class IIIFPresentationService {
         try {
             id = new Identifier(identifier, Identifier.MANIFEST_ID);
         } catch (IdentifierException e) {
-            e.printStackTrace();
-            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e.getMessage());
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
         final VolumeInfo vi = VolumeInfoService.getVolumeInfo(id.getVolumeId(), false); // not entirely sure about the false
         if (vi.restrictedInChina && GeoLocation.isFromChina(ctx)) {
@@ -216,7 +225,12 @@ public class IIIFPresentationService {
             itemId = id.getItemId();
             break;
         case Identifier.COLLECTION_ID_WORK_IN_ITEM:
-            final WorkInfo winf = WorkInfoService.getWorkInfo(id.getWorkId());
+            WorkInfo winf;
+            try {
+                winf = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+            }
             access = winf.rootAccess;
             isVirtual = winf.isVirtual;
             statusUri = winf.rootStatus;
@@ -224,7 +238,12 @@ public class IIIFPresentationService {
             itemId = id.getItemId();
             break;
         case Identifier.COLLECTION_ID_WORK_OUTLINE:
-            final WorkInfo winf1 = WorkInfoService.getWorkInfo(id.getWorkId());
+            WorkInfo winf1;
+            try {
+                winf1 = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+            }
             access = winf1.rootAccess;
             isVirtual = winf1.isVirtual;
             statusUri = winf1.rootStatus;

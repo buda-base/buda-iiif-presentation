@@ -1,4 +1,4 @@
-package io.bdrc.iiif.presentation;
+package io.bdrc.iiif.presentation.resservices;
 
 import static io.bdrc.iiif.presentation.AppConstants.CANNOT_FIND_VOLUME_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.models.VolumeInfo;
+import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
 
 public class VolumeInfoService {
 

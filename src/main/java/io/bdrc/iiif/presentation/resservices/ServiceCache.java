@@ -1,4 +1,4 @@
-package io.bdrc.iiif.presentation;
+package io.bdrc.iiif.presentation.resservices;
 
 import org.apache.commons.jcs.JCS;
 import org.apache.commons.jcs.access.CacheAccess;
