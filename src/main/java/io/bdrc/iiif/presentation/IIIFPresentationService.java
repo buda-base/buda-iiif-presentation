@@ -94,7 +94,7 @@ public class IIIFPresentationService {
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
         WorkInfo wi = null;
-        if (id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE && id.getWorkId() != null) {
+        if (id.getWorkId() != null && (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_ITEM || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID)) {
             try {
                 wi = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
             } catch (InterruptedException | ExecutionException e) {
@@ -102,7 +102,8 @@ public class IIIFPresentationService {
             }
         }
         WorkOutline wo = null;
-        if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE && id.getWorkId() != null) {
+        // quite specific: we want to compute wo here only if we don't have the volume id
+        if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE && id.getWorkId() != null && id.getVolumeId() == null) {
             try {
                 wo = WorkOutlineService.Instance.getAsync(id.getWorkId()).get();
             } catch (InterruptedException | ExecutionException e) {
@@ -141,13 +142,17 @@ public class IIIFPresentationService {
             return Response.status(302) // maybe 303 or 307 would be better?
                     .header("Location", vi.iiifManifest).build();
         }
-        if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE && wo == null) {
+        if (wo == null && (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE)) {
             try {
+                // important: we take the outline of the whole root work, that makes
+                // caching more efficient
                 wo = WorkOutlineService.Instance.getAsync(vi.workId).get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
         }
+        // TODO: case where a part is asked with an outline, we need to make sure that
+        // we get the part asked by the user
         final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, wi, volumeId, al == AccessLevel.FAIR_USE, wo);
         final StreamingOutput stream = new StreamingOutput() {
             @Override

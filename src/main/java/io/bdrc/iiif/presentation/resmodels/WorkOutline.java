@@ -36,6 +36,11 @@ public class WorkOutline {
         }
     }
     
+    public PartInfo getPartForWorkId(String workId) {
+        // TODO: implement
+        return rootPi;
+    }
+    
     // function finding the first node of the tree having two or more
     // children in the specified volume
     public static PartInfo getRootPiForVolumeR(PartInfo pi, int volNum) {
