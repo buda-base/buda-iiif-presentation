@@ -64,8 +64,9 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
         return s3Client;
     }
 
-    private static String getKey(final String workLocalId, final String imageGroupId) {
+    public static String getKey(final String workLocalId, String imageGroupId) {
         final String md5firsttwo = getFirstMd5Nums(workLocalId);
+        imageGroupId = getS3ImageGroupId(imageGroupId);
         return "Works/"+md5firsttwo+"/"+workLocalId+"/images/"+workLocalId+"-"+imageGroupId+"/dimensions.json";
     }
 

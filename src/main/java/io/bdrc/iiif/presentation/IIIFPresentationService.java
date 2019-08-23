@@ -93,21 +93,28 @@ public class IIIFPresentationService {
             e.printStackTrace();
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
-        boolean requiresVolumeOutline = false;
-        if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
-            requiresVolumeOutline = true;
-        }
         WorkInfo wi = null;
-        if (id.getWorkId() != null) {
+        if (id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE && id.getWorkId() != null) {
             try {
                 wi = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
         }
+        WorkOutline wo = null;
+        if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE && id.getWorkId() != null) {
+            try {
+                wo = WorkOutlineService.Instance.getAsync(id.getWorkId()).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+            }
+        }
         String volumeId = id.getVolumeId();
         if (volumeId == null) {
-            volumeId = wi.firstVolumeId;
+            if (wi != null)
+                volumeId = wi.firstVolumeId;
+            if (wo != null)
+                volumeId = wo.firstVolumeId;
             if (volumeId == null)
                 return Response.status(404).entity("\"Cannot find volume ID\"").header("Cache-Control", "no-cache").build();
         }
@@ -134,15 +141,12 @@ public class IIIFPresentationService {
             return Response.status(302) // maybe 303 or 307 would be better?
                     .header("Location", vi.iiifManifest).build();
         }
-        final WorkOutline wo;
-        if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
+        if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE && wo == null) {
             try {
                 wo = WorkOutlineService.Instance.getAsync(vi.workId).get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
-        } else {
-            wo = null;
         }
         final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, wi, volumeId, al == AccessLevel.FAIR_USE, wo);
         final StreamingOutput stream = new StreamingOutput() {

@@ -188,15 +188,15 @@ public class ManifestService {
         return mainSeq;
     }
 
-    public static PropertyValue getLabel(final int volumeNumber, final WorkInfo wi, final boolean needsVolumeIndication) {
+    public static PropertyValue getLabel(final int volumeNumber, final List<LangString> labels, final boolean needsVolumeIndication) {
         final PropertyValue label = new PropertyValue();
         final String volumeNum = Integer.toString(volumeNumber);
-        if (wi == null || wi.labels == null || wi.labels.isEmpty()) {
+        if (labels == null || labels.isEmpty()) {
             label.addValue(ManifestService.getLocaleFor("en"), "volume " + volumeNum);
             label.addValue(ManifestService.getLocaleFor("bo-x-ewts"), "pod/_" + volumeNum);
             return label;
         }
-        for (LangString ls : wi.labels) {
+        for (LangString ls : labels) {
             if (ls.language != null) {
                 if (ls.language.equals("bo-x-ewts") && needsVolumeIndication)
                     label.addValue(ManifestService.getLocaleFor(ls.language), ls.value + "_(pod/_" + volumeNum + ")");
@@ -228,13 +228,18 @@ public class ManifestService {
         manifest.setAttribution(attribution);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         manifest.addLogo(IIIF_IMAGE_PREFIX + "static::logo.png/full/max/0/default.png");
-        manifest.setLabel(getLabel(vi.volumeNumber, wi, true)); // TODO: the final true shouldn't always be true
+        List<LangString> labels = (wi != null) ? wi.labels : null;
+        labels = (labels == null && wo != null) ? wo.rootPi.labels : null;
+        manifest.setLabel(getLabel(vi.volumeNumber, labels, true)); // TODO: the final true shouldn't always be true
         int nbPagesIntro = vi.pagesIntroTbrc;
         int bPage;
         int ePage;
         if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID) {
             bPage = 1 + nbPagesIntro;
             ePage = vi.totalPages;
+            // get location from wi or wo:
+            Location location = (wi != null) ? wi.location : null;
+            location = (location == null && wo != null) ? wo.rootPi.location : null;
             if (wi != null && wi.location != null) {
                 if (wi.location.bvolnum > vi.volumeNumber)
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked starts after this volume");

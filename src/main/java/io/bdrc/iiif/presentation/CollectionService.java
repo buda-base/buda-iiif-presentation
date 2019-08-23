@@ -5,6 +5,7 @@ import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix_coll;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
@@ -81,7 +82,7 @@ public class CollectionService {
                 sb.append("?continuous=true");
             }
             final Manifest m = new Manifest(sb.toString());
-            m.setLabel(ManifestService.getLabel(i, wi, needsVolumeIndication));
+            m.setLabel(ManifestService.getLabel(i, wi.labels, needsVolumeIndication));
             c.addManifest(m);
         }
     }
@@ -101,18 +102,18 @@ public class CollectionService {
                 sb.append("?continuous=true");
             }
             final Manifest m = new Manifest(sb.toString());
-            m.setLabel(ManifestService.getLabel(i, wi, needsVolumeIndication));
+            m.setLabel(ManifestService.getLabel(i, wi.labels, needsVolumeIndication));
             c.addManifest(m);
         }
     }
 
-    public static PropertyValue getLabels(String workId, WorkInfo wi) {
+    public static PropertyValue getLabels(String workId, List<LangString> labels) {
         final PropertyValue label = new PropertyValue();
-        if (wi.labels == null || wi.labels.isEmpty()) {
+        if (labels == null || labels.isEmpty()) {
             label.addValue(workId);
             return label;
         }
-        for (LangString ls : wi.labels) {
+        for (LangString ls : labels) {
             if (ls.language != null)
                 label.addValue(ManifestService.getLocaleFor(ls.language), ls.value);
             else
@@ -134,7 +135,7 @@ public class CollectionService {
     public static Collection getCollectionForOutline(final Collection collection, final Identifier id, final WorkInfo wi, final boolean continuous) throws BDRCAPIException {
         final ItemInfo ii;
         logger.info("building outline collection for ID {}", id.getId());
-        collection.setLabel(getLabels(id.getWorkId(), wi));
+        collection.setLabel(getLabels(id.getWorkId(), wi.labels));
         if (wi.parts != null) {
             for (final PartInfo pi : wi.parts) {
                 final String collectionId = "wio:" + pi.partId;
@@ -179,7 +180,7 @@ public class CollectionService {
                     }
                 }
                 final Manifest manifest = new Manifest(manifestUrl);
-                manifest.setLabel(ManifestService.getLabel(vi.volumeNumber, wi, needsVolumeIndication));
+                manifest.setLabel(ManifestService.getLabel(vi.volumeNumber, wi.labels, needsVolumeIndication));
                 collection.addManifest(manifest);
             }
         }

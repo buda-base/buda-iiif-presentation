@@ -1,5 +1,8 @@
 package io.bdrc.iiif.presentation.resservices;
 
+import static io.bdrc.iiif.presentation.AppConstants.BDR;
+import static io.bdrc.iiif.presentation.AppConstants.BDR_len;
+
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,7 +45,14 @@ public class ConcurrentResourceService<T> {
         return null;
     }
     
-    T getSync(final String resId) throws BDRCAPIException {
+    String normalizeId(final String resId) {
+        if (resId.startsWith(BDR))
+            return "bdr:"+resId.substring(BDR_len);
+        return resId;
+    }
+    
+    T getSync(String resId) throws BDRCAPIException {
+        resId = normalizeId(resId);
         T resT = getFromCache(resId);
         if (resT != null) {
             logger.debug("found cache for "+resId);
@@ -83,7 +93,8 @@ public class ConcurrentResourceService<T> {
      *  which means just one request is made instead of 100.
      * 
      */
-    public CompletableFuture<T> getAsync(final String resId) {
+    public CompletableFuture<T> getAsync(String resId) {
+        resId = normalizeId(resId);
         T resT = getFromCache(resId);
         if (resT != null) {
             logger.debug("found cache for "+resId);
