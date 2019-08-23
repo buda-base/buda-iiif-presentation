@@ -29,7 +29,14 @@ public class VolumeInfoService extends ConcurrentResourceService<VolumeInfo> {
     private static final Logger logger = LoggerFactory.getLogger(VolumeInfoService.class);
     
     public static final VolumeInfoService Instance = new VolumeInfoService();
+    
+    public static String cachePrefix = "vis:";
 
+    VolumeInfoService() {
+        super();
+        super.cachePrefix = cachePrefix;
+    }
+    
     @Override
     final VolumeInfo getFromApi(final String volumeId) throws BDRCAPIException {
         logger.info("fetch volume info on LDS for {}", volumeId);

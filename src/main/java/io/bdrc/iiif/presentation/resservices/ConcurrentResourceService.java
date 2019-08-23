@@ -17,6 +17,8 @@ public class ConcurrentResourceService<T> {
     
     private static CacheAccess<String, Object> cache = null;
     
+    public String cachePrefix = "";
+    
     Map<String,CompletableFuture<T>> futures = new ConcurrentHashMap<>();
 
     static {
@@ -29,11 +31,11 @@ public class ConcurrentResourceService<T> {
     
     @SuppressWarnings("unchecked")
     T getFromCache(final String resId) {
-        return (T)cache.get(resId);
+        return (T)cache.get(cachePrefix+resId);
     }
     
     void putInCache(final String resId, final T res) {
-        cache.put(resId, res);
+        cache.put(cachePrefix+resId, res);
     }
     
     T getFromApi(final String resId) throws BDRCAPIException {

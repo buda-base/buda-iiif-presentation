@@ -17,6 +17,7 @@ public class AppConstants {
     public static final String LDS_ITEMGRAPH_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_itemGraph";
     public static final String LDS_VOLUME_QUERY = LDS_QUERYPREFIX + "query/table/IIIFPres_volumeInfo";
     public static final String LDS_VOLUME_OUTLINE_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_volumeOutline";
+    public static final String LDS_WORKOUTLINE_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_workOutline";
 
     public static final String IIIF_IMAGE_PREFIX = "https://iiif.bdrc.io/";
     public static final String PDF_URL_PREFIX = IIIF_IMAGE_PREFIX + "download/pdf/";

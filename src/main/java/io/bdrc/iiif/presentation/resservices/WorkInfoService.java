@@ -27,6 +27,12 @@ public class WorkInfoService extends ConcurrentResourceService<WorkInfo> {
 
     public static final WorkInfoService Instance = new WorkInfoService();
     
+    public static String cachePrefix = "wis:";
+    WorkInfoService() {
+        super();
+        super.cachePrefix = cachePrefix;
+    }
+    
     final WorkInfo getFromApi(final String workId) throws BDRCAPIException {
         logger.debug("fetch workInfo on LDS for {}", workId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead

@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PartInfo implements Comparable<PartInfo> {
     @JsonProperty("partIndex")
-    public final Integer partIndex;
+    public Integer partIndex = null;
     @JsonProperty("partId")
-    public final String partId;
+    public String partId = null;
     @JsonProperty("labels")
     public List<LangString> labels = null;
     @JsonProperty("subparts")
@@ -24,6 +24,8 @@ public class PartInfo implements Comparable<PartInfo> {
         this.partId = partId;
         this.partIndex = partIndex;
     }
+    
+    public PartInfo() {}
     
     @Override
     public int compareTo(PartInfo compared) {
