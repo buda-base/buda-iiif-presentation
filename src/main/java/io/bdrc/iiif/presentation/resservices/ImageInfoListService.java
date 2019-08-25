@@ -84,7 +84,7 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
     }
     
     @Override
-    final List<ImageInfo> getFromApi(final String s3key) throws BDRCAPIException {
+    final public List<ImageInfo> getFromApi(final String s3key) throws BDRCAPIException {
         final AmazonS3 s3Client = getClient();
         logger.info("fetching s3 key {}", s3key);
         final S3Object object;

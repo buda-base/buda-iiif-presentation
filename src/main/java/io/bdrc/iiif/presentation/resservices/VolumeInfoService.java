@@ -38,7 +38,7 @@ public class VolumeInfoService extends ConcurrentResourceService<VolumeInfo> {
     }
     
     @Override
-    final VolumeInfo getFromApi(final String volumeId) throws BDRCAPIException {
+    final public VolumeInfo getFromApi(final String volumeId) throws BDRCAPIException {
         logger.info("fetch volume info on LDS for {}", volumeId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); // Use this instead
         final VolumeInfo resVolumeInfo;

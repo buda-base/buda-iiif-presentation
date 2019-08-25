@@ -41,7 +41,7 @@ public class ConcurrentResourceService<T> {
         cache.put(cachePrefix+resId, res);
     }
     
-    T getFromApi(final String resId) throws BDRCAPIException {
+    public T getFromApi(final String resId) throws BDRCAPIException {
         return null;
     }
     
@@ -51,7 +51,7 @@ public class ConcurrentResourceService<T> {
         return resId;
     }
     
-    T getSync(String resId) throws BDRCAPIException {
+    public T getSync(String resId) throws BDRCAPIException {
         resId = normalizeId(resId);
         T resT = getFromCache(resId);
         if (resT != null) {

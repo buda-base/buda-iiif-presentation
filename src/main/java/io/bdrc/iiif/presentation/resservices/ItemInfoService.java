@@ -34,7 +34,7 @@ public class ItemInfoService extends ConcurrentResourceService<ItemInfo> {
     }
 
     @Override
-    final ItemInfo getFromApi(final String itemId) throws BDRCAPIException {
+    final public ItemInfo getFromApi(final String itemId) throws BDRCAPIException {
         logger.debug("fetch itemInfo on LDS for {}", itemId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
         final ItemInfo resItemInfo;

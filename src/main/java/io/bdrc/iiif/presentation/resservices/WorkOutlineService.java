@@ -34,7 +34,7 @@ private static final Logger logger = LoggerFactory.getLogger(WorkOutlineService.
     }
     
     @Override
-    final WorkOutline getFromApi(final String workId) throws BDRCAPIException {
+    final public WorkOutline getFromApi(final String workId) throws BDRCAPIException {
         logger.debug("fetch workOutline on LDS for {}", workId);
         final HttpClient httpClient = HttpClientBuilder.create().build();
         final WorkOutline res;

@@ -33,7 +33,7 @@ public class WorkInfoService extends ConcurrentResourceService<WorkInfo> {
         super.cachePrefix = cachePrefix;
     }
     
-    final WorkInfo getFromApi(final String workId) throws BDRCAPIException {
+    final public WorkInfo getFromApi(final String workId) throws BDRCAPIException {
         logger.debug("fetch workInfo on LDS for {}", workId);
         final HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead
         final Model resModel;
