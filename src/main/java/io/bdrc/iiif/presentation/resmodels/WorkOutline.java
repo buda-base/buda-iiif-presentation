@@ -56,6 +56,8 @@ public class WorkOutline {
             // if the part is not in the volume, no need to go any further
             return null;
         }
+        if (pi.parts == null)
+            return null;
         PartInfo aChildInVolume = null;
         int nbChildrenInVolume = 0;
         for (final PartInfo child : pi.parts) {
