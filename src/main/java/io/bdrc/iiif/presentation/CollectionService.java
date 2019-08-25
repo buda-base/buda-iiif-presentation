@@ -97,7 +97,7 @@ public class CollectionService {
             if (vi == null)
                 continue;
             final StringBuilder sb = new StringBuilder();
-            sb.append(IIIFPresPrefix + "wv:" + workId + "::" + vi.getPrefixedUri() + "/manifest");
+            sb.append(IIIFPresPrefix + "wvo:" + workId + "::" + vi.getPrefixedUri() + "/manifest");
             if (continuous) {
                 sb.append("?continuous=true");
             }
