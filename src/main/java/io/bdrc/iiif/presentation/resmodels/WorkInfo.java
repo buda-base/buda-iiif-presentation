@@ -9,6 +9,7 @@ import static io.bdrc.iiif.presentation.AppConstants.TMPPREFIX;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Literal;
@@ -27,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
-public class WorkInfo {
+public class WorkInfo extends PartInfo {
     
     private static final Logger logger = LoggerFactory.getLogger(WorkInfo.class);
 
@@ -41,10 +42,6 @@ public class WorkInfo {
     public Boolean isRoot = false;
     @JsonProperty("rootWorkId")
     public String rootWorkId = null;
-    @JsonProperty("parts")
-    public List<PartInfo> parts = null;
-    @JsonProperty("labels")
-    public List<LangString> labels = null; // ?
     @JsonProperty("creatorLabels")
     public List<LangString> creatorLabels = null; // ?
     @JsonProperty("hasLocation")
@@ -52,12 +49,6 @@ public class WorkInfo {
     // prefixed
     @JsonProperty("firstVolumeId")
     public String firstVolumeId = null;
-    @JsonProperty("location")
-    public Location location = null;
-    @JsonProperty("linkTo")
-    public String linkTo = null;
-    @JsonProperty("linkToType")
-    public String linkToType = null;
     // prefixed
     @JsonProperty("itemId")
     public String itemId = null;
@@ -143,7 +134,7 @@ public class WorkInfo {
             }
         }
 
-        this.parts = getParts(m, work);
+        this.parts = getParts(m, work, null);
         this.labels = getLabels(m, work);
         
         final Resource linkTo = work.getPropertyResourceValue(m.getProperty(BDO, "workLinkTo"));
@@ -154,7 +145,7 @@ public class WorkInfo {
                 this.linkToType = linkToType.getLocalName();
             }
             if (this.parts == null) {
-                this.parts = getParts(m, linkTo);
+                this.parts = getParts(m, linkTo, null);
             }
             if (this.labels == null) {
                 this.labels = getLabels(m, linkTo);
@@ -195,7 +186,7 @@ public class WorkInfo {
     }
     
     // this is recursive, and assumes no loop
-    public static List<PartInfo> getParts(final Model m, final Resource work) {
+    public static List<PartInfo> getParts(final Model m, final Resource work, final Map<String,PartInfo> shortIdPartMap) {
         final StmtIterator partsItr = work.listProperties(m.getProperty(BDO, "workHasPart"));
         if (partsItr.hasNext()) {
             final Property partIndexP = m.getProperty(BDO, "workPartIndex");
@@ -210,6 +201,8 @@ public class WorkInfo {
                     partInfo = new PartInfo(partId, null);
                 else
                     partInfo = new PartInfo(partId, partIndexS.getInt());
+                if (shortIdPartMap != null)
+                    shortIdPartMap.put(partId, partInfo);
                 final Resource linkTo = part.getPropertyResourceValue(m.getProperty(BDO, "workLinkTo"));
                 if (linkTo != null) {
                     partInfo.linkTo = "bdr:"+linkTo.getLocalName();
@@ -222,14 +215,14 @@ public class WorkInfo {
                 if (location != null)
                     partInfo.location = new Location(m, location);
                 partInfo.labels = getLabels(m, part);
-                partInfo.subparts = getParts(m, part);
+                partInfo.parts = getParts(m, part, shortIdPartMap);
                 if (partInfo.labels == null && linkTo != null) {
                     partInfo.labels = getLabels(m, linkTo);
                 }
-                if (partInfo.subparts == null && linkTo != null) {
-                    partInfo.subparts = getParts(m, linkTo);
+                if (partInfo.parts == null && linkTo != null) {
+                    partInfo.parts = getParts(m, linkTo, shortIdPartMap);
                 }
-                if (location != null || partInfo.labels != null || partInfo.subparts != null || partInfo.linkTo != null)
+                if (location != null || partInfo.labels != null || partInfo.parts != null || partInfo.linkTo != null)
                     parts.add(partInfo);
             }
             Collections.sort(parts);

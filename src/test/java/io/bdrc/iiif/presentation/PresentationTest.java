@@ -166,7 +166,7 @@ public class PresentationTest {
         vi.itemId = BDR+"I22084";
         vi.volumeNumber = 1;
         vi.totalPages = 15;
-        Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, null, "bdr:V22084_I0890", false, wo);
+        Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:V22084_I0890", false, wo.getPartForWorkId("bdr:W22084_0002"));
         final File fout2 = new File("/tmp/virtualWorkLocation-manifest.json");
         IIIFApiObjectMapperProvider.writer.writeValue(fout2, man);
     }

@@ -34,6 +34,9 @@ import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.AccessType;
 import io.bdrc.iiif.presentation.resmodels.ImageInfo;
 import io.bdrc.iiif.presentation.resmodels.ItemInfo;
+import io.bdrc.iiif.presentation.resmodels.LangString;
+import io.bdrc.iiif.presentation.resmodels.Location;
+import io.bdrc.iiif.presentation.resmodels.PartInfo;
 import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
 import io.bdrc.iiif.presentation.resmodels.WorkInfo;
 import io.bdrc.iiif.presentation.resmodels.WorkOutline;
@@ -93,10 +96,12 @@ public class IIIFPresentationService {
             e.printStackTrace();
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
+        PartInfo rootPart = null;
         WorkInfo wi = null;
         if (id.getWorkId() != null && (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_ITEM || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID)) {
             try {
                 wi = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
+                rootPart = wi;
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
@@ -106,6 +111,7 @@ public class IIIFPresentationService {
         if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE && id.getWorkId() != null && id.getVolumeId() == null) {
             try {
                 wo = WorkOutlineService.Instance.getAsync(id.getWorkId()).get();
+                rootPart = wo.getPartForWorkId(id.getWorkId());
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
@@ -147,13 +153,14 @@ public class IIIFPresentationService {
                 // important: we take the outline of the whole root work, that makes
                 // caching more efficient
                 wo = WorkOutlineService.Instance.getAsync(vi.workId).get();
+                rootPart = wo.getPartForWorkId(id.getWorkId());
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
         }
         // TODO: case where a part is asked with an outline, we need to make sure that
         // we get the part asked by the user
-        final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, wi, volumeId, al == AccessLevel.FAIR_USE, wo);
+        final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, volumeId, al == AccessLevel.FAIR_USE, rootPart);
         final StreamingOutput stream = new StreamingOutput() {
             @Override
             public void write(final OutputStream os) throws IOException, WebApplicationException {

@@ -181,7 +181,7 @@ public class VolumeInfo {
             this.restrictedInChina = restrictedInChinaS.getBoolean();
         }
 
-        this.partInfo = WorkInfo.getParts(m, work);
+        this.partInfo = WorkInfo.getParts(m, work, null);
         // this.labels = getLabels(m, volume);
     }
 

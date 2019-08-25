@@ -1,8 +1,12 @@
 package io.bdrc.iiif.presentation.resmodels;
 
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
+import static io.bdrc.iiif.presentation.AppConstants.BDR_len;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.TMPPREFIX;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
@@ -15,8 +19,8 @@ public class WorkOutline {
 
     @JsonProperty("firstVolumeId")
     public String firstVolumeId = null;
-    @JsonProperty("rootPi")
-    public PartInfo rootPi = null;
+    @JsonProperty("shortIdPartMap")
+    public Map<String,PartInfo> shortIdPartMap = new HashMap<>();
     
     public WorkOutline(final Model m, String workId) throws BDRCAPIException {
         if (workId.startsWith("bdr:"))
@@ -26,10 +30,11 @@ public class WorkOutline {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: missing work");
         // we currently ignore linkTo, this should never happen with the current
         // code although it would probably be good to implement it at some point
-        this.rootPi = new PartInfo();
-        this.rootPi.labels = WorkInfo.getLabels(m, work);
+        PartInfo rootPi = new PartInfo();
+        this.shortIdPartMap.put("bdr:"+work.getLocalName(), rootPi);
+        rootPi.labels = WorkInfo.getLabels(m, work);
         // this is recursive
-        this.rootPi.subparts = WorkInfo.getParts(m, work);
+        rootPi.parts = WorkInfo.getParts(m, work, this.shortIdPartMap);
         final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
         if (firstVolume != null) {
             this.firstVolumeId = "bdr:"+firstVolume.getLocalName();
@@ -37,8 +42,10 @@ public class WorkOutline {
     }
     
     public PartInfo getPartForWorkId(String workId) {
-        // TODO: implement
-        return rootPi;
+        if (workId.startsWith(BDR)) {
+            workId = "bdr:"+workId.substring(BDR_len);
+        }
+        return this.shortIdPartMap.get(workId);
     }
     
     // function finding the first node of the tree having two or more
@@ -51,7 +58,7 @@ public class WorkOutline {
         }
         PartInfo aChildInVolume = null;
         int nbChildrenInVolume = 0;
-        for (final PartInfo child : pi.subparts) {
+        for (final PartInfo child : pi.parts) {
             if (isInVolumeR(volNum, child)) {
                 aChildInVolume = child;
                 nbChildrenInVolume += 1;
@@ -76,7 +83,7 @@ public class WorkOutline {
         if (loc != null) {
             return loc.bvolnum <= volNum && loc.evolnum >= volNum;
         }
-        for (final PartInfo child : pi.subparts) {
+        for (final PartInfo child : pi.parts) {
             if (isInVolumeR(volNum, child)) {
                 return true;
             }

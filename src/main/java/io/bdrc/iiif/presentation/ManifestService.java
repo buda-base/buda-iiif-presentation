@@ -209,8 +209,8 @@ public class ManifestService {
         return label;
     }
 
-    public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi, boolean continuous, final WorkInfo wi, final String volumeId, final boolean fairUse, final WorkOutline wo) throws BDRCAPIException {
-        if (id.getType() != Identifier.MANIFEST_ID || (id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE)) {
+    public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi, boolean continuous, final String volumeId, final boolean fairUse, final PartInfo rootPart) throws BDRCAPIException {
+        if (id.getType() != Identifier.MANIFEST_ID || (id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE)) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
         if (!vi.workId.startsWith(BDR)) {
@@ -228,31 +228,27 @@ public class ManifestService {
         manifest.setAttribution(attribution);
         manifest.addLicense("https://creativecommons.org/publicdomain/mark/1.0/");
         manifest.addLogo(IIIF_IMAGE_PREFIX + "static::logo.png/full/max/0/default.png");
-        List<LangString> labels = (wi != null) ? wi.labels : null;
-        labels = (labels == null && wo != null) ? wo.rootPi.labels : null;
-        manifest.setLabel(getLabel(vi.volumeNumber, labels, true)); // TODO: the final true shouldn't always be true
+        manifest.setLabel(getLabel(vi.volumeNumber, (rootPart == null ? null : rootPart.labels), true)); // TODO: the final true shouldn't always be true
         int nbPagesIntro = vi.pagesIntroTbrc;
         int bPage;
         int ePage;
         if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID) {
             bPage = 1 + nbPagesIntro;
             ePage = vi.totalPages;
-            // get location from wi or wo:
-            Location location = (wi != null) ? wi.location : null;
-            location = (location == null && wo != null) ? wo.rootPi.location : null;
-            if (wi != null && wi.location != null) {
-                if (wi.location.bvolnum > vi.volumeNumber)
+            Location location = rootPart == null ? null : rootPart.location;
+            if (location != null) {
+                if (location.bvolnum > vi.volumeNumber)
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked starts after this volume");
                 // if bvolnum < vi.volumeNumber, we already have bPage correctly set to
                 // 1+nbPagesIntro
-                if (wi.location.bvolnum == vi.volumeNumber)
-                    bPage = wi.location.bpagenum;
-                if (wi.location.evolnum < vi.volumeNumber)
+                if (location.bvolnum == vi.volumeNumber)
+                    bPage = location.bpagenum;
+                if (location.evolnum < vi.volumeNumber)
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked ends before this volume");
                 // if evolnum > vi.volumeNumber, we already have bPage correctly set to
                 // vi.totalPages
-                if (wi.location.evolnum == vi.volumeNumber && wi.location.epagenum != -1)
-                    ePage = wi.location.epagenum;
+                if (location.evolnum == vi.volumeNumber && location.epagenum != -1)
+                    ePage = location.epagenum;
             }
         } else {
             bPage = id.getBPageNum() == null ? 1 + nbPagesIntro : id.getBPageNum().intValue();
@@ -267,7 +263,7 @@ public class ManifestService {
         final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
         manifest.setRenderings(oc);
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
-            addRangesToManifest(manifest, id, vi, volumeId, fairUse, imageInfoList, wo);
+            addRangesToManifest(manifest, id, vi, volumeId, fairUse, imageInfoList, rootPart);
         }
         manifest.addSequence(mainSeq);
         return manifest;
@@ -285,15 +281,15 @@ public class ManifestService {
         return ct;
     }
 
-    public static void addRangesToManifest(final Manifest m, final Identifier id, final VolumeInfo vi, final String volumeId, final boolean fairUse, final List<ImageInfo> imageInfoList, final WorkOutline wo) throws BDRCAPIException {
-        if (wo == null || wo.rootPi == null)
+    public static void addRangesToManifest(final Manifest m, final Identifier id, final VolumeInfo vi, final String volumeId, final boolean fairUse, final List<ImageInfo> imageInfoList, final PartInfo rootPi) throws BDRCAPIException {
+        if (rootPi == null)
             return;
-        final PartInfo volumeRoot = WorkOutline.getRootPiForVolumeR(wo.rootPi, vi.volumeNumber);
+        final PartInfo volumeRoot = WorkOutline.getRootPiForVolumeR(rootPi, vi.volumeNumber);
         if (volumeRoot == null)
             return;
         final Range r = new Range(IIIFPresPrefix + "vo:" + id.getVolumeId() + "/range/top", "Table of Contents");
         r.setViewingHints("top");
-        for (final PartInfo part : volumeRoot.subparts) {
+        for (final PartInfo part : volumeRoot.parts) {
             addSubRangeToRange(m, r, id, part, vi, volumeId, imageInfoList, fairUse);
         }
         m.addRange(r);
@@ -301,7 +297,7 @@ public class ManifestService {
 
     public static void addSubRangeToRange(final Manifest m, final Range r, final Identifier id, final PartInfo part, final VolumeInfo vi, final String volumeId, final List<ImageInfo> imageInfoList, final boolean fairUse) throws BDRCAPIException {
         // do not add ranges where there is no location nor subparts
-        if (part.location == null && part.subparts == null)
+        if (part.location == null && part.parts == null)
             return;
         final String rangeUri = IIIFPresPrefix + "vo:" + volumeId + "/range/w:" + part.partId;
         final Range subRange = new Range(rangeUri);
@@ -346,8 +342,8 @@ public class ManifestService {
                 }
             }
         }
-        if (part.subparts != null) {
-            for (final PartInfo subpart : part.subparts) {
+        if (part.parts != null) {
+            for (final PartInfo subpart : part.parts) {
                 addSubRangeToRange(m, subRange, id, subpart, vi, volumeId, imageInfoList, fairUse);
             }
         }
