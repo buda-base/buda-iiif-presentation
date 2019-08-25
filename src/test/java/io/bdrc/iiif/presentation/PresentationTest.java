@@ -152,7 +152,7 @@ public class PresentationTest {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workOutline.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
-        final WorkOutline wo = new WorkOutline(m, "bdr:W25094");
+        final WorkOutline wo = new WorkOutline(m, "bdr:W22084");
         //final File fout = new File("/tmp/workOutline.json");
         //om.writeValue(fout, wo);
         final Identifier id = new Identifier("wvo:bdr:W22084_0002::bdr:V22084_I0890", Identifier.MANIFEST_ID);
@@ -167,8 +167,8 @@ public class PresentationTest {
         vi.volumeNumber = 1;
         vi.totalPages = 15;
         Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:V22084_I0890", false, wo.getPartForWorkId("bdr:W22084_0002"));
-        final File fout2 = new File("/tmp/virtualWorkLocation-manifest.json");
-        IIIFApiObjectMapperProvider.writer.writeValue(fout2, man);
+        //final File fout2 = new File("/tmp/workOutline-manifest.json");
+        //IIIFApiObjectMapperProvider.writer.writeValue(fout2, man);
     }
     
     @Test
