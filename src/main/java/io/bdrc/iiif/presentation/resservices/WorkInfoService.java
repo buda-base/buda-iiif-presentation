@@ -26,11 +26,9 @@ public class WorkInfoService extends ConcurrentResourceService<WorkInfo> {
     private static final Logger logger = LoggerFactory.getLogger(WorkInfoService.class);
 
     public static final WorkInfoService Instance = new WorkInfoService();
-    
-    public static String cachePrefix = "wis:";
+
     WorkInfoService() {
-        super();
-        super.cachePrefix = cachePrefix;
+        super(ServiceCache.CACHE, "wis:");
     }
     
     final public WorkInfo getFromApi(final String workId) throws BDRCAPIException {

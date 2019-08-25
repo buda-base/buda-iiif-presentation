@@ -18,18 +18,17 @@ public class ConcurrentResourceService<T> {
 
     static Logger logger = LoggerFactory.getLogger(ConcurrentResourceService.class);
     
-    private static CacheAccess<String, Object> cache = null;
+    CacheAccess<String, Object> cache = null;
     
-    public String cachePrefix = "";
+    String cachePrefix = "";
     
     Map<String,CompletableFuture<T>> futures = new ConcurrentHashMap<>();
 
-    static {
-        try {
-            cache = ServiceCache.CACHE;
-        } catch (CacheException e) {
-            logger.error("cache initialization error, this shouldn't happen!", e);
-        }
+    public ConcurrentResourceService () {}
+    
+    public ConcurrentResourceService(CacheAccess<String, Object> cache, String cachePrefix) {
+        this.cache = cache;
+        this.cachePrefix = cachePrefix;
     }
     
     @SuppressWarnings("unchecked")

@@ -27,10 +27,8 @@ public class ItemInfoService extends ConcurrentResourceService<ItemInfo> {
     
     public static final ItemInfoService Instance = new ItemInfoService();
     
-    public static String cachePrefix = "iis:";
     ItemInfoService() {
-        super();
-        super.cachePrefix = cachePrefix;
+        super(ServiceCache.CACHE, "iis:");
     }
 
     @Override

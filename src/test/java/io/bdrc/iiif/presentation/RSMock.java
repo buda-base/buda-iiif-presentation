@@ -2,16 +2,14 @@ package io.bdrc.iiif.presentation;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resservices.ConcurrentResourceService;
+import io.bdrc.iiif.presentation.resservices.ServiceCache;
 
 public class RSMock extends ConcurrentResourceService<String> {
-
-    public static String cachePrefix = "mock:";
     
     public static final RSMock Instance = new RSMock();
-    
+
     RSMock() {
-        super();
-        super.cachePrefix = cachePrefix;
+        super(ServiceCache.CACHE, "mock:");
     }
     
     @Override

@@ -26,11 +26,9 @@ public class WorkOutlineService extends ConcurrentResourceService<WorkOutline> {
 private static final Logger logger = LoggerFactory.getLogger(WorkOutlineService.class);
     
     public static final WorkOutlineService Instance = new WorkOutlineService();
-    
-    public static String cachePrefix = "woss:";
+
     WorkOutlineService() {
-        super();
-        super.cachePrefix = cachePrefix;
+        super(ServiceCache.CACHE, "wo:");
     }
     
     @Override

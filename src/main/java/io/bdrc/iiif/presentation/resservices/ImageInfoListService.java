@@ -39,6 +39,10 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
     private static final Charset utf8 = Charset.forName("UTF-8");
     public static final ImageInfoListService Instance = new ImageInfoListService();
 
+    ImageInfoListService() {
+        super(ServiceCache.CACHE, "");
+    }
+    
     static {
         om = new ObjectMapper();
         try {
