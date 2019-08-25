@@ -155,7 +155,7 @@ public class PresentationTest {
         final WorkOutline wo = new WorkOutline(m, "bdr:W22084");
         //final File fout = new File("/tmp/workOutline.json");
         //om.writeValue(fout, wo);
-        final Identifier id = new Identifier("wvo:bdr:W22084_0002::bdr:V22084_I0890", Identifier.MANIFEST_ID);
+        final Identifier id = new Identifier("wvo:bdr:W22084::bdr:V22084_I0890", Identifier.MANIFEST_ID);
         final String cacheKey = ImageInfoListService.getKey("W22084", "I0890");
         final List<ImageInfo> ii = getTestImageList("W22084-0890.json");
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
@@ -166,7 +166,7 @@ public class PresentationTest {
         vi.itemId = BDR+"I22084";
         vi.volumeNumber = 1;
         vi.totalPages = 15;
-        Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:V22084_I0890", false, wo.getPartForWorkId("bdr:W22084_0002"));
+        Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:V22084_I0890", false, wo.getPartForWorkId("bdr:W22084"));
         //final File fout2 = new File("/tmp/workOutline-manifest.json");
         //IIIFApiObjectMapperProvider.writer.writeValue(fout2, man);
     }

@@ -262,7 +262,7 @@ public class ManifestService {
         // PDF / zip download
         final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
         manifest.setRenderings(oc);
-        if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
+        if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE) {
             addRangesToManifest(manifest, id, vi, volumeId, fairUse, imageInfoList, rootPart);
         }
         manifest.addSequence(mainSeq);
