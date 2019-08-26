@@ -109,6 +109,8 @@ public class WorkOutline {
         if (loc != null) {
             return loc.bvolnum <= volNum && loc.evolnum >= volNum;
         }
+        if (pi.parts == null)
+            return false;
         for (final PartInfo child : pi.parts) {
             if (isInVolumeR(volNum, child)) {
                 return true;
