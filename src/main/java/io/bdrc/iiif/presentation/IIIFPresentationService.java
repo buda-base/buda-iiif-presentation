@@ -153,7 +153,10 @@ public class IIIFPresentationService {
                 // important: we take the outline of the whole root work, that makes
                 // caching more efficient
                 wo = WorkOutlineService.Instance.getAsync(vi.workId).get();
-                rootPart = wo.getPartForWorkId(id.getWorkId());
+                String shortWorkId = id.getWorkId();
+                if (shortWorkId == null)
+                    shortWorkId = "bdr:"+vi.workId.substring(BDR_len);
+                rootPart = wo.getPartForWorkId(shortWorkId);
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
