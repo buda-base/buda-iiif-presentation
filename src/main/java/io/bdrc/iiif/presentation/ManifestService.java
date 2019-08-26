@@ -314,7 +314,7 @@ public class ManifestService {
             int ePage = vi.totalPages;
             if (loc.evolnum != null && loc.evolnum == vi.volumeNumber && loc.epagenum != null)
                 ePage = loc.epagenum;
-            String debug = "bPage="+bPage+"; ePage="+ePage+"; ";
+            String debug = "bPage="+bPage+"; ePage="+ePage+"; volnum="+vi.volumeNumber;
             debug += loc.toString();
             subRange.setLabel(new PropertyValue(debug));
             if (!fairUse) {
