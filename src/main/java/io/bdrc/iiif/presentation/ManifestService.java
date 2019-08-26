@@ -287,7 +287,7 @@ public class ManifestService {
         final PartInfo volumeRoot = WorkOutline.getRootPiForVolumeR(rootPi, vi.volumeNumber);
         if (volumeRoot == null)
             return;
-        final Range r = new Range(IIIFPresPrefix + "vo:" + id.getVolumeId() + "/range/top", "Table of Contents");
+        final Range r = new Range(IIIFPresPrefix + "v:" + id.getVolumeId() + "/range/top", "Table of Contents");
         r.setViewingHints("top");
         for (final PartInfo part : volumeRoot.parts) {
             addSubRangeToRange(m, r, id, part, vi, volumeId, imageInfoList, fairUse);
@@ -299,10 +299,10 @@ public class ManifestService {
         // do not add ranges where there is no location nor subparts
         if (part.location == null && part.parts == null)
             return;
-        final String rangeUri = IIIFPresPrefix + "vo:" + volumeId + "/range/w:" + part.partId;
+        final String rangeUri = IIIFPresPrefix + "v:" + volumeId + "/range/w:" + part.partId;
         final Range subRange = new Range(rangeUri);
-        final PropertyValue labels = getPropForLabels(part.labels);
-        subRange.setLabel(labels);
+        //final PropertyValue labels = getPropForLabels(part.labels);
+        //subRange.setLabel(labels);
         if (part.location != null) {
             final Location loc = part.location;
             int bPage = 1;
@@ -314,6 +314,9 @@ public class ManifestService {
             int ePage = vi.totalPages;
             if (loc.evolnum != null && loc.evolnum == vi.volumeNumber && loc.epagenum != null)
                 ePage = loc.epagenum;
+            String debug = "bPage="+bPage+"; ePage="+ePage+"; ";
+            debug += loc.toString();
+            subRange.setLabel(new PropertyValue(debug));
             if (!fairUse) {
                 for (int seqNum = bPage; seqNum <= ePage; seqNum++) {
                     // imgSeqNum starts at 1
