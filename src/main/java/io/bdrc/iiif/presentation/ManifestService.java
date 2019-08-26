@@ -305,6 +305,8 @@ public class ManifestService {
         //subRange.setLabel(labels);
         if (part.location != null) {
             final Location loc = part.location;
+            if (loc.bvolnum > vi.volumeNumber || loc.evolnum < vi.volumeNumber)
+                return;
             int bPage = 1;
             if (loc.bvolnum == vi.volumeNumber && loc.bpagenum != null)
                 bPage = loc.bpagenum;
