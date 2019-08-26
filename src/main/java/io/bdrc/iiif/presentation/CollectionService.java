@@ -166,7 +166,7 @@ public class CollectionService {
             // addManifestsForLocation(collection, wi, ii, continuous);
             addManifestsForWorkInVolumes(collection, wi, ii, continuous, id.getWorkId());
         } else if (wi.isRoot) {
-            final String volPrefix = "v:";
+            final String volPrefix = "vo:";
             boolean needsVolumeIndication = ii.volumes.size() > 1;
             for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
                 final String manifestId = volPrefix + vi.getPrefixedUri();

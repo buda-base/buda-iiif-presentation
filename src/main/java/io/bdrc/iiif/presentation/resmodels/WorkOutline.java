@@ -1,5 +1,6 @@
 package io.bdrc.iiif.presentation.resmodels;
 
+import static io.bdrc.iiif.presentation.AppConstants.BDO;
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
 import static io.bdrc.iiif.presentation.AppConstants.BDR_len;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
@@ -10,6 +11,7 @@ import java.util.Map;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDF;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -38,6 +40,28 @@ public class WorkOutline {
         final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
         if (firstVolume != null) {
             this.firstVolumeId = "bdr:"+firstVolume.getLocalName();
+        }
+        Resource location = work.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
+        if (location != null)
+            rootPi.location = new Location(m, location);
+        final Resource linkTo = work.getPropertyResourceValue(m.getProperty(BDO, "workLinkTo"));
+        if (linkTo != null) {
+            rootPi.linkTo = "bdr:"+linkTo.getLocalName();
+            final Resource linkToType = linkTo.getPropertyResourceValue(RDF.type);
+            if (linkToType != null) {
+                rootPi.linkToType = linkToType.getLocalName();
+            }
+            if (rootPi.parts == null) {
+                rootPi.parts = WorkInfo.getParts(m, linkTo, null);
+            }
+            if (rootPi.labels == null) {
+                rootPi.labels = WorkInfo.getLabels(m, linkTo);
+            }
+            if (rootPi.location == null) {
+                location = linkTo.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
+                if (location != null)
+                    rootPi.location = new Location(m, location);
+            }
         }
     }
     
