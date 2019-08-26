@@ -35,7 +35,6 @@ import io.bdrc.iiif.presentation.resmodels.LangString;
 import io.bdrc.iiif.presentation.resmodels.Location;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
 import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
-import io.bdrc.iiif.presentation.resmodels.WorkInfo;
 import io.bdrc.iiif.presentation.resmodels.WorkOutline;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.libraries.Identifier;
@@ -301,8 +300,8 @@ public class ManifestService {
             return;
         final String rangeUri = IIIFPresPrefix + "v:" + volumeId + "/range/w:" + part.partId;
         final Range subRange = new Range(rangeUri);
-        //final PropertyValue labels = getPropForLabels(part.labels);
-        //subRange.setLabel(labels);
+        final PropertyValue labels = getPropForLabels(part.labels);
+        subRange.setLabel(labels);
         if (part.location != null) {
             final Location loc = part.location;
             if (loc.bvolnum > vi.volumeNumber || loc.evolnum < vi.volumeNumber)
@@ -316,9 +315,6 @@ public class ManifestService {
             int ePage = vi.totalPages;
             if (loc.evolnum != null && loc.evolnum == vi.volumeNumber && loc.epagenum != null)
                 ePage = loc.epagenum;
-            String debug = "bPage="+bPage+"; ePage="+ePage+"; volnum="+vi.volumeNumber;
-            debug += loc.toString();
-            subRange.setLabel(new PropertyValue(debug));
             if (!fairUse) {
                 for (int seqNum = bPage; seqNum <= ePage; seqNum++) {
                     // imgSeqNum starts at 1
