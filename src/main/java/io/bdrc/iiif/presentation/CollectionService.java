@@ -68,7 +68,7 @@ public class CollectionService {
             final int volumebPage = (i == loc.bvolnum) ? loc.bpagenum : 0;
             final int volumeePage = (i == loc.evolnum) ? loc.epagenum : -1;
             final StringBuilder sb = new StringBuilder();
-            sb.append(IIIFPresPrefix + "v:" + vi.getPrefixedUri());
+            sb.append(IIIFPresPrefix + "vo:" + vi.getPrefixedUri());
             if (volumebPage != 0 || volumeePage != -1) {
                 sb.append("::");
                 if (volumebPage != 0)
