@@ -152,6 +152,9 @@ public class ManifestService {
         // all indices start at 1
         mainSeq.setViewingDirection(getViewingDirection(imageInfoList));
         Canvas firstCanvas = null;
+        final int totalPages = imageInfoList.size();
+        if (totalPages != vi.totalPages)
+            logger.error("VolumeInfo has a different image number than the json file ("+vi.totalPages+" vs. "+totalPages+") for identifier "+id.getId());
         if (!fairUse) {
             for (int imgSeqNum = beginIndex; imgSeqNum <= endIndex; imgSeqNum++) {
                 final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq);
@@ -160,7 +163,7 @@ public class ManifestService {
             }
         } else {
             final int firstUnaccessiblePage = AppConstants.FAIRUSE_PAGES_S + vi.pagesIntroTbrc + 1;
-            final int lastUnaccessiblePage = vi.totalPages - AppConstants.FAIRUSE_PAGES_E;
+            final int lastUnaccessiblePage = totalPages - AppConstants.FAIRUSE_PAGES_E;
             // first part: min(firstUnaccessiblePage+1,beginIndex) to
             // min(endIndex,firstUnaccessiblePage+1)
             for (int imgSeqNum = Math.min(firstUnaccessiblePage, beginIndex); imgSeqNum <= Math.min(endIndex, firstUnaccessiblePage - 1); imgSeqNum++) {
@@ -231,9 +234,10 @@ public class ManifestService {
         int nbPagesIntro = vi.pagesIntroTbrc;
         int bPage;
         int ePage;
+        final int totalPages = imageInfoList.size();
         if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID) {
             bPage = 1 + nbPagesIntro;
-            ePage = vi.totalPages;
+            ePage = totalPages;
             Location location = rootPart == null ? null : rootPart.location;
             if (location != null) {
                 if (location.bvolnum > vi.volumeNumber)
@@ -251,7 +255,7 @@ public class ManifestService {
             }
         } else {
             bPage = id.getBPageNum() == null ? 1 + nbPagesIntro : id.getBPageNum().intValue();
-            ePage = id.getEPageNum() == null ? vi.totalPages : id.getEPageNum().intValue();
+            ePage = id.getEPageNum() == null ? totalPages : id.getEPageNum().intValue();
         }
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList, vi, volumeId, bPage, ePage, fairUse);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
@@ -312,7 +316,7 @@ public class ManifestService {
             // ignoring the tbrc pages
             if (vi.pagesIntroTbrc != null && bPage <= vi.pagesIntroTbrc)
                 bPage = vi.pagesIntroTbrc + 1;
-            int ePage = vi.totalPages;
+            int ePage = imageInfoList.size();
             if (loc.evolnum != null && loc.evolnum == vi.volumeNumber && loc.epagenum != null)
                 ePage = loc.epagenum;
             if (!fairUse) {
@@ -323,7 +327,7 @@ public class ManifestService {
                 }
             } else {
                 final int firstUnaccessiblePage = AppConstants.FAIRUSE_PAGES_S + vi.pagesIntroTbrc + 1;
-                final int lastUnaccessiblePage = vi.totalPages - AppConstants.FAIRUSE_PAGES_E;
+                final int lastUnaccessiblePage = imageInfoList.size() - AppConstants.FAIRUSE_PAGES_E;
                 // first part: min(firstUnaccessiblePage+1,beginIndex) to
                 // min(endIndex,firstUnaccessiblePage+1)
                 for (int imgSeqNum = Math.min(firstUnaccessiblePage, bPage); imgSeqNum <= Math.min(ePage, firstUnaccessiblePage - 1); imgSeqNum++) {

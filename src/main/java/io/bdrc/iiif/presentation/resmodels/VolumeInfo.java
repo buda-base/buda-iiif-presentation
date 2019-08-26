@@ -7,7 +7,6 @@ import static io.bdrc.iiif.presentation.AppConstants.TMPPREFIX;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.jena.graph.Triple;
@@ -24,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resservices.VolumeInfoService;
-import io.bdrc.libraries.ImageListIterator;
 
 public class VolumeInfo {
 
@@ -41,7 +39,7 @@ public class VolumeInfo {
     @JsonProperty("itemId")
     public String itemId;
     @JsonProperty("imageList")
-    public String imageList;
+    private String imageList;
     @JsonProperty("totalPages")
     public Integer totalPages;
     @JsonProperty("pagesIntroTbrc")
@@ -207,10 +205,6 @@ public class VolumeInfo {
         }
     }
 
-    public Iterator<String> getImageListIterator(int beginIdx, int endIdx) {
-        return new ImageListIterator(imageList, beginIdx, endIdx);
-    }
-
     public AccessType getAccess() {
         return access;
     }
@@ -225,10 +219,6 @@ public class VolumeInfo {
 
     public String getItemId() {
         return itemId;
-    }
-
-    public String getImageList() {
-        return imageList;
     }
 
     public Integer getTotalPages() {
