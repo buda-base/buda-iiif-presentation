@@ -1,6 +1,12 @@
 package io.bdrc.iiif.presentation;
 
 import static io.bdrc.iiif.presentation.AppConstants.BDR_len;
+import static io.bdrc.iiif.presentation.AppConstants.CACHENAME;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_WI;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_WO;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_II;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_IIL;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_VI;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -24,6 +30,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
@@ -54,6 +62,8 @@ public class IIIFPresentationService {
 
     private static final Logger logger = LoggerFactory.getLogger(IIIFPresentationService.class);
     static final int ACCESS_CONTROL_MAX_AGE_IN_SECONDS = 24 * 60 * 60;
+    
+    final static ObjectMapper om = new ObjectMapper();
 
     // no robots on manifests
     @GET
@@ -78,6 +88,62 @@ public class IIIFPresentationService {
             return "ERROR";
         }
     }
+    
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/admin/cache/{region}/{key}")
+    public Response getKey(@PathParam("region") final String region, @PathParam("key") final String key) throws BDRCAPIException {
+        if (!CACHENAME.equals(region))
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "unknown region");
+        if (key.length() < 4)
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "key is too short");
+        final String prefix = key.substring(0,3);
+        final Object res = ServiceCache.getObjectFromCache(key);
+        if (res == null)
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "key not found");
+        StreamingOutput stream;
+        // this is quite repetitive unfortunately but I couldn't find another way...
+        switch(prefix) {
+        case CACHEPREFIX_WI:
+            stream = new StreamingOutput() {
+                @Override
+                public void write(final OutputStream os) throws IOException, WebApplicationException {
+                    om.writeValue(os, (WorkInfo) res);
+                }};
+            return Response.ok(stream).build();
+        case CACHEPREFIX_WO:
+            stream = new StreamingOutput() {
+                @Override
+                public void write(final OutputStream os) throws IOException, WebApplicationException {
+                    om.writeValue(os, (WorkOutline) res);
+                }};
+            return Response.ok(stream).build();
+        case CACHEPREFIX_II:
+            stream = new StreamingOutput() {
+                @Override
+                public void write(final OutputStream os) throws IOException, WebApplicationException {
+                    om.writeValue(os, (ItemInfo) res);
+                }};
+            return Response.ok(stream).build();
+        case CACHEPREFIX_IIL:
+            stream = new StreamingOutput() {
+                @SuppressWarnings("unchecked")
+                @Override
+                public void write(final OutputStream os) throws IOException, WebApplicationException {
+                    om.writeValue(os, (List<ImageInfo>) res);
+                }};
+            return Response.ok(stream).build();
+        case CACHEPREFIX_VI:
+            stream = new StreamingOutput() {
+                @Override
+                public void write(final OutputStream os) throws IOException, WebApplicationException {
+                    om.writeValue(os, (VolumeInfo) res);
+                }};
+            return Response.ok(stream).build();
+        default:
+            throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, "unhandled key prefix, this shouldn't happen");
+        }
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -93,7 +159,6 @@ public class IIIFPresentationService {
         try {
             id = new Identifier(identifier, Identifier.MANIFEST_ID);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
         PartInfo rootPart = null;

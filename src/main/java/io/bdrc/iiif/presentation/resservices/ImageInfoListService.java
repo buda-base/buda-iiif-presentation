@@ -1,6 +1,7 @@
 package io.bdrc.iiif.presentation.resservices;
 
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_IIL;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +41,7 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
     public static final ImageInfoListService Instance = new ImageInfoListService();
 
     ImageInfoListService() {
-        super(ServiceCache.CACHE, "");
+        super(ServiceCache.CACHE, CACHEPREFIX_IIL);
     }
     
     static {

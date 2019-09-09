@@ -2,6 +2,7 @@ package io.bdrc.iiif.presentation.resservices;
 
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_II;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +29,7 @@ public class ItemInfoService extends ConcurrentResourceService<ItemInfo> {
     public static final ItemInfoService Instance = new ItemInfoService();
     
     ItemInfoService() {
-        super(ServiceCache.CACHE, "iis:");
+        super(ServiceCache.CACHE, CACHEPREFIX_II);
     }
 
     @Override

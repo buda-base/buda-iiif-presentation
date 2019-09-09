@@ -6,13 +6,15 @@ import org.apache.commons.jcs.access.exception.CacheException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.bdrc.iiif.presentation.AppConstants.CACHENAME;
+
 public class ServiceCache {
 
     public static CacheAccess<String, Object> CACHE;
     public final static Logger log = LoggerFactory.getLogger(ServiceCache.class.getName());
 
     public static void init() {
-        CACHE = JCS.getInstance("iiifpres");
+        CACHE = JCS.getInstance(CACHENAME);
     }
 
     public static void put(Object res, String key) {

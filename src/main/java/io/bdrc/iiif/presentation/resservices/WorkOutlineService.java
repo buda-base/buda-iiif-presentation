@@ -2,6 +2,7 @@ package io.bdrc.iiif.presentation.resservices;
 
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_WO;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +29,7 @@ private static final Logger logger = LoggerFactory.getLogger(WorkOutlineService.
     public static final WorkOutlineService Instance = new WorkOutlineService();
 
     WorkOutlineService() {
-        super(ServiceCache.CACHE, "wo:");
+        super(ServiceCache.CACHE, CACHEPREFIX_WO);
     }
     
     @Override

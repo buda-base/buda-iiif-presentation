@@ -3,6 +3,7 @@ package io.bdrc.iiif.presentation.resservices;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
 import static io.bdrc.iiif.presentation.AppConstants.LDS_WORKGRAPH_QUERY;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_WI;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +29,7 @@ public class WorkInfoService extends ConcurrentResourceService<WorkInfo> {
     public static final WorkInfoService Instance = new WorkInfoService();
 
     WorkInfoService() {
-        super(ServiceCache.CACHE, "wis:");
+        super(ServiceCache.CACHE, CACHEPREFIX_WI);
     }
     
     final public WorkInfo getFromApi(final String workId) throws BDRCAPIException {

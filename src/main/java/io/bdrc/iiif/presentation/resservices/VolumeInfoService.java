@@ -4,6 +4,7 @@ import static io.bdrc.iiif.presentation.AppConstants.CANNOT_FIND_VOLUME_ERROR_CO
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
 import static io.bdrc.iiif.presentation.AppConstants.LDS_VOLUME_QUERY;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_VI;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +32,7 @@ public class VolumeInfoService extends ConcurrentResourceService<VolumeInfo> {
     public static final VolumeInfoService Instance = new VolumeInfoService();
 
     VolumeInfoService() {
-        super(ServiceCache.CACHE, "vis:");
+        super(ServiceCache.CACHE, CACHEPREFIX_VI);
     }
     
     @Override

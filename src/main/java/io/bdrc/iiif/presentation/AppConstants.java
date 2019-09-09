@@ -6,6 +6,16 @@ public class AppConstants {
     public static final String BDO = "http://purl.bdrc.io/ontology/core/";
     public static final String ADM = "http://purl.bdrc.io/ontology/admin/";
     public static final String TMPPREFIX = "http://purl.bdrc.io/ontology/tmp/";
+    
+    public static final String CACHENAME = "iiifpres";
+    
+    // they should all be two characters long + colon
+    public static final String CACHEPREFIX_WI = "wi:";
+    public static final String CACHEPREFIX_WO = "wo:";
+    public static final String CACHEPREFIX_II = "ii:";
+    public static final String CACHEPREFIX_IIL = "il:";
+    public static final String CACHEPREFIX_VI = "vi:";
+    
 
     // used to create the urls for canvases, manifests, etc. should be canonical
     // at least for canvases (so that the annotation can target the uri)
