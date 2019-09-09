@@ -235,10 +235,10 @@ public class ManifestService {
         int bPage;
         int ePage;
         final int totalPages = imageInfoList.size();
-        if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID) {
+        if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE) {
             bPage = 1 + nbPagesIntro;
             ePage = totalPages;
-            Location location = rootPart == null ? null : rootPart.location;
+            Location location = (rootPart == null) ? null : rootPart.location;
             if (location != null) {
                 if (location.bvolnum > vi.volumeNumber)
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked starts after this volume");
