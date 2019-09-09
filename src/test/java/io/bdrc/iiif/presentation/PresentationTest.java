@@ -2,6 +2,7 @@ package io.bdrc.iiif.presentation;
 
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix_coll;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_IIL;
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
 import static org.junit.Assert.assertTrue;
 
@@ -156,7 +157,7 @@ public class PresentationTest {
         //final File fout = new File("/tmp/workOutline.json");
         //om.writeValue(fout, wo);
         final Identifier id = new Identifier("wvo:bdr:W22084::bdr:V22084_I0890", Identifier.MANIFEST_ID);
-        final String cacheKey = ImageInfoListService.getKey("W22084", "I0890");
+        final String cacheKey = CACHEPREFIX_IIL+ImageInfoListService.getKey("W22084", "I0890");
         final List<ImageInfo> ii = getTestImageList("W22084-0890.json");
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
         cache.put(cacheKey, ii);
