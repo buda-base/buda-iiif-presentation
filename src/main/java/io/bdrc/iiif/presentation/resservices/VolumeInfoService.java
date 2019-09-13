@@ -50,17 +50,17 @@ public class VolumeInfoService extends ConcurrentResourceService<VolumeInfo> {
             final HttpResponse response = httpClient.execute(request);
             int code = response.getStatusLine().getStatusCode();
             if (code != 200) {
-                throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error", response.toString(), "");
+                throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error for volume "+volumeId, response.toString(), "");
             }
             final InputStream body = response.getEntity().getContent();
             final ResultSet res = ResultSetMgr.read(body, ResultSetLang.SPARQLResultSetJSON);
             if (!res.hasNext()) {
-                throw new BDRCAPIException(500, CANNOT_FIND_VOLUME_ERROR_CODE, "cannot find volume in the database");
+                throw new BDRCAPIException(500, CANNOT_FIND_VOLUME_ERROR_CODE, "cannot find volume "+volumeId+" in the database");
             }
             final QuerySolution sol = res.next();
             resVolumeInfo = new VolumeInfo(sol);
             if (res.hasNext()) {
-                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "more than one volume found in the database, this shouldn't happen");
+                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "more than one volume found in the database for "+volumeId+", this shouldn't happen");
             }
         } catch (IOException ex) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
