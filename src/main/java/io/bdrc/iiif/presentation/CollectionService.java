@@ -165,7 +165,8 @@ public class CollectionService {
         if (wi.hasLocation) {
             // addManifestsForLocation(collection, wi, ii, continuous);
             addManifestsForWorkInVolumes(collection, wi, ii, continuous, id.getWorkId());
-        } else if (wi.isRoot) {
+         // special case for the Taisho where we have many items
+        } else if (wi.isRoot || id.getWorkId().equals(ii.workId)) {
             final String volPrefix = "vo:";
             boolean needsVolumeIndication = ii.volumes.size() > 1;
             for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
