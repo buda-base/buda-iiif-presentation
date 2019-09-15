@@ -59,9 +59,7 @@ public class AuthCheck {
 		props.load(input);
 		InputStream is = new FileInputStream("/etc/buda/share/shared-private.properties");
 		props.load(is);
-		log.info("PROPS >>> {}", props);
 		AuthProps.init(props);
-		// RdfAuthModel.initForStaticTests();
 		ServiceCache.init();
 		auth = new AuthAPI("bdrc-io.auth0.com", AuthProps.getProperty("lds-pdiClientID"), AuthProps.getProperty("lds-pdiClientSecret"));
 		HttpClient client = HttpClientBuilder.create().build();
