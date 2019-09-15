@@ -1,87 +1,141 @@
 package io.bdrc.iiif.presentation;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.HashMap;
 import java.util.Properties;
-
-import javax.ws.rs.core.Application;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.env.Environment;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.auth0.client.auth.AuthAPI;
+import com.auth0.net.AuthRequest;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.rdf.RdfAuthModel;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
 
-public class AuthCheck extends JerseyTest{
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = SpringBootIIIFPres.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+public class AuthCheck {
 
-    static AuthAPI auth;
-    static String token;
-    static String publicToken="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJodHRwczovL2Rldi1iZHJjLmF1dGgwLmNvbS9hcGkvdjIvIiwic3ViIjoiYXV0aDB8NWJlOTkyZDlkN2VjZTg3ZjE1OWM4YmVkIiwiYXpwIjoiRzBBam1DS3NwTm5nSnNUdFJuSGFBVUNENDRaeHdvTUoiLCJpc3MiOiJodHRwczovL2Rldi1iZHJjLmF1dGgwLmNvbS8iLCJleHAiOjE3MzU3MzgyNjR9.zqOALhi8Gz1io-B1pWIgHVvkSa0U6BuGmB18FnF3CIg\n";
-    static String adminToken="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJodHRwczovL2Rldi1iZHJjLmF1dGgwLmNvbS9hcGkvdjIvIiwic3ViIjoiYXV0aDB8NWJlOTkyMGJlYzMxMjMyMGY1NjI5NGRjIiwiYXpwIjoiRzBBam1DS3NwTm5nSnNUdFJuSGFBVUNENDRaeHdvTUoiLCJpc3MiOiJodHRwczovL2Rldi1iZHJjLmF1dGgwLmNvbS8iLCJleHAiOjE3MzU3Mzc1OTB9.m1V64-90tjNRMD18RQTF8SBlMFOcqgSuPwtALZBLd8U";
+	public final static Logger log = LoggerFactory.getLogger(AuthCheck.class.getName());
 
+	static AuthAPI auth;
+	static String token;
+	static String publicToken;
+	static String adminToken;
 
-    @BeforeClass
-    public static void init() throws IOException {
-        InputStream input=AuthCheck.class.getClassLoader().getResourceAsStream("iiifpres.properties");
-        Properties props=new Properties();
-        props.load(input);
-        AuthProps.init(props);
-        RdfAuthModel.initForStaticTests();
-        ServiceCache.init();
-    }
+	@Autowired
+	Environment environment;
 
-    @Override
-    protected Application configure() {
-        return new ResourceConfig(IIIFPresentationService.class)
-                .register(IIIFPresAuthTestFilter.class)
-                .register(CommonHeadersFilter.class);
+	@BeforeClass
+	public static void init() throws IOException {
+		InputStream input = AuthCheck.class.getClassLoader().getResourceAsStream("iiifpres.properties");
+		Properties props = new Properties();
+		props.load(input);
+		InputStream is = new FileInputStream("/etc/buda/share/shared-private.properties");
+		props.load(is);
+		log.info("PROPS >>> {}", props);
+		AuthProps.init(props);
+		// RdfAuthModel.initForStaticTests();
+		ServiceCache.init();
+		auth = new AuthAPI("bdrc-io.auth0.com", AuthProps.getProperty("lds-pdiClientID"), AuthProps.getProperty("lds-pdiClientSecret"));
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpPost post = new HttpPost("https://bdrc-io.auth0.com/oauth/token");
+		HashMap<String, String> json = new HashMap<>();
+		json.put("grant_type", "client_credentials");
+		json.put("client_id", AuthProps.getProperty("lds-pdiClientID"));
+		json.put("client_secret", AuthProps.getProperty("lds-pdiClientSecret"));
+		json.put("audience", "https://bdrc-io.auth0.com/api/v2/");
+		ObjectMapper mapper = new ObjectMapper();
+		String post_data = mapper.writer().writeValueAsString(json);
+		StringEntity se = new StringEntity(post_data);
+		se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+		post.setEntity(se);
+		HttpResponse response = client.execute(post);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		response.getEntity().writeTo(baos);
+		String json_resp = baos.toString();
+		baos.close();
+		JsonNode node = mapper.readTree(json_resp);
+		token = node.findValue("access_token").asText();
+		RdfAuthModel.init();
+		log.info("USERS >> {}" + RdfAuthModel.getUsers());
+		setPublicToken();
+		setAdminToken();
+	}
 
-    }
+	@Test
+	public void publicResource() throws ClientProtocolException, IOException, IllegalArgumentException, CertificateException, InvalidKeySpecException, NoSuchAlgorithmException {
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpGet get = new HttpGet("http://localhost:" + environment.getProperty("local.server.port") + "/2.1.1/v:bdr:V29329_I1KG15042/manifest");
+		HttpResponse resp = client.execute(get);
+		log.info("RESP STATUS public resource >> {}", resp.getStatusLine());
+		assert (resp.getStatusLine().getStatusCode() == 200);
+	}
 
-    @Test
-    public void publicResource() throws ClientProtocolException, IOException, IllegalArgumentException, CertificateException, InvalidKeySpecException, NoSuchAlgorithmException {
-        HttpClient client=HttpClientBuilder.create().build();
-        HttpGet get=new HttpGet(this.getBaseUri()+"/2.1.1/v:bdr:V29329_I1KG15042/manifest");
-        HttpResponse resp=client.execute(get);
-        System.out.println("RESP STATUS >>"+resp.getStatusLine());
-        assert(resp.getStatusLine().getStatusCode()==200);
-    }
+	@Test
+	public void RestrictedResource() throws ClientProtocolException, IOException, IllegalArgumentException, CertificateException, InvalidKeySpecException, NoSuchAlgorithmException {
+		// with public Token and authorized picture
+		HttpClient client1 = HttpClientBuilder.create().build();
+		HttpGet get1 = new HttpGet("http://localhost:" + environment.getProperty("local.server.port") + "/2.1.1/v:bdr:V29329_I1KG15042::10-35/manifest");
+		get1.addHeader("Authorization", "Bearer " + publicToken);
+		HttpResponse resp1 = client1.execute(get1);
+		log.info("RESP 1 public Token and authorized picture >> {}", resp1.getStatusLine().getStatusCode());
+		assert (resp1.getStatusLine().getStatusCode() == 200);
+		// with public Token and restricted picture
+		HttpClient client = HttpClientBuilder.create().build();
+		HttpGet get = new HttpGet("http://localhost:" + environment.getProperty("local.server.port") + "/2.1.1/v:bdr:V1KG12713_I1KG12762/manifest");
+		get.addHeader("Authorization", "Bearer " + publicToken);
+		HttpResponse resp2 = client.execute(get);
+		log.info("RESP 2 public Token and authorized picture >> {}", resp2.getStatusLine().getStatusCode());
+		assert (resp2.getStatusLine().getStatusCode() == 403);
+		// with admin Token and restricted picture = still 403 since the i
+		HttpClient client2 = HttpClientBuilder.create().build();
+		HttpGet get3 = new HttpGet("http://localhost:" + environment.getProperty("local.server.port") + "/2.1.1/v:bdr:V1KG12713_I1KG12762/manifest");
+		get3.addHeader("Authorization", "Bearer " + adminToken);
+		HttpResponse resp3 = client2.execute(get3);
+		log.info("RESP 3 public Token and authorized picture >> {}", resp3.getStatusLine().getStatusCode());
+		assert (resp3.getStatusLine().getStatusCode() == 200);
+	}
 
-    @Test
-    public void ChinaRestrictedResource() throws ClientProtocolException, IOException, IllegalArgumentException, CertificateException, InvalidKeySpecException, NoSuchAlgorithmException {
-        //with public Token and authorized picture
-        HttpClient client1=HttpClientBuilder.create().build();
-        HttpGet get1=new HttpGet(this.getBaseUri()+"2.1.1/v:bdr:V29329_I1KG15042::10-35/manifest");
-        get1.addHeader("Authorization", "Bearer "+publicToken);
-        HttpResponse resp1=client1.execute(get1);
-        System.out.println("RESP 1 >>"+resp1.getStatusLine());
-        assert(resp1.getStatusLine().getStatusCode()==200);
-        //with public Token and restricted picture
-        HttpClient client=HttpClientBuilder.create().build();
-        HttpGet get=new HttpGet(this.getBaseUri()+"2.1.1/v:bdr:V28263_I1KG14453/manifest");
-        get.addHeader("Authorization", "Bearer "+publicToken);
-        HttpResponse resp=client.execute(get);
-        System.out.println("RESP 2 >>"+resp.getStatusLine());
-        assert(resp.getStatusLine().getStatusCode()==403);
-        //with admin Token and restricted picture
-        HttpClient client2=HttpClientBuilder.create().build();
-        HttpGet get2=new HttpGet(this.getBaseUri()+"2.1.1/v:bdr:V28263_I1KG14453/manifest");
-        get2.addHeader("Authorization", "Bearer "+adminToken);
-        HttpResponse resp2=client2.execute(get2);
-        System.out.println("RESP 3 >>"+resp2.getStatusLine());
-        assert(resp2.getStatusLine().getStatusCode()==200);
-    }
+	private static void setPublicToken() throws IOException {
+		AuthRequest req = auth.login("publicuser@bdrc.com", AuthProps.getProperty("publicuser@bdrc.com"));
+		req.setScope("openid offline_access");
+		req.setAudience("https://bdrc-io.auth0.com/api/v2/");
+		publicToken = req.execute().getIdToken();
+		log.info("public Token >> {}", publicToken);
+	}
+
+	private static void setAdminToken() throws IOException {
+		AuthRequest req = auth.login("tchame@rimay.net", AuthProps.getProperty("tchame@rimay.net"));
+		req.setScope("openid offline_access");
+		req.setAudience("https://bdrc-io.auth0.com/api/v2/");
+		adminToken = req.execute().getIdToken();
+		log.info("admin Token >> {}", adminToken);
+	}
 }
