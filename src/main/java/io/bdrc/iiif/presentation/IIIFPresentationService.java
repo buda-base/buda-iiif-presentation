@@ -1,6 +1,5 @@
 package io.bdrc.iiif.presentation;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -29,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
+import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.auth.Access;
 import io.bdrc.auth.Access.AccessLevel;
@@ -110,12 +110,12 @@ public class IIIFPresentationService {
 	}
 
 	@RequestMapping(value = "/collection/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> getCollectionNoVer(@PathVariable String identifier, HttpServletRequest request) throws BDRCAPIException {
+	public ResponseEntity<StreamingResponseBody> getCollectionNoVer(@PathVariable String identifier, HttpServletRequest request) throws BDRCAPIException {
 		return getCollection(identifier, "", request);
 	}
 
 	@RequestMapping(value = "/{version:.+}/collection/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> getCollection(@PathVariable String identifier, @PathVariable String version, HttpServletRequest request) throws BDRCAPIException {
+	public ResponseEntity<StreamingResponseBody> getCollection(@PathVariable String identifier, @PathVariable String version, HttpServletRequest request) throws BDRCAPIException {
 		System.out.println("Call to getCollection()");
 		String cont = request.getParameter("continuous");
 		boolean continuous = false;
@@ -183,13 +183,27 @@ public class IIIFPresentationService {
 		final String statusShortName = getShortName(statusUri);
 		final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, itemId);
 		if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
-			return ResponseEntity.status(acc.isUserLoggedIn() ? 403 : 401).cacheControl(CacheControl.noCache()).body("\"Insufficient rights\"");
+			final StreamingResponseBody stream = new StreamingResponseBody() {
+				@Override
+				public void writeTo(final OutputStream os) throws IOException {
+					AppConstants.IIIFMAPPER.writer().writeValue(os, "Insufficient rights");
+				}
+			};
+			return ResponseEntity.status(acc.isUserLoggedIn() ? 403 : 401).cacheControl(CacheControl.noCache()).body(stream);
 		}
 		int maxAgeSeconds = Integer.parseInt(AuthProps.getProperty("max-age")) / 1000;
+		Collection coll = CollectionService.getCollectionForIdentifier(id, continuous);
+		StreamingResponseBody stream = null;
 		if (access == AccessType.OPEN) {
-			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(maxAgeSeconds, TimeUnit.SECONDS).cachePublic()).body(CollectionService.getCollectionForIdentifier(id, continuous));
+			stream = new StreamingResponseBody() {
+				@Override
+				public void writeTo(final OutputStream os) throws IOException {
+					AppConstants.IIIFMAPPER.writer().writeValue(os, coll);
+				}
+			};
+			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(maxAgeSeconds, TimeUnit.SECONDS).cachePublic()).body(stream);
 		} else {
-			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(maxAgeSeconds, TimeUnit.SECONDS).cachePrivate()).body(CollectionService.getCollectionForIdentifier(id, continuous));
+			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(maxAgeSeconds, TimeUnit.SECONDS).cachePrivate()).body(stream);
 		}
 	}
 
@@ -282,13 +296,6 @@ public class IIIFPresentationService {
 			logger.info("redirect manifest request for ID {} to {}", identifier, vi.iiifManifest.toString());
 			HttpHeaders responseHeaders = new HttpHeaders();
 			responseHeaders.add("Location", vi.iiifManifest.toString());
-			final StreamingResponseBody stream = new StreamingResponseBody() {
-				@Override
-				public void writeTo(final OutputStream os) throws IOException {
-					AppConstants.IIIFMAPPER.writer().writeValue(os, "");
-				}
-			};
-
 			return new ResponseEntity<StreamingResponseBody>(responseHeaders, HttpStatus.resolve(302));
 		}
 		if (wo == null && (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE)) {
@@ -308,8 +315,6 @@ public class IIIFPresentationService {
 		// we get the part asked by the user
 		final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, volumeId, al == AccessLevel.FAIR_USE, rootPart);
 
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		AppConstants.IIIFMAPPER.writer().writeValue(os, resmanifest);
 		final StreamingResponseBody stream = new StreamingResponseBody() {
 			@Override
 			public void writeTo(final OutputStream os) throws IOException {
