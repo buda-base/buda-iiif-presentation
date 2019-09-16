@@ -26,9 +26,9 @@ import io.bdrc.iiif.presentation.resservices.ServiceCache;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = SpringBootIIIFPres.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class PathTest1 {
+public class PathTest {
 
-	public final static Logger log = LoggerFactory.getLogger(PathTest1.class.getName());
+	public final static Logger log = LoggerFactory.getLogger(PathTest.class.getName());
 
 	@Autowired
 	Environment environment;
@@ -50,8 +50,6 @@ public class PathTest1 {
 	public void testPathWithVersion() throws ClientProtocolException, IOException {
 		HttpClient client = HttpClientBuilder.create().build();
 		HttpGet get = new HttpGet("http://localhost:" + environment.getProperty("local.server.port") + "/2.1.1/v:bdr:V22334_I3867/manifest");
-		get.addHeader("Accept-Language", "eng");
-		get.addHeader("Accept-Charset", "UTF-8");
 		HttpResponse resp = client.execute(get);
 		log.info("RESP STATUS public resource >> {}", resp.getStatusLine());
 		assert (resp.getStatusLine().getStatusCode() == 200);
