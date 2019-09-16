@@ -77,7 +77,7 @@ public class IIIFPresentationService {
 	}
 
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/admin/cache/{region}/{key}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/admin/cache/{region}/{key}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<Object> getKey(@PathVariable String region, @PathVariable final String key) throws BDRCAPIException {
 		if (!AppConstants.CACHENAME.equals(region))
 			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "unknown region");
@@ -109,14 +109,15 @@ public class IIIFPresentationService {
 		}
 	}
 
-	@RequestMapping(value = "/collection/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<StreamingResponseBody> getCollectionNoVer(@PathVariable String identifier, HttpServletRequest request) throws BDRCAPIException {
-		return getCollection(identifier, "", request);
+	@RequestMapping(value = "/collection/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<StreamingResponseBody> getCollectionNoVer(@PathVariable String identifier, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
+		return getCollection(identifier, "", request, resp);
 	}
 
-	@RequestMapping(value = "/{version:.+}/collection/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<StreamingResponseBody> getCollection(@PathVariable String identifier, @PathVariable String version, HttpServletRequest request) throws BDRCAPIException {
+	@RequestMapping(value = "/{version:.+}/collection/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<StreamingResponseBody> getCollection(@PathVariable String identifier, @PathVariable String version, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
 		System.out.println("Call to getCollection()");
+		resp.setContentType("application/json;charset=UTF-8");
 		String cont = request.getParameter("continuous");
 		boolean continuous = false;
 		if (cont != null) {
@@ -207,13 +208,15 @@ public class IIIFPresentationService {
 		}
 	}
 
-	@RequestMapping(value = "/{identifier}/manifest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<StreamingResponseBody> getManifestNoVer(@PathVariable String identifier, HttpServletRequest req) throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
-		return getManifest(identifier, "", req);
+	@RequestMapping(value = "/{identifier}/manifest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<StreamingResponseBody> getManifestNoVer(@PathVariable String identifier, HttpServletRequest req, HttpServletResponse resp) throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+		return getManifest(identifier, "", req, resp);
 	}
 
-	@RequestMapping(value = "/{version:.+}/{identifier}/manifest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<StreamingResponseBody> getManifest(@PathVariable String identifier, @PathVariable String version, HttpServletRequest req) throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+	@RequestMapping(value = "/{version:.+}/{identifier}/manifest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<StreamingResponseBody> getManifest(@PathVariable String identifier, @PathVariable String version, HttpServletRequest req, HttpServletResponse resp)
+			throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+		resp.setContentType("application/json;charset=UTF-8");
 		String cont = req.getParameter("continuous");
 		boolean continuous = false;
 		if (cont != null) {
@@ -328,16 +331,18 @@ public class IIIFPresentationService {
 		}
 	}
 
-	@RequestMapping(value = "/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<StreamingResponseBody> getCanvasNoVer(@PathVariable String identifier, @PathVariable String filename, HttpServletRequest req) throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
-		return getCanvas(identifier, "", filename, req);
+	@RequestMapping(value = "/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<StreamingResponseBody> getCanvasNoVer(@PathVariable String identifier, @PathVariable String filename, HttpServletRequest req, HttpServletResponse resp)
+			throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+		return getCanvas(identifier, "", filename, req, resp);
 	}
 
-	@RequestMapping(value = "/{version:.+}/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<StreamingResponseBody> getCanvas(@PathVariable String identifier, @PathVariable String version, @PathVariable String filename, HttpServletRequest req)
+	@RequestMapping(value = "/{version:.+}/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<StreamingResponseBody> getCanvas(@PathVariable String identifier, @PathVariable String version, @PathVariable String filename, HttpServletRequest req, HttpServletResponse resp)
 			throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
 		// TODO: adjust to new filename in the path (requires file name lookup in the
 		// image list)
+		resp.setContentType("application/json;charset=UTF-8");
 		Identifier id = null;
 		try {
 			id = new Identifier(identifier, Identifier.MANIFEST_ID);
