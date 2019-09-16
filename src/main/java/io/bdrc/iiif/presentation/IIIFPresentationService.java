@@ -1,5 +1,7 @@
 package io.bdrc.iiif.presentation;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
@@ -188,12 +192,12 @@ public class IIIFPresentationService {
 	}
 
 	@RequestMapping(value = "/{identifier}/manifest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> getManifestNoVer(@PathVariable String identifier, HttpServletRequest req) throws BDRCAPIException {
+	public ResponseEntity<Object> getManifestNoVer(@PathVariable String identifier, HttpServletRequest req) throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
 		return getManifest(identifier, "", req);
 	}
 
 	@RequestMapping(value = "/{version:.+}/{identifier}/manifest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> getManifest(@PathVariable String identifier, @PathVariable String version, HttpServletRequest req) throws BDRCAPIException {
+	public ResponseEntity<Object> getManifest(@PathVariable String identifier, @PathVariable String version, HttpServletRequest req) throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
 		String cont = req.getParameter("continuous");
 		boolean continuous = false;
 		if (cont != null) {
@@ -275,20 +279,24 @@ public class IIIFPresentationService {
 		// TODO: case where a part is asked with an outline, we need to make sure that
 		// we get the part asked by the user
 		final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, volumeId, al == AccessLevel.FAIR_USE, rootPart);
+
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		AppConstants.IIIFMAPPER.writer().writeValue(os, resmanifest);
 		if (vi.access == AccessType.OPEN) {
-			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(resmanifest);
+			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(os);
 		} else {
-			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePrivate()).body(resmanifest);
+			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePrivate()).body(os);
 		}
 	}
 
 	@RequestMapping(value = "/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> getCanvasNoVer(@PathVariable String identifier, @PathVariable String version, @PathVariable String filename, HttpServletRequest req) throws BDRCAPIException {
+	public ResponseEntity<Object> getCanvasNoVer(@PathVariable String identifier, @PathVariable String version, @PathVariable String filename, HttpServletRequest req)
+			throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
 		return getCanvas(identifier, "", filename, req);
 	}
 
 	@RequestMapping(value = "/{version:.+}/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> getCanvas(@PathVariable String identifier, @PathVariable String version, @PathVariable String filename, HttpServletRequest req) throws BDRCAPIException {
+	public ResponseEntity<Object> getCanvas(@PathVariable String identifier, @PathVariable String version, @PathVariable String filename, HttpServletRequest req) throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
 		// TODO: adjust to new filename in the path (requires file name lookup in the
 		// image list)
 		Identifier id = null;
@@ -332,10 +340,12 @@ public class IIIFPresentationService {
 				return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401)).cacheControl(CacheControl.noCache()).body("\"Insufficient rights (" + vi.access + ")\"");
 		}
 		final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgSeqNum, id.getVolumeId(), imageInfoList);
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		AppConstants.IIIFMAPPER.writer().writeValue(os, res);
 		if (vi.access == AccessType.OPEN) {
-			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(res);
+			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(os);
 		} else {
-			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePrivate()).body(res);
+			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePrivate()).body(os);
 		}
 	}
 
