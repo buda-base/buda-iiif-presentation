@@ -116,7 +116,6 @@ public class IIIFPresentationService {
 
 	@RequestMapping(value = "/{version:.+}/collection/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<StreamingResponseBody> getCollection(@PathVariable String identifier, @PathVariable String version, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
-		System.out.println("Call to getCollection()");
 		resp.setContentType("application/json;charset=UTF-8");
 		String cont = request.getParameter("continuous");
 		boolean continuous = false;
@@ -340,8 +339,6 @@ public class IIIFPresentationService {
 	@RequestMapping(value = "/{version:.+}/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<StreamingResponseBody> getCanvas(@PathVariable String identifier, @PathVariable String version, @PathVariable String filename, HttpServletRequest req, HttpServletResponse resp)
 			throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
-		// TODO: adjust to new filename in the path (requires file name lookup in the
-		// image list)
 		resp.setContentType("application/json;charset=UTF-8");
 		Identifier id = null;
 		try {
@@ -422,6 +419,24 @@ public class IIIFPresentationService {
 		}
 	}
 
+    @RequestMapping(value = "/il/v:{volumeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Object> getImageList(@PathVariable String volumeId, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
+        resp.setContentType("application/json;charset=UTF-8");
+        VolumeInfo vi;
+        try {
+            vi = VolumeInfoService.Instance.getAsync(volumeId).get();
+        } catch (InterruptedException | ExecutionException e1) {
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
+        }
+        List<ImageInfo> imageInfoList;
+        try {
+            imageInfoList = ImageInfoListService.Instance.getAsync(vi.workId.substring(AppConstants.BDR_len), vi.imageGroup).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+        }
+        return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(imageInfoList);
+    }
+	
 	public static String getShortName(final String st) {
 		if (st == null || st.isEmpty()) {
 			return null;
