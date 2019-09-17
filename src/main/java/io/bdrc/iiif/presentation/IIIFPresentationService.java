@@ -91,19 +91,14 @@ public class IIIFPresentationService {
 		switch (prefix) {
 		case AppConstants.CACHEPREFIX_WI:
 			return ResponseEntity.ok().body((WorkInfo) res);
-		// return new ResponseEntity<StreamingResponseBody>(stream, HttpStatus.OK);
 		case AppConstants.CACHEPREFIX_WO:
 			return ResponseEntity.ok().body((WorkOutline) res);
-		// return new ResponseEntity<StreamingResponseBody>(stream, HttpStatus.OK);
 		case AppConstants.CACHEPREFIX_II:
 			return ResponseEntity.ok().body((ItemInfo) res);
-		// return new ResponseEntity<StreamingResponseBody>(stream, HttpStatus.OK);
 		case AppConstants.CACHEPREFIX_IIL:
 			return ResponseEntity.ok().body((List<ImageInfo>) res);
-		// return new ResponseEntity<StreamingResponseBody>(stream, HttpStatus.OK);
 		case AppConstants.CACHEPREFIX_VI:
 			return ResponseEntity.ok().body((VolumeInfo) res);
-		// return new ResponseEntity<StreamingResponseBody>(stream, HttpStatus.OK);
 		default:
 			throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, "unhandled key prefix, this shouldn't happen");
 		}
@@ -116,7 +111,6 @@ public class IIIFPresentationService {
 
 	@RequestMapping(value = "/{version:.+}/collection/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<StreamingResponseBody> getCollection(@PathVariable String identifier, @PathVariable String version, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
-		System.out.println("Call to getCollection()");
 		resp.setContentType("application/json;charset=UTF-8");
 		String cont = request.getParameter("continuous");
 		boolean continuous = false;
@@ -184,27 +178,14 @@ public class IIIFPresentationService {
 		final String statusShortName = getShortName(statusUri);
 		final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, itemId);
 		if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
-			final StreamingResponseBody stream = new StreamingResponseBody() {
-				@Override
-				public void writeTo(final OutputStream os) throws IOException {
-					AppConstants.IIIFMAPPER.writer().writeValue(os, "Insufficient rights");
-				}
-			};
-			return ResponseEntity.status(acc.isUserLoggedIn() ? 403 : 401).cacheControl(CacheControl.noCache()).body(stream);
+			return ResponseEntity.status(acc.isUserLoggedIn() ? 403 : 401).cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
 		}
 		int maxAgeSeconds = Integer.parseInt(AuthProps.getProperty("max-age")) / 1000;
 		Collection coll = CollectionService.getCollectionForIdentifier(id, continuous);
-		StreamingResponseBody stream = null;
 		if (access == AccessType.OPEN) {
-			stream = new StreamingResponseBody() {
-				@Override
-				public void writeTo(final OutputStream os) throws IOException {
-					AppConstants.IIIFMAPPER.writer().writeValue(os, coll);
-				}
-			};
-			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(maxAgeSeconds, TimeUnit.SECONDS).cachePublic()).body(stream);
+			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(maxAgeSeconds, TimeUnit.SECONDS).cachePublic()).body(getStream(coll));
 		} else {
-			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(maxAgeSeconds, TimeUnit.SECONDS).cachePrivate()).body(stream);
+			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(maxAgeSeconds, TimeUnit.SECONDS).cachePrivate()).body(getStream(coll));
 		}
 	}
 
@@ -256,13 +237,7 @@ public class IIIFPresentationService {
 			if (wo != null)
 				volumeId = wo.firstVolumeId;
 			if (volumeId == null) {
-				final StreamingResponseBody stream = new StreamingResponseBody() {
-					@Override
-					public void writeTo(final OutputStream os) throws IOException {
-						AppConstants.IIIFMAPPER.writer().writeValue(os, "\"Cannot find volume ID\"");
-					}
-				};
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).cacheControl(CacheControl.noCache()).body(stream);
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).cacheControl(CacheControl.noCache()).body(getStream("\"Cannot find volume ID\""));
 			}
 		}
 		VolumeInfo vi;
@@ -272,13 +247,7 @@ public class IIIFPresentationService {
 			throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 		}
 		if (vi.restrictedInChina && GeoLocation.isFromChina(req)) {
-			final StreamingResponseBody stream = new StreamingResponseBody() {
-				@Override
-				public void writeTo(final OutputStream os) throws IOException {
-					AppConstants.IIIFMAPPER.writer().writeValue(os, "Insufficient rights");
-				}
-			};
-			return ResponseEntity.status(HttpStatus.resolve(403)).cacheControl(CacheControl.noCache()).body(stream);
+			return ResponseEntity.status(HttpStatus.resolve(403)).cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
 		}
 		Access acc = (Access) req.getAttribute("access");
 		if (acc == null)
@@ -287,13 +256,7 @@ public class IIIFPresentationService {
 		final String statusShortName = getShortName(vi.statusUri);
 		final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.itemId);
 		if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
-			final StreamingResponseBody stream = new StreamingResponseBody() {
-				@Override
-				public void writeTo(final OutputStream os) throws IOException {
-					AppConstants.IIIFMAPPER.writer().writeValue(os, "Insufficient rights");
-				}
-			};
-			return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401)).cacheControl(CacheControl.noCache()).body(stream);
+			return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401)).cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
 		}
 		if (vi.iiifManifest != null) {
 			logger.info("redirect manifest request for ID {} to {}", identifier, vi.iiifManifest.toString());
@@ -317,17 +280,10 @@ public class IIIFPresentationService {
 		// TODO: case where a part is asked with an outline, we need to make sure that
 		// we get the part asked by the user
 		final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, volumeId, al == AccessLevel.FAIR_USE, rootPart);
-
-		final StreamingResponseBody stream = new StreamingResponseBody() {
-			@Override
-			public void writeTo(final OutputStream os) throws IOException {
-				AppConstants.IIIFMAPPER.writer().writeValue(os, resmanifest);
-			}
-		};
 		if (vi.access == AccessType.OPEN) {
-			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(stream);
+			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(getStream(resmanifest));
 		} else {
-			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePrivate()).body(stream);
+			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePrivate()).body(getStream(resmanifest));
 		}
 	}
 
@@ -340,8 +296,6 @@ public class IIIFPresentationService {
 	@RequestMapping(value = "/{version:.+}/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<StreamingResponseBody> getCanvas(@PathVariable String identifier, @PathVariable String version, @PathVariable String filename, HttpServletRequest req, HttpServletResponse resp)
 			throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
-		// TODO: adjust to new filename in the path (requires file name lookup in the
-		// image list)
 		resp.setContentType("application/json;charset=UTF-8");
 		Identifier id = null;
 		try {
@@ -356,13 +310,7 @@ public class IIIFPresentationService {
 			throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
 		} // not entirely sure about the false
 		if (vi.restrictedInChina && GeoLocation.isFromChina(req)) {
-			final StreamingResponseBody stream = new StreamingResponseBody() {
-				@Override
-				public void writeTo(final OutputStream os) throws IOException {
-					AppConstants.IIIFMAPPER.writer().writeValue(os, "Insufficient rights");
-				}
-			};
-			return ResponseEntity.status(HttpStatus.resolve(403)).cacheControl(CacheControl.noCache()).body(stream);
+			return ResponseEntity.status(HttpStatus.resolve(403)).cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
 		}
 		Access acc = (Access) req.getAttribute("access");
 		if (acc == null)
@@ -371,22 +319,10 @@ public class IIIFPresentationService {
 		final String statusShortName = getShortName(vi.statusUri);
 		final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.itemId);
 		if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
-			final StreamingResponseBody stream = new StreamingResponseBody() {
-				@Override
-				public void writeTo(final OutputStream os) throws IOException {
-					AppConstants.IIIFMAPPER.writer().writeValue(os, "Insufficient rights");
-				}
-			};
-			return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401)).cacheControl(CacheControl.noCache()).body(stream);
+			return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401)).cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
 		}
 		if (vi.iiifManifest != null) {
-			final StreamingResponseBody stream = new StreamingResponseBody() {
-				@Override
-				public void writeTo(final OutputStream os) throws IOException {
-					AppConstants.IIIFMAPPER.writer().writeValue(os, "\"Cannot serve canvas for external manifests\"");
-				}
-			};
-			return ResponseEntity.status(HttpStatus.resolve(404)).cacheControl(CacheControl.noCache()).body(stream);
+			return ResponseEntity.status(HttpStatus.resolve(404)).cacheControl(CacheControl.noCache()).body(getStream("\"Cannot serve canvas for external manifests\""));
 		}
 		List<ImageInfo> imageInfoList;
 		try {
@@ -399,27 +335,33 @@ public class IIIFPresentationService {
 			throw new BDRCAPIException(500, AppConstants.GENERIC_LDS_ERROR, "Cannot find filename in the S3 image list");
 		if (al == AccessLevel.FAIR_USE) {
 			if (imgSeqNum > (AppConstants.FAIRUSE_PAGES_S + vi.pagesIntroTbrc) && imgSeqNum < (vi.totalPages - AppConstants.FAIRUSE_PAGES_E)) {
-				final StreamingResponseBody stream = new StreamingResponseBody() {
-					@Override
-					public void writeTo(final OutputStream os) throws IOException {
-						AppConstants.IIIFMAPPER.writer().writeValue(os, "\"Insufficient rights (" + vi.access + ")\"");
-					}
-				};
-				return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401)).cacheControl(CacheControl.noCache()).body(stream);
+				return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401)).cacheControl(CacheControl.noCache()).body(getStream("\"Insufficient rights (" + vi.access + ")\""));
 			}
 		}
 		final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgSeqNum, id.getVolumeId(), imageInfoList);
-		final StreamingResponseBody stream = new StreamingResponseBody() {
-			@Override
-			public void writeTo(final OutputStream os) throws IOException {
-				AppConstants.IIIFMAPPER.writer().writeValue(os, res);
-			}
-		};
 		if (vi.access == AccessType.OPEN) {
-			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(stream);
+			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(getStream(res));
 		} else {
-			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePrivate()).body(stream);
+			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePrivate()).body(getStream(res));
 		}
+	}
+
+	@RequestMapping(value = "/il/v:{volumeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<Object> getImageList(@PathVariable String volumeId, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
+		resp.setContentType("application/json;charset=UTF-8");
+		VolumeInfo vi;
+		try {
+			vi = VolumeInfoService.Instance.getAsync(volumeId).get();
+		} catch (InterruptedException | ExecutionException e1) {
+			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
+		}
+		List<ImageInfo> imageInfoList;
+		try {
+			imageInfoList = ImageInfoListService.Instance.getAsync(vi.workId.substring(AppConstants.BDR_len), vi.imageGroup).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+		}
+		return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(imageInfoList);
 	}
 
 	public static String getShortName(final String st) {
@@ -427,5 +369,15 @@ public class IIIFPresentationService {
 			return null;
 		}
 		return st.substring(st.lastIndexOf("/") + 1);
+	}
+
+	private StreamingResponseBody getStream(Object obj) {
+		final StreamingResponseBody stream = new StreamingResponseBody() {
+			@Override
+			public void writeTo(final OutputStream os) throws IOException {
+				AppConstants.IIIFMAPPER.writer().writeValue(os, obj);
+			}
+		};
+		return stream;
 	}
 }
