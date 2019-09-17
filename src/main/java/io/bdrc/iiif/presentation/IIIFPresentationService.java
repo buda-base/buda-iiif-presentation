@@ -346,24 +346,6 @@ public class IIIFPresentationService {
 		}
 	}
 
-	@RequestMapping(value = "/il/v:{volumeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<Object> getImageList(@PathVariable String volumeId, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
-		resp.setContentType("application/json;charset=UTF-8");
-		VolumeInfo vi;
-		try {
-			vi = VolumeInfoService.Instance.getAsync(volumeId).get();
-		} catch (InterruptedException | ExecutionException e1) {
-			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
-		}
-		List<ImageInfo> imageInfoList;
-		try {
-			imageInfoList = ImageInfoListService.Instance.getAsync(vi.workId.substring(AppConstants.BDR_len), vi.imageGroup).get();
-		} catch (InterruptedException | ExecutionException e) {
-			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
-		}
-		return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(imageInfoList);
-	}
-
     @RequestMapping(value = "/il/v:{volumeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Object> getImageList(@PathVariable String volumeId, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
         resp.setContentType("application/json;charset=UTF-8");
