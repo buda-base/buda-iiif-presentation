@@ -11,12 +11,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -49,8 +49,9 @@ import io.bdrc.iiif.presentation.resservices.WorkInfoService;
 import io.bdrc.iiif.presentation.resservices.WorkOutlineService;
 import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
 
-@Component
 @RestController
 @RequestMapping("/")
 public class IIIFPresentationService {
@@ -59,6 +60,9 @@ public class IIIFPresentationService {
 	static final int ACCESS_CONTROL_MAX_AGE_IN_SECONDS = 24 * 60 * 60;
 
 	final static ObjectMapper om = new ObjectMapper();
+
+	@Autowired
+	MeterRegistry registry;
 
 	// no robots on manifests
 	@RequestMapping(value = "/robots.txt", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
@@ -122,6 +126,7 @@ public class IIIFPresentationService {
 			id = new Identifier(identifier, Identifier.COLLECTION_ID);
 		} catch (IdentifierException e) {
 			e.printStackTrace();
+			Metrics.counter("exit.status", "result", "404").increment();
 			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e.getMessage());
 		}
 		AccessType access = AccessType.RESTR_BDRC;
@@ -136,6 +141,7 @@ public class IIIFPresentationService {
 			try {
 				ii = ItemInfoService.Instance.getAsync(id.getItemId()).get();
 			} catch (InterruptedException | ExecutionException e1) {
+				Metrics.counter("exit.status", "result", "500").increment();
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
 			}
 			access = ii.access;
@@ -148,6 +154,7 @@ public class IIIFPresentationService {
 			try {
 				winf = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
 			} catch (InterruptedException | ExecutionException e) {
+				Metrics.counter("exit.status", "result", "500").increment();
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 			}
 			access = winf.rootAccess;
@@ -160,7 +167,8 @@ public class IIIFPresentationService {
 			try {
 				winf1 = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
 			} catch (InterruptedException | ExecutionException e2) {
-				throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e2);
+				Metrics.counter("exit.status", "result", "500").increment();
+				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e2);
 			}
 			access = winf1.rootAccess;
 			statusUri = winf1.rootStatus;
@@ -169,6 +177,7 @@ public class IIIFPresentationService {
 			break;
 		}
 		if (restrictedInChina && GeoLocation.isFromChina(request)) {
+			Metrics.counter("exit.status", "result", "403").increment();
 			throw new BDRCAPIException(403, AppConstants.GENERIC_LDS_ERROR, "Insufficient rights");
 		}
 		Access acc = (Access) request.getAttribute("access");
@@ -178,6 +187,7 @@ public class IIIFPresentationService {
 		final String statusShortName = getShortName(statusUri);
 		final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, itemId);
 		if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
+			Metrics.counter("exit.status", "result", acc.isUserLoggedIn() ? "403" : "401").increment();
 			return ResponseEntity.status(acc.isUserLoggedIn() ? 403 : 401).cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
 		}
 		int maxAgeSeconds = Integer.parseInt(AuthProps.getProperty("max-age")) / 1000;
@@ -346,24 +356,24 @@ public class IIIFPresentationService {
 		}
 	}
 
-    @RequestMapping(value = "/il/v:{volumeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<Object> getImageList(@PathVariable String volumeId, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
-        resp.setContentType("application/json;charset=UTF-8");
-        VolumeInfo vi;
-        try {
-            vi = VolumeInfoService.Instance.getAsync(volumeId).get();
-        } catch (InterruptedException | ExecutionException e1) {
-            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
-        }
-        List<ImageInfo> imageInfoList;
-        try {
-            imageInfoList = ImageInfoListService.Instance.getAsync(vi.workId.substring(AppConstants.BDR_len), vi.imageGroup).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
-        }
-        return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(imageInfoList);
-    }
-	
+	@RequestMapping(value = "/il/v:{volumeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public ResponseEntity<Object> getImageList(@PathVariable String volumeId, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
+		resp.setContentType("application/json;charset=UTF-8");
+		VolumeInfo vi;
+		try {
+			vi = VolumeInfoService.Instance.getAsync(volumeId).get();
+		} catch (InterruptedException | ExecutionException e1) {
+			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
+		}
+		List<ImageInfo> imageInfoList;
+		try {
+			imageInfoList = ImageInfoListService.Instance.getAsync(vi.workId.substring(AppConstants.BDR_len), vi.imageGroup).get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+		}
+		return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(imageInfoList);
+	}
+
 	public static String getShortName(final String st) {
 		if (st == null || st.isEmpty()) {
 			return null;
