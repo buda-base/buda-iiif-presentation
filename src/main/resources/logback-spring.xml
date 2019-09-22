@@ -28,7 +28,7 @@
       </encoder>
     </appender>    
   </springProfile>
-  <root level="debug">
+  <root level="warn">
     <appender-ref ref="default" />
   </root>
 </configuration>

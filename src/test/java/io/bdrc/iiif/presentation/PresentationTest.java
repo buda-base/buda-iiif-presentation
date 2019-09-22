@@ -79,7 +79,7 @@ public class PresentationTest {
 //        om.writeValue(System.out, itemInfo);
     }
 
-    public List<ImageInfo> getTestImageList(String filename) throws JsonParseException, JsonMappingException, IOException {
+    public static List<ImageInfo> getTestImageList(String filename) throws JsonParseException, JsonMappingException, IOException {
         final File f = new File(TESTDIR + filename);
         final List<ImageInfo> imageList = om.readValue(f, new TypeReference<List<ImageInfo>>() {
         });
