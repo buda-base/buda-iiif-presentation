@@ -240,6 +240,8 @@ public class ManifestService {
             bPage = 1 + nbPagesIntro;
             ePage = totalPages;
             Location location = (rootPart == null) ? null : rootPart.location;
+            logger.debug("location: {}", location);
+            logger.debug("vi: {}", vi);
             if (location != null) {
                 if (location.bvolnum > vi.volumeNumber)
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked starts after this volume");
@@ -258,6 +260,7 @@ public class ManifestService {
             bPage = id.getBPageNum() == null ? 1 + nbPagesIntro : id.getBPageNum().intValue();
             ePage = id.getEPageNum() == null ? totalPages : id.getEPageNum().intValue();
         }
+        logger.debug("computed: {}-{}", bPage, ePage);
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList, vi, volumeId, bPage, ePage, fairUse);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         if (continuous) {
