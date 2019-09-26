@@ -7,6 +7,8 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Location {
     @JsonProperty("bvolnum")
@@ -54,7 +56,10 @@ public class Location {
     
     @Override
     public String toString() {
-        return "Location [bvolnum=" + bvolnum + ", evolnum=" + evolnum
-                + ", bpagenum=" + bpagenum + ", epagenum=" + epagenum + "]";
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "toString objectmapper exception, this shouldn't happen";
+        }
     }
 }

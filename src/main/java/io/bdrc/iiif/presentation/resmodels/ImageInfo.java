@@ -2,6 +2,8 @@ package io.bdrc.iiif.presentation.resmodels;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ImageInfo {
@@ -33,5 +35,14 @@ public class ImageInfo {
     
     public void setFilename (String filename) {
         this.filename = filename;
+    }
+    
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "toString objectmapper exception, this shouldn't happen";
+        }
     }
 }

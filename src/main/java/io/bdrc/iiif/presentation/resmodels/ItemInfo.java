@@ -13,6 +13,8 @@ import org.apache.jena.rdf.model.StmtIterator;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.digitalcollections.iiif.model.PropertyValue;
 import io.bdrc.iiif.presentation.CollectionService;
@@ -156,5 +158,14 @@ public class ItemInfo {
                 return null;
         }
         return null;
+    }
+    
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "toString objectmapper exception, this shouldn't happen";
+        }
     }
 }
