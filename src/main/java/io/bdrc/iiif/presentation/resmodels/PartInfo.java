@@ -3,6 +3,8 @@ package io.bdrc.iiif.presentation.resmodels;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PartInfo implements Comparable<PartInfo> {
     @JsonProperty("partIndex")
@@ -32,5 +34,14 @@ public class PartInfo implements Comparable<PartInfo> {
         if (this.partIndex == null || compared.partIndex == null)
             return 0;
         return this.partIndex - compared.partIndex;
+    }
+    
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "toString objectmapper exception, this shouldn't happen";
+        }
     }
 }

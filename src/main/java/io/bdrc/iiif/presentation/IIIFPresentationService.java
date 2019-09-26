@@ -225,6 +225,7 @@ public class IIIFPresentationService {
 			try {
 				wi = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
 				rootPart = wi;
+				logger.debug("for {} got workInfo {}", identifier, wi);
 			} catch (InterruptedException | ExecutionException e) {
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 			}

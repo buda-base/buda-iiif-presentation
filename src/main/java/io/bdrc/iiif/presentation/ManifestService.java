@@ -153,8 +153,8 @@ public class ManifestService {
         mainSeq.setViewingDirection(getViewingDirection(imageInfoList));
         Canvas firstCanvas = null;
         final int totalPages = imageInfoList.size();
-        if (totalPages != vi.totalPages)
-            logger.error("VolumeInfo has a different image number than the json file ("+vi.totalPages+" vs. "+totalPages+") for identifier "+id.getId());
+        //if (totalPages != vi.totalPages)
+        //    logger.error("VolumeInfo has a different image number than the json file ("+vi.totalPages+" vs. "+totalPages+") for identifier "+id.getId());
         if (!fairUse) {
             for (int imgSeqNum = beginIndex; imgSeqNum <= endIndex; imgSeqNum++) {
                 final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq);
@@ -218,8 +218,9 @@ public class ManifestService {
         if (!vi.workId.startsWith(BDR)) {
             throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you can only access BDRC volumes through this API");
         }
-        final String workLocalId = vi.workId.substring(BDR_len);
         logger.info("building manifest for ID {}", id.getId());
+        logger.debug("rootPart: {}", rootPart);
+        final String workLocalId = vi.workId.substring(BDR_len);
         List<ImageInfo> imageInfoList;
         try {
             imageInfoList = ImageInfoListService.Instance.getAsync(workLocalId, vi.imageGroup).get();

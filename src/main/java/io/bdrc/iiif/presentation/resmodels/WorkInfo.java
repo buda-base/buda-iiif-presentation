@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
@@ -86,16 +88,14 @@ public class WorkInfo extends PartInfo {
         final Resource partOf = work.getPropertyResourceValue(m.getProperty(BDO, "workPartOf"));
         this.isRoot = (partOf == null);
         Resource item = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "inItem"));
-        if (item == null) {
+        if (item != null) {
+            this.itemId = "bdr:"+item.getLocalName();
+        }
+        final Resource location = work.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
+        if (location == null) {
             this.hasLocation = false;
         } else {
-            this.itemId = "bdr:"+item.getLocalName();
-            final Resource location = work.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
-            if (location == null) {
-                this.hasLocation = false;
-            } else {
-                readLocation(m, location);
-            }
+            readLocation(m, location);
         }
         final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
         if (firstVolume != null) {
@@ -151,9 +151,9 @@ public class WorkInfo extends PartInfo {
                 this.labels = getLabels(m, linkTo);
             }
             if (!this.hasLocation) {
-                final Resource location = linkTo.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
-                if (location != null)
-                    readLocation(m, location);
+                final Resource linkToLocation = linkTo.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
+                if (linkToLocation != null)
+                    readLocation(m, linkToLocation);
             }
             this.isRoot = (linkTo.getPropertyResourceValue(m.getProperty(BDO, "workPartOf")) == null);
         }
@@ -233,8 +233,11 @@ public class WorkInfo extends PartInfo {
 
     @Override
     public String toString() {
-        return "WorkInfo [rootWorkId=" + rootWorkId + ", hasLocation=" + hasLocation + ", parts=" + parts + ", labels="
-                + labels + ", creatorLabels=" + creatorLabels + ", itemId=" + itemId + "]";
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "toString objectmapper exception, this shouldn't happen";
+        }
     }
 
 

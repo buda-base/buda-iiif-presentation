@@ -31,7 +31,8 @@
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix ldp:   <http://www.w3.org/ns/ldp#> .
 
-bdr:W22084  bdo:workHasPart  bdr:W22084_01 , bdr:W22084_02  ;
+bdr:W22084  a           :Work ;
+        bdo:workHasPart  bdr:W22084_01 , bdr:W22084_02  ;
         bdo:workLocation   bdr:WL22084 ;
         skos:prefLabel     "root"@en .
 
@@ -42,7 +43,8 @@ bdr:WL22084  a            bdo:WorkLocation ;
         bdo:workLocationEndVolume   2 ;
         bdo:workLocationWork     bdr:W22084 .
 
-bdr:W22084_01  bdo:workHasPart  bdr:W22084_01_01 , bdr:W22084_01_02  ;
+bdr:W22084_01  a           :Work ;
+        bdo:workHasPart  bdr:W22084_01_01 , bdr:W22084_01_02  ;
         bdo:workLocation   bdr:WL22084_01 ;
         bdo:workPartIndex  1 ;
         skos:prefLabel     "first son"@en .
@@ -54,7 +56,7 @@ bdr:WL22084_01  a            bdo:WorkLocation ;
         bdo:workLocationEndVolume   1 ;
         bdo:workLocationWork     bdr:W22084 .
 
-bdr:W22084_01_01 
+bdr:W22084_01_01  a           :Work ;
         bdo:workLocation   bdr:WL22084_01_01 ;
         bdo:workPartIndex  1 ;
         skos:prefLabel     "first son - first son"@en .
@@ -66,7 +68,7 @@ bdr:WL22084_01_01  a            bdo:WorkLocation ;
         bdo:workLocationEndVolume   1 ;
         bdo:workLocationWork     bdr:W22084 .
 
-bdr:W22084_01_02 
+bdr:W22084_01_02  a           :Work ;
         bdo:workLocation   bdr:WL22084_01_02 ;
         bdo:workPartIndex  2 ;
         skos:prefLabel     "first son - second son"@en .
@@ -78,7 +80,7 @@ bdr:WL22084_01_02  a            bdo:WorkLocation ;
         bdo:workLocationEndVolume   1 ;
         bdo:workLocationWork     bdr:W22084 .
 
-bdr:W22084_02 
+bdr:W22084_02  a           :Work ;
         bdo:workLocation   bdr:WL22084_02 ;
         bdo:workPartIndex  2 ;
         skos:prefLabel     "second son"@en .
