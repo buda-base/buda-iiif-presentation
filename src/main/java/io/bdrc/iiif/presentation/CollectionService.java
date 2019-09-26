@@ -65,8 +65,8 @@ public class CollectionService {
             VolumeInfoSmall vi = ii.getVolumeNumber(i);
             if (vi == null)
                 continue;
-            final int volumebPage = (i == loc.bvolnum) ? loc.bpagenum : 0;
-            final int volumeePage = (i == loc.evolnum) ? loc.epagenum : -1;
+            final int volumebPage = (i == loc.bvolnum.intValue()) ? loc.bpagenum : 0;
+            final int volumeePage = (i == loc.evolnum.intValue()) ? loc.epagenum : -1;
             final StringBuilder sb = new StringBuilder();
             sb.append(IIIFPresPrefix + "vo:" + vi.getPrefixedUri());
             if (volumebPage != 0 || volumeePage != -1) {

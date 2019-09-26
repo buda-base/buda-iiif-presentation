@@ -247,7 +247,7 @@ public class ManifestService {
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked starts after this volume");
                 // if bvolnum < vi.volumeNumber, we already have bPage correctly set to:
                 // 1+nbPagesIntro
-                if (location.bvolnum == vi.volumeNumber) {
+                if (location.bvolnum.equals(vi.volumeNumber)) {
                     bPage = location.bpagenum;
                     logger.debug("set bPage to {}", bPage);
                 } else {
@@ -256,7 +256,7 @@ public class ManifestService {
                 if (location.evolnum < vi.volumeNumber)
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked ends before this volume");
                 // if evolnum > vi.volumeNumber, we already have bPage correctly set to totalPages
-                if (location.evolnum == vi.volumeNumber && location.epagenum != -1)
+                if (vi.volumeNumber.equals(location.evolnum)  && location.epagenum != -1)
                     ePage = location.epagenum;
             }
         } else {
@@ -318,13 +318,13 @@ public class ManifestService {
             if (loc.bvolnum > vi.volumeNumber || loc.evolnum < vi.volumeNumber)
                 return;
             int bPage = 1;
-            if (loc.bvolnum == vi.volumeNumber && loc.bpagenum != null)
+            if (loc.bvolnum.equals(vi.volumeNumber) && loc.bpagenum != null)
                 bPage = loc.bpagenum;
             // ignoring the tbrc pages
             if (vi.pagesIntroTbrc != null && bPage <= vi.pagesIntroTbrc)
                 bPage = vi.pagesIntroTbrc + 1;
             int ePage = imageInfoList.size();
-            if (loc.evolnum != null && loc.evolnum == vi.volumeNumber && loc.epagenum != null)
+            if (loc.evolnum != null && loc.evolnum.equals(vi.volumeNumber) && loc.epagenum != null)
                 ePage = loc.epagenum;
             if (!fairUse) {
                 for (int seqNum = bPage; seqNum <= ePage; seqNum++) {
