@@ -240,19 +240,22 @@ public class ManifestService {
             bPage = 1 + nbPagesIntro;
             ePage = totalPages;
             Location location = (rootPart == null) ? null : rootPart.location;
-            logger.debug("location: {}", location);
-            logger.debug("vi: {}", vi);
             if (location != null) {
+                logger.debug("location: {}", location);
+                logger.debug("vi: {}", vi);
                 if (location.bvolnum > vi.volumeNumber)
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked starts after this volume");
-                // if bvolnum < vi.volumeNumber, we already have bPage correctly set to
+                // if bvolnum < vi.volumeNumber, we already have bPage correctly set to:
                 // 1+nbPagesIntro
-                if (location.bvolnum == vi.volumeNumber)
+                if (location.bvolnum == vi.volumeNumber) {
                     bPage = location.bpagenum;
+                    logger.debug("set bPage to {}", bPage);
+                } else {
+                    logger.debug("bvolnum differs: {} != {}", location.bvolnum, vi.volumeNumber);
+                }
                 if (location.evolnum < vi.volumeNumber)
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked ends before this volume");
-                // if evolnum > vi.volumeNumber, we already have bPage correctly set to
-                // vi.totalPages
+                // if evolnum > vi.volumeNumber, we already have bPage correctly set to totalPages
                 if (location.evolnum == vi.volumeNumber && location.epagenum != -1)
                     ePage = location.epagenum;
             }
