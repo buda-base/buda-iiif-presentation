@@ -41,7 +41,10 @@ public class IIIFPresAuthFilter implements Filter {
 	}
 
 	public static String getToken(final String header) {
-		if (header == null || !header.startsWith("Bearer ")) {
+        if (header == null) {
+            return null;
+        }
+		if (!header.startsWith("Bearer ")) {
 			log.error("invalid Authorization header: {}", header);
 			return null;
 		}
