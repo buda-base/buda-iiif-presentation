@@ -81,8 +81,8 @@ public class PresentationTest {
 
     public static List<ImageInfo> getTestImageList(String filename) throws JsonParseException, JsonMappingException, IOException {
         final File f = new File(TESTDIR + filename);
-        final List<ImageInfo> imageList = om.readValue(f, new TypeReference<List<ImageInfo>>() {
-        });
+        final List<ImageInfo> imageList = om.readValue(f, new TypeReference<List<ImageInfo>>() {});
+        imageList.removeIf(imageInfo -> imageInfo.filename.endsWith("json"));
         return imageList;
     }
 
@@ -159,6 +159,7 @@ public class PresentationTest {
         final Identifier id = new Identifier("wvo:bdr:W22084::bdr:V22084_I0890", Identifier.MANIFEST_ID);
         final String cacheKey = CACHEPREFIX_IIL+ImageInfoListService.getKey("W22084", "I0890");
         final List<ImageInfo> ii = getTestImageList("W22084-0890.json");
+        
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
         cache.put(cacheKey, ii);
         final VolumeInfo vi = new VolumeInfo();

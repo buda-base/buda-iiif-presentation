@@ -107,9 +107,9 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
 		final InputStream objectData = object.getObjectContent();
 		try {
 			final GZIPInputStream gis = new GZIPInputStream(objectData);
-			final List<ImageInfo> imageList = om.readValue(gis, new TypeReference<List<ImageInfo>>() {
-			});
+			final List<ImageInfo> imageList = om.readValue(gis, new TypeReference<List<ImageInfo>>() {});
 			objectData.close();
+			imageList.removeIf(imageInfo -> imageInfo.filename.endsWith("json"));
 			return imageList;
 		} catch (IOException e) {
 			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
