@@ -292,6 +292,13 @@ public class IIIFPresentationService {
 		}
 		if (rootPart == null) {
 		    // case of a virtual work with a location
+		    if (wi == null && id.getWorkId() != null) {
+		        try {
+		            wi = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
+		        } catch (InterruptedException | ExecutionException e) {
+	                throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+	            }
+		    }
 		    rootPart = wi;
 		}
 		// TODO: case where a part is asked with an outline, we need to make sure that
