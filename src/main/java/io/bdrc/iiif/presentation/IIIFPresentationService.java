@@ -284,9 +284,15 @@ public class IIIFPresentationService {
 				if (shortWorkId == null)
 					shortWorkId = "bdr:" + vi.workId.substring(AppConstants.BDR_len);
 				rootPart = wo.getPartForWorkId(shortWorkId);
+				// TODO: case of a virtual work pointing to an outline
+				// we should copy the labels of the virtual work...
 			} catch (InterruptedException | ExecutionException e) {
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 			}
+		}
+		if (rootPart == null) {
+		    // case of a virtual work with a location
+		    rootPart = wi;
 		}
 		// TODO: case where a part is asked with an outline, we need to make sure that
 		// we get the part asked by the user
