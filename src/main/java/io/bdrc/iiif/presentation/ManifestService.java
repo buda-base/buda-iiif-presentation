@@ -319,7 +319,7 @@ public class ManifestService {
                 bPage = vi.pagesIntroTbrc + 1;
             int ePage = imageInfoList.size();
             if (loc.evolnum != null && loc.evolnum.equals(vi.volumeNumber) && loc.epagenum != null)
-                ePage = loc.epagenum;
+                ePage = Math.min(loc.epagenum, ePage);
             if (!fairUse) {
                 for (int seqNum = bPage; seqNum <= ePage; seqNum++) {
                     // imgSeqNum starts at 1
