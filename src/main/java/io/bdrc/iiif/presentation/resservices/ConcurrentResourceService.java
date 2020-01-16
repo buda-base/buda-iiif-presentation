@@ -107,6 +107,10 @@ public class ConcurrentResourceService<T> {
 			resT = getFromApi(resId);
 		} catch (BDRCAPIException e) {
 			res.completeExceptionally(e);
+			// this means that each failed fetch will not be saved and the next
+			// API call will trigger a new one... this could be optimized by doing
+			// that every, say 10mn, so that we don't do too many external calls
+			futures.remove(resId);
 			return res;
 		}
 		putInCache(resId, resT);
