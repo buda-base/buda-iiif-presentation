@@ -99,6 +99,7 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
 			object = s3Client.getObject(new GetObjectRequest(bucketName, s3key));
 		} catch (AmazonS3Exception e) {
 			if (e.getErrorCode().equals("NoSuchKey")) {
+			    logger.error("NoSuchKey: {}", s3key);
 				throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "sorry, BDRC did not complete the data migration for this Work");
 			} else {
 				throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
