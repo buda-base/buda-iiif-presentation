@@ -27,34 +27,37 @@ import io.bdrc.iiif.presentation.resservices.ServiceCache;
 
 public class SpringBootIIIFPres extends SpringBootServletInitializer {
 
-	public final static Logger log = LoggerFactory.getLogger(SpringBootIIIFPres.class.getName());
+    public final static Logger log = LoggerFactory.getLogger(SpringBootIIIFPres.class.getName());
 
-	public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
+        final String configPath = System.getProperty("iiifpres.configpath");
+        try {
+            InputStream input = SpringBootIIIFPres.class.getClassLoader().getResourceAsStream("iiifpres.properties");
+            Properties props = new Properties();
+            props.load(input);
+            try {
+                InputStream is = new FileInputStream("/etc/buda/share/shared-private.properties");
+                props.load(is);
+                is = new FileInputStream(configPath + "iiifpres.properties");
+                props.load(is);
+                is.close();
 
-		try {
-			InputStream input = SpringBootIIIFPres.class.getClassLoader().getResourceAsStream("iiifpres.properties");
-			Properties props = new Properties();
-			props.load(input);
-			try {
-				InputStream is = new FileInputStream("/etc/buda/share/shared-private.properties");
-				props.load(is);
+            } catch (Exception ex) {
+                // do nothing, continue props initialization
+            }
+            AuthProps.init(props);
+            if ("true".equals(AuthProps.getProperty("useAuth"))) {
+                RdfAuthModel.init();
+            }
+            ServiceCache.init();
 
-			} catch (Exception ex) {
-				// do nothing, continue props initialization
-			}
-			AuthProps.init(props);
-			if ("true".equals(AuthProps.getProperty("useAuth"))) {
-				RdfAuthModel.init();
-			}
-			ServiceCache.init();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		log.info("SpringBootIIIFPres has been properly initialized");
-		SpringApplication.run(SpringBootIIIFPres.class, args);
-	}
+        log.info("SpringBootIIIFPres has been properly initialized");
+        SpringApplication.run(SpringBootIIIFPres.class, args);
+    }
 
 }
