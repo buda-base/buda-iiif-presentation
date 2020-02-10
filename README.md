@@ -2,6 +2,10 @@
 
 This repository contains a servlet generating manifests and collections for BDRC.
 
+## API
+
+See [API.md](API.md) for the API.
+
 ## Running
 
 - `mvn test` runs the tests
@@ -9,18 +13,11 @@ This repository contains a servlet generating manifests and collections for BDRC
 - `mvn package` produces a war file
 
 Ex: 
-- http://localhost:8080/2.1.1/v:bdr:V22084_I0886/manifest
-- http://localhost:8080/2.1.1/collection/i:bdr:I22084
-- http://localhost:8080/2.1.1/v:bdr:VEAP676-7-12/manifest
+- http://localhost:8080/v:bdr:V22084_I0886/manifest
+- http://localhost:8080/collection/i:bdr:I22084
+- http://localhost:8080/v:bdr:VEAP676-7-12/manifest
 
 This uses S3 to fetch a dimension.json file, using the default credential provider, make sure the correct environment vars / properties are set.
-
-## TODO
-
-- seeAlso with the link to the BDRC data
-- permalink of the manifest?
-- when a resource is a 404 on LDS, the error in iiifpres should be 404 too
-- build http redirection when the volume has an external manifest
 
 ## Copyright and License
 
