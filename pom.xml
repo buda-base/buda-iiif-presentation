@@ -97,7 +97,7 @@
               <artifactId>slf4j-log4j12</artifactId>
             </exclusion>
           </exclusions>
-          <version>0.5.1</version>
+          <version>0.8.1</version>
         </dependency>
         <dependency><!-- next two: deprected from Java 9: https://stackoverflow.com/questions/46493613/what-is-the-replacement-for-javax-activation-package-in-java-9 -->
             <groupId>com.sun.activation</groupId>
