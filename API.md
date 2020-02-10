@@ -28,3 +28,10 @@ The manifest URIs implemented on BUDA are:
 - `/vo:{image_group}(::{image_range})/manifest` idem, with the outline ([example](http://iiifpres.bdrc.io/vo:bdr:I0891/manifest))
 - `/wv:{instance}::{image_group}/manifest` for the manifest of a subset of an image group corresponding to a part of an instance (example: [part of bdr:I0946 corresponding to bdr:MW22084_0193](http://iiifpres.bdrc.io/wv:bdr:MW22084_0193::bdr:I0946/manifest))
 - `/wvo:{instance}::{image_group}/manifest` idem, with the outline ([example](http://iiifpres.bdrc.io/wvo:bdr:MW22084_0193::bdr:I0946/manifest))
+
+### Non-IIIF objects
+
+These API endpoints serve non-iiif objects:
+
+- `/il/v:{image_group}` returns the image list for the image group, in a format that should be straightforward to understand
+- `/bvm/v:{image_group}` returns a manifest containing informations about corrections made to the order of images and their pagination. Note that unlike image lists, we do not have manifests for all image groups.
