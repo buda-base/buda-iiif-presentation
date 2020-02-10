@@ -17,7 +17,7 @@ All the URLs given in the rest of the document should be considered to be prefix
 Collection URIs implemented on BUDA are:
 
 - `/collection/wio:{instance}(::{image_instance})` (`::{image_instance}` is optional) a collection listing the parts of the instance as subcollections and the corresponding image groups as manifests, this is probably what you're looking for ([example](http://iiifpres.bdrc.io/collection/wio:bdr:MW22084))
-- `/collection/wi:{instance}(::{image_instance})` (`::{image_instance}` is optional) a collection listing the image groups corresponding to a work as manifests ([example](http://iiifpres.bdrc.io/collection/wi:bdr:MW22084))
+- `/collection/wi:{instance}(::{image_instance})` idem with just the manifests and not the subcollections ([example](http://iiifpres.bdrc.io/collection/wi:bdr:MW22084))
 - `/collection/i:{image_instance}` a collection with the image groups of an image instance as manifests ([example](http://iiifpres.bdrc.io/collection/i:bdr:W22084))
 
 ### Manifests
