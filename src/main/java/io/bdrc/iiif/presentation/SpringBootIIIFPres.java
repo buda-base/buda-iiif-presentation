@@ -48,6 +48,7 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
             AuthProps.init(props);
             if ("true".equals(AuthProps.getProperty("useAuth"))) {
                 RdfAuthModel.init();
+                RdfAuthModel.getFullModel().write(System.out, "TURTLE");
             }
             ServiceCache.init();
 

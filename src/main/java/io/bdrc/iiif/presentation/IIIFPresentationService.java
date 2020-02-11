@@ -426,7 +426,6 @@ public class IIIFPresentationService {
         String json = "";
         try {
             String res = resource.substring(resource.indexOf(":") + 1);
-            System.out.println("RES >>> " + res);
             String filename = System.getProperty("iiifpres.configpath") + "gitData/buda-volume-manifests/" + GlobalHelpers.getTwoLettersBucket(res)
                     + "/" + res + ".json";
             json = GlobalHelpers.readFileContent(filename);
@@ -442,6 +441,8 @@ public class IIIFPresentationService {
             HttpServletResponse resp) throws BDRCAPIException, NoSuchAlgorithmException {
         try {
             String repoBase = System.getProperty("iiifpres.configpath") + "gitData/buda-volume-manifests/";
+            Repository repo = GitHelpers.ensureGitRepo(repoBase);
+            GitHelpers.pull(repo);
             String res = resource.substring(resource.indexOf(":") + 1);
             String filename = repoBase + GlobalHelpers.getTwoLettersBucket(res) + "/" + res + ".json";
             File f = new File(repoBase + GlobalHelpers.getTwoLettersBucket(res) + "/");
@@ -451,7 +452,6 @@ public class IIIFPresentationService {
             BufferedWriter br = new BufferedWriter(new FileWriter(new File(filename)));
             br.write(json);
             br.close();
-            Repository repo = GitHelpers.ensureGitRepo(repoBase);
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
             GitHelpers.commitChanges(repo, "Added/updated " + res + ".json on " + dtf.format(LocalDateTime.now()));
             GitHelpers.push(repo, AuthProps.getProperty("gitRemoteUrl"), AuthProps.getProperty("gitUser"), AuthProps.getProperty("gitPass"));
