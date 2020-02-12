@@ -31,15 +31,15 @@ public class IIIFPresAuthFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        String method = ((HttpServletRequest) request).getMethod();
         try {
-            if ("true".equals(AuthProps.getProperty("useAuth"))) {
+            if ("true".equals(AuthProps.getProperty("useAuth")) && !method.equalsIgnoreCase("OPTIONS")) {
                 HttpServletRequest req = (HttpServletRequest) request;
                 boolean isSecuredEndpoint = true;
                 request.setAttribute("access", new Access());
                 String token = getToken(req.getHeader("Authorization"));
                 TokenValidation validation = null;
                 String path = req.getServletPath();
-                String method = req.getMethod();
                 log.debug("PATH in Auth filter is {} for HTTP method: {}", path, method);
                 Endpoint end = null;
                 try {
