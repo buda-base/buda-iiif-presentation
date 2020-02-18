@@ -27,31 +27,31 @@ public class ImageInstanceInfo {
     static public class VolumeInfoSmall implements Comparable<VolumeInfoSmall> {
         @JsonProperty("volumeNumber")
         public Integer volumeNumber;
-        @JsonProperty("volumeId")
-        public String volumeId;
-        @JsonProperty("iiifManifest")
-        public String iiifManifest;
+        @JsonProperty("imageGroupUri")
+        public String imageGroupUri;
+        @JsonProperty("iiifManifestUri")
+        public String iiifManifestUri;
         @JsonIgnore
-        public String prefixedId;
+        public String imageGroupQname;
         
-        public VolumeInfoSmall(String volumeId, Integer volumeNumber, String iiifManifest) {
-            this.volumeId = volumeId;
-            this.prefixedId = CollectionService.getPrefixedForm(volumeId);
+        public VolumeInfoSmall(String imageGroupUri, Integer volumeNumber, String iiifManifestUri) {
+            this.imageGroupUri = imageGroupUri;
+            this.imageGroupQname = CollectionService.getQname(imageGroupUri);
             this.volumeNumber = volumeNumber;
-            this.iiifManifest = iiifManifest;
+            this.iiifManifestUri = iiifManifestUri;
         }
 
         public String getPrefixedUri() {
-            if (prefixedId == null && volumeId != null) {
-                prefixedId = CollectionService.getPrefixedForm(volumeId);
+            if (imageGroupQname == null && imageGroupUri != null) {
+                imageGroupQname = CollectionService.getQname(imageGroupUri);
             }
-            return prefixedId;
+            return imageGroupQname;
         }
         
         public PropertyValue getLabel() {
             final PropertyValue label = new PropertyValue();
             if (volumeNumber == null) {
-                label.addValue(prefixedId);
+                label.addValue(imageGroupQname);
             } else {
                 label.addValue(ManifestService.getLocaleFor("en"), "volume "+volumeNumber);
                 label.addValue(ManifestService.getLocaleFor("bo-x-ewts"), "pod"+volumeNumber+"/");
@@ -67,8 +67,8 @@ public class ImageInstanceInfo {
         }
     }
     
-    @JsonProperty("workId")
-    public String workId;
+    @JsonProperty("instanceUri")
+    public String instanceUri;
     @JsonProperty("access")
     public AccessType access;
     @JsonProperty("restrictedInChina")
@@ -98,7 +98,7 @@ public class ImageInstanceInfo {
         if (itemId.startsWith("bdr:"))
             itemId = BDR+itemId.substring(4);
         final Resource item = m.getResource(itemId);
-        this.workId = item.getPropertyResourceValue(m.getProperty(BDO, "itemForWork")).getURI();
+        this.instanceUri = item.getPropertyResourceValue(m.getProperty(BDO, "itemForWork")).getURI();
         final Resource itemAdmin =  getAdminForResource(m, item);
         if (itemAdmin == null) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no admin data for item");

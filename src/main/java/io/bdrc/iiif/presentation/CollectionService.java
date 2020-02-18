@@ -32,8 +32,8 @@ public class CollectionService {
     // ViewingHint[] { ViewingHint.MULTI_PART});
     public static final String VIEWING_HINTS = "multi-part";
 
-    public static String getPrefixedForm(final String id) {
-        return "bdr:" + id.substring(BDR_len);
+    public static String getQname(final String uri) {
+        return "bdr:" + uri.substring(BDR_len);
     }
 
     public static Collection getCollectionForIdentifier(final Identifier id, boolean continuous) throws BDRCAPIException {
@@ -138,7 +138,7 @@ public class CollectionService {
         collection.setLabel(getLabels(id.getWorkId(), wi.labels));
         if (wi.parts != null) {
             for (final PartInfo pi : wi.parts) {
-                final String collectionId = "wio:" + pi.partId;
+                final String collectionId = "wio:" + pi.partQname;
                 final Collection subcollection = new Collection(IIIFPresPrefix_coll + collectionId);
                 final PropertyValue labels = ManifestService.getPropForLabels(pi.labels);
                 subcollection.setLabel(labels);
@@ -151,9 +151,9 @@ public class CollectionService {
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
             }
-        } else if (wi.itemId != null) {
+        } else if (wi.imageInstanceQname != null) {
             try {
-                ii = ImageInstanceInfoService.Instance.getAsync(wi.itemId).get();
+                ii = ImageInstanceInfoService.Instance.getAsync(wi.imageInstanceQname).get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
             }
@@ -166,14 +166,14 @@ public class CollectionService {
             // addManifestsForLocation(collection, wi, ii, continuous);
             addManifestsForWorkInVolumes(collection, wi, ii, continuous, id.getWorkId());
          // special case for the Taisho where we have many items
-        } else if (wi.isRoot || id.getWorkId().equals(getPrefixedForm(ii.workId))) {
+        } else if (wi.isRoot || id.getWorkId().equals(getQname(ii.instanceUri))) {
             final String volPrefix = "vo:";
             boolean needsVolumeIndication = ii.volumes.size() > 1;
             for (ImageInstanceInfo.VolumeInfoSmall vi : ii.volumes) {
                 final String manifestId = volPrefix + vi.getPrefixedUri();
                 String manifestUrl;
-                if (vi.iiifManifest != null) {
-                    manifestUrl = vi.iiifManifest;
+                if (vi.iiifManifestUri != null) {
+                    manifestUrl = vi.iiifManifestUri;
                 } else {
                     manifestUrl = IIIFPresPrefix + manifestId + "/manifest";
                     if (continuous) {
@@ -189,7 +189,7 @@ public class CollectionService {
     }
 
     public static Collection getCollectionForItem(final Collection collection, final Identifier id, final InstanceInfo wi, final boolean continuous) throws BDRCAPIException {
-        final String itemId = (id.getItemId() == null) ? wi.itemId : id.getItemId();
+        final String itemId = (id.getItemId() == null) ? wi.imageInstanceQname : id.getItemId();
         final ImageInstanceInfo ii;
         try {
             ii = ImageInstanceInfoService.Instance.getAsync(itemId).get();
@@ -202,8 +202,8 @@ public class CollectionService {
         for (ImageInstanceInfo.VolumeInfoSmall vi : ii.volumes) {
             final String manifestId = volPrefix + vi.getPrefixedUri();
             String manifestUrl;
-            if (vi.iiifManifest != null) {
-                manifestUrl = vi.iiifManifest;
+            if (vi.iiifManifestUri != null) {
+                manifestUrl = vi.iiifManifestUri;
             } else {
                 manifestUrl = IIIFPresPrefix + manifestId + "/manifest";
                 if (continuous) {

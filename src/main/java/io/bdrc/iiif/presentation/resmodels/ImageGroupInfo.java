@@ -38,20 +38,16 @@ public class ImageGroupInfo {
     public String statusUri;
     @JsonProperty("workId")
     public String workId;
-    @JsonProperty("itemId")
-    public String itemId;
-    @JsonProperty("imageList")
-    private String imageList;
-    @JsonProperty("totalPages")
-    public Integer totalPages;
+    @JsonProperty("imageInstanceUri")
+    public String imageInstanceUri;
     @JsonProperty("pagesIntroTbrc")
     public Integer pagesIntroTbrc = 0;
     @JsonProperty("volumeNumber")
     public Integer volumeNumber = 1;
     @JsonProperty("imageGroup")
     public String imageGroup = null;
-    @JsonProperty("iiifManifest")
-    public URI iiifManifest = null;
+    @JsonProperty("iiifManifestUri")
+    public URI iiifManifestUri = null;
     @JsonProperty("partInfo")
     public List<PartInfo> partInfo = null;
 
@@ -64,18 +60,12 @@ public class ImageGroupInfo {
         this.statusUri = sol.getResource("status").getURI();
         this.license = LicenseType.fromString(sol.getResource("license").getURI());
         this.workId = sol.getResource("workId").getURI();
-        this.itemId = sol.getResource("itemId").getURI();
+        this.imageInstanceUri = sol.getResource("itemId").getURI();
         if (sol.contains("?ric")) {
             this.restrictedInChina = sol.get("?ric").asLiteral().getBoolean();
         }
-        if (sol.contains("?imageList")) {
-            this.imageList = sol.get("?imageList").asLiteral().getString();
-        }
         if (sol.contains("?volumeNumber")) {
             this.volumeNumber = sol.get("?volumeNumber").asLiteral().getInt();
-        }
-        if (sol.contains("?totalPages")) {
-            this.totalPages = sol.get("?totalPages").asLiteral().getInt();
         }
         if (sol.contains("?pagesIntroTbrc")) {
             this.pagesIntroTbrc = sol.get("?pagesIntroTbrc").asLiteral().getInt();
@@ -86,7 +76,7 @@ public class ImageGroupInfo {
         if (sol.contains("iiifManifest")) {
             final String manifestURIString = sol.getResource("iiifManifest").getURI();
             try {
-                this.iiifManifest = new URI(manifestURIString);
+                this.iiifManifestUri = new URI(manifestURIString);
             } catch (URISyntaxException e) {
                 logger.error("problem converting sparql result to URI: " + manifestURIString, e);
             }
@@ -111,27 +101,17 @@ public class ImageGroupInfo {
         if (item == null) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: no associated item");
         }
-        this.itemId = item.getURI();
-
-        final Statement imageListS = volume.getProperty(m.getProperty(BDO, "imageList"));
-        if (imageListS != null) {
-            this.imageList = imageListS.getString();
-        }
+        this.imageInstanceUri = item.getURI();
 
         final Statement imageGroupS = volume.getProperty(m.getProperty(TMPPREFIX, "legacyImageGroupRID"));
         if (imageGroupS != null) {
             this.imageGroup = imageGroupS.getString();
         }
 
-        final Statement volumePagesTotalS = volume.getProperty(m.getProperty(BDO, "volumePagesTotal"));
-        if (volumePagesTotalS != null) {
-            this.totalPages = volumePagesTotalS.getInt();
-        }
-
         final Statement iiifManifestS = volume.getProperty(m.getProperty(BDO, "hasIIIFManifest"));
         if (iiifManifestS != null) {
             try {
-                this.iiifManifest = new URI(iiifManifestS.getResource().getURI());
+                this.iiifManifestUri = new URI(iiifManifestS.getResource().getURI());
             } catch (URISyntaxException e) {
                 logger.error("problem converting sparql graph result to URI: " + iiifManifestS.getResource().getURI(), e);
             }
@@ -205,38 +185,6 @@ public class ImageGroupInfo {
         } else {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "cannot get volumeId from work model");
         }
-    }
-
-    public AccessType getAccess() {
-        return access;
-    }
-
-    public LicenseType getLicense() {
-        return license;
-    }
-
-    public String getWorkId() {
-        return workId;
-    }
-
-    public String getItemId() {
-        return itemId;
-    }
-
-    public Integer getTotalPages() {
-        return totalPages;
-    }
-
-    public Integer getPagesIntroTbrc() {
-        return pagesIntroTbrc;
-    }
-
-    public String getImageGroup() {
-        return imageGroup;
-    }
-
-    public URI getIiifManifest() {
-        return iiifManifest;
     }
 
     public ImageGroupInfo() {

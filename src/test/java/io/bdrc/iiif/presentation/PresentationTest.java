@@ -98,7 +98,7 @@ public class PresentationTest {
         collection.setLabel(CollectionService.getLabels(id.getWorkId(), wi.labels));
         if (wi.parts != null) {
             for (final PartInfo pi : wi.parts) {
-                final String collectionId = "wio:" + pi.partId;
+                final String collectionId = "wio:" + pi.partQname;
                 final Collection subcollection = new Collection(IIIFPresPrefix_coll + collectionId);
                 final PropertyValue labels = ManifestService.getPropForLabels(pi.labels);
                 subcollection.setLabel(labels);
@@ -165,9 +165,8 @@ public class PresentationTest {
         final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
         vi.workId = BDR+"W22084";
-        vi.itemId = BDR+"I22084";
+        vi.imageInstanceUri = BDR+"I22084";
         vi.volumeNumber = 1;
-        vi.totalPages = 15;
         Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:V22084_I0890", false, wo.getPartForWorkId("bdr:W22084"));
         //final File fout2 = new File("/tmp/workOutline-manifest.json");
         //IIIFApiObjectMapperProvider.writer.writeValue(fout2, man);
@@ -190,9 +189,8 @@ public class PresentationTest {
         final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
         vi.workId = BDR+"W22084";
-        vi.itemId = BDR+"I22084";
+        vi.imageInstanceUri = BDR+"I22084";
         vi.volumeNumber = 1;
-        vi.totalPages = 15;
         Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:V22084_I0890", false, wi);
         //final File fout2 = new File("/tmp/wv-manifest.json");
         //AppConstants.IIIFMAPPER.writer().writeValue(fout2, man);
@@ -223,8 +221,8 @@ public class PresentationTest {
             for (ImageInstanceInfo.VolumeInfoSmall vi : ii.volumes) {
                 final String manifestId = volPrefix + vi.getPrefixedUri();
                 String manifestUrl;
-                if (vi.iiifManifest != null) {
-                    manifestUrl = vi.iiifManifest;
+                if (vi.iiifManifestUri != null) {
+                    manifestUrl = vi.iiifManifestUri;
                 } else {
                     manifestUrl = IIIFPresPrefix + manifestId + "/manifest";
                 }

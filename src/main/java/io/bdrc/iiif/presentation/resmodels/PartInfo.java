@@ -9,21 +9,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class PartInfo implements Comparable<PartInfo> {
     @JsonProperty("partIndex")
     public Integer partIndex = null;
-    @JsonProperty("partId")
-    public String partId = null;
+    @JsonProperty("partQname")
+    public String partQname = null;
     @JsonProperty("labels")
     public List<LangString> labels = null;
     @JsonProperty("parts")
     public List<PartInfo> parts = null;
     @JsonProperty("location")
     public Location location = null;
-    @JsonProperty("linkTo")
-    public String linkTo = null;
-    @JsonProperty("linkToType")
-    public String linkToType = null;
+    @JsonProperty("linkToQname")
+    public String linkToQname = null;
+    @JsonProperty("linkToTypeLname")
+    public String linkToTypeLname = null;
     
-    public PartInfo(final String partId, final Integer partIndex) {
-        this.partId = partId;
+    public PartInfo(final String partQname, final Integer partIndex) {
+        this.partQname = partQname;
         this.partIndex = partIndex;
     }
     

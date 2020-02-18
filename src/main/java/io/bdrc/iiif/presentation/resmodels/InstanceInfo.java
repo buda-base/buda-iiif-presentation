@@ -38,22 +38,22 @@ public class InstanceInfo extends PartInfo {
     public AccessType rootAccess = null;
     @JsonProperty("rootRestrictedInChina")
     public Boolean rootRestrictedInChina = false;
-    @JsonProperty("rootStatus")
-    public String rootStatus = null;
+    @JsonProperty("rootStatusUri")
+    public String rootStatusUri = null;
     @JsonProperty("isRoot")
     public Boolean isRoot = false;
-    @JsonProperty("rootWorkId")
-    public String rootWorkId = null;
+    @JsonProperty("rootInstanceQname")
+    public String rootInstanceQname = null;
     @JsonProperty("creatorLabels")
     public List<LangString> creatorLabels = null; // ?
     @JsonProperty("hasLocation")
     public boolean hasLocation = false;
     // prefixed
-    @JsonProperty("firstVolumeId")
-    public String firstVolumeId = null;
+    @JsonProperty("firstImageGroupQname")
+    public String firstImageGroupQname = null;
     // prefixed
-    @JsonProperty("itemId")
-    public String itemId = null;
+    @JsonProperty("imageInstanceId")
+    public String imageInstanceQname = null;
     @JsonProperty("isVirtual")
     public boolean isVirtual = false;
 
@@ -63,7 +63,7 @@ public class InstanceInfo extends PartInfo {
         this.location = new Location(m, location);
         final Property locationWorkP = m.getProperty(BDO, "workLocationWork");
         if (location.hasProperty(locationWorkP))
-            this.rootWorkId = "bdr:"+location.getProperty(locationWorkP).getResource().getLocalName();
+            this.rootInstanceQname = "bdr:"+location.getProperty(locationWorkP).getResource().getLocalName();
         this.hasLocation = true;
     }
 
@@ -89,7 +89,7 @@ public class InstanceInfo extends PartInfo {
         this.isRoot = (partOf == null);
         Resource item = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "inItem"));
         if (item != null) {
-            this.itemId = "bdr:"+item.getLocalName();
+            this.imageInstanceQname = "bdr:"+item.getLocalName();
         }
         final Resource location = work.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
         if (location == null) {
@@ -99,7 +99,7 @@ public class InstanceInfo extends PartInfo {
         }
         final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
         if (firstVolume != null) {
-            this.firstVolumeId = "bdr:"+firstVolume.getLocalName();
+            this.firstImageGroupQname = "bdr:"+firstVolume.getLocalName();
         }
         
         final Resource root_access = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootAccess"));
@@ -114,12 +114,12 @@ public class InstanceInfo extends PartInfo {
         }
         final Statement rootStatusS = work.getProperty(m.getProperty(TMPPREFIX, "rootStatus"));
         if (rootStatusS == null) {
-            this.rootStatus = null;
+            this.rootStatusUri = null;
             if (this.isVirtual) {
-                this.rootStatus = "http://purl.bdrc.io/admindata/StatusReleased";
+                this.rootStatusUri = "http://purl.bdrc.io/admindata/StatusReleased";
             }
         } else {
-            this.rootStatus = rootStatusS.getResource().getURI();
+            this.rootStatusUri = rootStatusS.getResource().getURI();
         }
         final Resource access = work.getPropertyResourceValue(m.getProperty(ADM, "access"));
         if (access != null) {
@@ -139,10 +139,10 @@ public class InstanceInfo extends PartInfo {
         
         final Resource linkTo = work.getPropertyResourceValue(m.getProperty(BDO, "workLinkTo"));
         if (linkTo != null) {
-            this.linkTo = "bdr:"+linkTo.getLocalName();
+            this.linkToQname = "bdr:"+linkTo.getLocalName();
             final Resource linkToType = linkTo.getPropertyResourceValue(RDF.type);
             if (linkToType != null) {
-                this.linkToType = linkToType.getLocalName();
+                this.linkToTypeLname = linkToType.getLocalName();
             }
             if (this.parts == null) {
                 this.parts = getParts(m, linkTo, null);
@@ -205,10 +205,10 @@ public class InstanceInfo extends PartInfo {
                     shortIdPartMap.put(partId, partInfo);
                 final Resource linkTo = part.getPropertyResourceValue(m.getProperty(BDO, "workLinkTo"));
                 if (linkTo != null) {
-                    partInfo.linkTo = "bdr:"+linkTo.getLocalName();
+                    partInfo.linkToQname = "bdr:"+linkTo.getLocalName();
                     final Resource linkToType = linkTo.getPropertyResourceValue(RDF.type);
                     if (linkToType != null) {
-                        partInfo.linkToType = linkToType.getLocalName();
+                        partInfo.linkToTypeLname = linkToType.getLocalName();
                     }
                 }
                 final Resource location = part.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
@@ -222,7 +222,7 @@ public class InstanceInfo extends PartInfo {
                 if (partInfo.parts == null && linkTo != null) {
                     partInfo.parts = getParts(m, linkTo, shortIdPartMap);
                 }
-                if (location != null || partInfo.labels != null || partInfo.parts != null || partInfo.linkTo != null)
+                if (location != null || partInfo.labels != null || partInfo.parts != null || partInfo.linkToQname != null)
                     parts.add(partInfo);
             }
             Collections.sort(parts);

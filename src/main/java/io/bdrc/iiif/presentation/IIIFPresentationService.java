@@ -158,7 +158,7 @@ public class IIIFPresentationService {
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 			}
 			access = winf.rootAccess;
-			statusUri = winf.rootStatus;
+			statusUri = winf.rootStatusUri;
 			restrictedInChina = winf.rootRestrictedInChina;
 			itemId = id.getItemId();
 			break;
@@ -171,9 +171,9 @@ public class IIIFPresentationService {
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e2);
 			}
 			access = winf1.rootAccess;
-			statusUri = winf1.rootStatus;
+			statusUri = winf1.rootStatusUri;
 			restrictedInChina = winf1.rootRestrictedInChina;
-			itemId = winf1.itemId;
+			itemId = winf1.imageInstanceQname;
 			break;
 		}
 		if (restrictedInChina && GeoLocation.isFromChina(request)) {
@@ -183,8 +183,8 @@ public class IIIFPresentationService {
 		Access acc = (Access) request.getAttribute("access");
 		if (acc == null)
 			acc = new Access();
-		final String accessShortName = getShortName(access.getUri());
-		final String statusShortName = getShortName(statusUri);
+		final String accessShortName = getLocalName(access.getUri());
+		final String statusShortName = getLocalName(statusUri);
 		final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, itemId);
 		if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
 			Metrics.counter("exit.status", "result", acc.isUserLoggedIn() ? "403" : "401").increment();
@@ -244,9 +244,9 @@ public class IIIFPresentationService {
 		String volumeId = id.getVolumeId();
 		if (volumeId == null) {
 			if (wi != null)
-				volumeId = wi.firstVolumeId;
+				volumeId = wi.firstImageGroupQname;
 			if (wo != null)
-				volumeId = wo.firstVolumeId;
+				volumeId = wo.firstImageGroupQname;
 			if (volumeId == null) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).cacheControl(CacheControl.noCache()).body(getStream("\"Cannot find volume ID\""));
 			}
@@ -263,16 +263,16 @@ public class IIIFPresentationService {
 		Access acc = (Access) req.getAttribute("access");
 		if (acc == null)
 			acc = new Access();
-		final String accessShortName = getShortName(vi.access.getUri());
-		final String statusShortName = getShortName(vi.statusUri);
-		final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.itemId);
+		final String accessShortName = getLocalName(vi.access.getUri());
+		final String statusShortName = getLocalName(vi.statusUri);
+		final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.imageInstanceUri);
 		if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
 			return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401)).cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
 		}
-		if (vi.iiifManifest != null) {
-			logger.info("redirect manifest request for ID {} to {}", identifier, vi.iiifManifest.toString());
+		if (vi.iiifManifestUri != null) {
+			logger.info("redirect manifest request for ID {} to {}", identifier, vi.iiifManifestUri.toString());
 			HttpHeaders responseHeaders = new HttpHeaders();
-			responseHeaders.add("Location", vi.iiifManifest.toString());
+			responseHeaders.add("Location", vi.iiifManifestUri.toString());
 			return new ResponseEntity<StreamingResponseBody>(responseHeaders, HttpStatus.resolve(302));
 		}
 		if (wo == null && (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE)) {
@@ -339,13 +339,13 @@ public class IIIFPresentationService {
 		Access acc = (Access) req.getAttribute("access");
 		if (acc == null)
 			acc = new Access();
-		final String accessShortName = getShortName(vi.access.getUri());
-		final String statusShortName = getShortName(vi.statusUri);
-		final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.itemId);
+		final String accessShortName = getLocalName(vi.access.getUri());
+		final String statusShortName = getLocalName(vi.statusUri);
+		final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.imageInstanceUri);
 		if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
 			return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401)).cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
 		}
-		if (vi.iiifManifest != null) {
+		if (vi.iiifManifestUri != null) {
 			return ResponseEntity.status(HttpStatus.resolve(404)).cacheControl(CacheControl.noCache()).body(getStream("\"Cannot serve canvas for external manifests\""));
 		}
 		List<ImageInfo> imageInfoList;
@@ -358,7 +358,7 @@ public class IIIFPresentationService {
 		if (imgSeqNum == null)
 			throw new BDRCAPIException(500, AppConstants.GENERIC_LDS_ERROR, "Cannot find filename in the S3 image list");
 		if (al == AccessLevel.FAIR_USE) {
-			if (imgSeqNum > (AppConstants.FAIRUSE_PAGES_S + vi.pagesIntroTbrc) && imgSeqNum < (vi.totalPages - AppConstants.FAIRUSE_PAGES_E)) {
+			if (imgSeqNum > (AppConstants.FAIRUSE_PAGES_S + vi.pagesIntroTbrc) && imgSeqNum < (imageInfoList.size() - AppConstants.FAIRUSE_PAGES_E)) {
 				return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401)).cacheControl(CacheControl.noCache()).body(getStream("\"Insufficient rights (" + vi.access + ")\""));
 			}
 		}
@@ -388,7 +388,7 @@ public class IIIFPresentationService {
 		return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(imageInfoList);
 	}
 
-	public static String getShortName(final String st) {
+	public static String getLocalName(final String st) {
 		if (st == null || st.isEmpty()) {
 			return null;
 		}

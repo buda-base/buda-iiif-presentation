@@ -19,8 +19,8 @@ public class Location {
     public Integer bpagenum = null;
     @JsonProperty("epagenum") // by convention, epagenum is -1 for the last page
     public Integer epagenum = null;
-    @JsonProperty("workUrl")
-    public String workUrl = null;
+    @JsonProperty("instanceUri")
+    public String instanceUri = null;
     
     
     public Location(final Model m, final Resource location) {
@@ -51,7 +51,7 @@ public class Location {
             this.epagenum = -1;
         final Property workLocationWorkP = m.getProperty(BDO, "workLocationWork");
         if (location.hasProperty(workLocationWorkP))
-            this.workUrl = location.getPropertyResourceValue(workLocationWorkP).getURI();
+            this.instanceUri = location.getPropertyResourceValue(workLocationWorkP).getURI();
     }
     
     @Override

@@ -54,9 +54,8 @@ public class PathTest {
         final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
         vi.workId = BDR+"W22084";
-        vi.itemId = BDR+"I22084";
+        vi.imageInstanceUri = BDR+"I22084";
         vi.volumeNumber = 1;
-        vi.totalPages = 15;
         vi.access = AccessType.OPEN;
         vi.restrictedInChina = false;
         vi.statusUri = "http://purl.bdrc.io/admindata/StatusReleased";

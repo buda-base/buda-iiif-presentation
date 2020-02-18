@@ -303,7 +303,7 @@ public class ManifestService {
         // do not add ranges where there is no location nor subparts
         if (part.location == null && part.parts == null)
             return;
-        final String rangeUri = IIIFPresPrefix + "v:" + volumeId + "/range/w:" + part.partId;
+        final String rangeUri = IIIFPresPrefix + "v:" + volumeId + "/range/w:" + part.partQname;
         final Range subRange = new Range(rangeUri);
         final PropertyValue labels = getPropForLabels(part.labels);
         subRange.setLabel(labels);

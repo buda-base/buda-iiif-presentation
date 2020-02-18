@@ -19,10 +19,10 @@ import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
 public class InstanceOutline {
 
-    @JsonProperty("firstVolumeId")
-    public String firstVolumeId = null;
+    @JsonProperty("firstImageGroupQname")
+    public String firstImageGroupQname = null;
     @JsonProperty("shortIdPartMap")
-    public Map<String,PartInfo> shortIdPartMap = new HashMap<>();
+    public Map<String,PartInfo> partQnameToPartInfo = new HashMap<>();
     
     public InstanceOutline(final Model m, String workId) throws BDRCAPIException {
         if (workId.startsWith("bdr:"))
@@ -33,23 +33,23 @@ public class InstanceOutline {
         // we currently ignore linkTo, this should never happen with the current
         // code although it would probably be good to implement it at some point
         PartInfo rootPi = new PartInfo();
-        this.shortIdPartMap.put("bdr:"+work.getLocalName(), rootPi);
+        this.partQnameToPartInfo.put("bdr:"+work.getLocalName(), rootPi);
         rootPi.labels = InstanceInfo.getLabels(m, work);
         // this is recursive
-        rootPi.parts = InstanceInfo.getParts(m, work, this.shortIdPartMap);
+        rootPi.parts = InstanceInfo.getParts(m, work, this.partQnameToPartInfo);
         final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
         if (firstVolume != null) {
-            this.firstVolumeId = "bdr:"+firstVolume.getLocalName();
+            this.firstImageGroupQname = "bdr:"+firstVolume.getLocalName();
         }
         Resource location = work.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
         if (location != null)
             rootPi.location = new Location(m, location);
         final Resource linkTo = work.getPropertyResourceValue(m.getProperty(BDO, "workLinkTo"));
         if (linkTo != null) {
-            rootPi.linkTo = "bdr:"+linkTo.getLocalName();
+            rootPi.linkToQname = "bdr:"+linkTo.getLocalName();
             final Resource linkToType = linkTo.getPropertyResourceValue(RDF.type);
             if (linkToType != null) {
-                rootPi.linkToType = linkToType.getLocalName();
+                rootPi.linkToTypeLname = linkToType.getLocalName();
             }
             if (rootPi.parts == null) {
                 rootPi.parts = InstanceInfo.getParts(m, linkTo, null);
@@ -69,7 +69,7 @@ public class InstanceOutline {
         if (workId.startsWith(BDR)) {
             workId = "bdr:"+workId.substring(BDR_len);
         }
-        return this.shortIdPartMap.get(workId);
+        return this.partQnameToPartInfo.get(workId);
     }
     
     // function finding the first node of the tree having two or more
