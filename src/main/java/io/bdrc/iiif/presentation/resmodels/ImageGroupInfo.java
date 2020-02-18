@@ -36,8 +36,8 @@ public class ImageGroupInfo {
     public LicenseType license;
     @JsonProperty("status")
     public String statusUri;
-    @JsonProperty("workId")
-    public String workId;
+    @JsonProperty("instanceUri")
+    public String instanceUri;
     @JsonProperty("imageInstanceUri")
     public String imageInstanceUri;
     @JsonProperty("pagesIntroTbrc")
@@ -59,8 +59,8 @@ public class ImageGroupInfo {
         this.access = AccessType.fromString(sol.getResource("access").getURI());
         this.statusUri = sol.getResource("status").getURI();
         this.license = LicenseType.fromString(sol.getResource("license").getURI());
-        this.workId = sol.getResource("workId").getURI();
-        this.imageInstanceUri = sol.getResource("itemId").getURI();
+        this.instanceUri = sol.getResource("instanceId").getURI();
+        this.imageInstanceUri = sol.getResource("iinstanceId").getURI();
         if (sol.contains("?ric")) {
             this.restrictedInChina = sol.get("?ric").asLiteral().getBoolean();
         }
@@ -97,11 +97,11 @@ public class ImageGroupInfo {
         if (!ext.hasNext()) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: not a volume");
         }
-        final Resource item = volume.getPropertyResourceValue(m.getProperty(BDO, "volumeOf"));
-        if (item == null) {
+        final Resource imageInstance = volume.getPropertyResourceValue(m.getProperty(BDO, "volumeOf"));
+        if (imageInstance == null) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: no associated item");
         }
-        this.imageInstanceUri = item.getURI();
+        this.imageInstanceUri = imageInstance.getURI();
 
         final Statement imageGroupS = volume.getProperty(m.getProperty(TMPPREFIX, "legacyImageGroupRID"));
         if (imageGroupS != null) {
@@ -127,17 +127,17 @@ public class ImageGroupInfo {
             this.pagesIntroTbrc = volumePagesTbrcIntroS.getInt();
         }
 
-        final Resource work = item.getPropertyResourceValue(m.getProperty(BDO, "itemForWork"));
-        if (work == null) {
+        final Resource instance = imageInstance.getPropertyResourceValue(m.getProperty(BDO, "instanceReproductionOf"));
+        if (instance == null) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: no associated work");
         }
-        this.workId = work.getURI();
+        this.instanceUri = instance.getURI();
 
         final Resource access = volume.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootAccess"));
         if (access != null) {
             this.access = AccessType.fromString(access.getURI());
         } else {
-            logger.warn("cannot find model access for {}", workId);
+            logger.warn("cannot find model access for {}", instanceUri);
             this.access = AccessType.fromString(BDR + "AccessRestrictedByTbrc");
         }
 
@@ -145,11 +145,11 @@ public class ImageGroupInfo {
         if (access != null) {
             this.statusUri = status.getURI();
         } else {
-            logger.warn("cannot find model status for {}", workId);
+            logger.warn("cannot find model status for {}", instanceUri);
             this.statusUri = null;
         }
 
-        final Resource license = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootLicense"));
+        final Resource license = instance.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootLicense"));
         if (license != null) {
             this.license = LicenseType.fromString(license.getURI());
         }
@@ -161,7 +161,7 @@ public class ImageGroupInfo {
             this.restrictedInChina = restrictedInChinaS.getBoolean();
         }
 
-        this.partInfo = InstanceInfo.getParts(m, work, null);
+        this.partInfo = InstanceInfo.getParts(m, instance, null);
         // this.labels = getLabels(m, volume);
     }
 
@@ -169,21 +169,21 @@ public class ImageGroupInfo {
         fromModel(m, volumeId);
     }
 
-    public ImageGroupInfo(final Model m, String workId, String volumeId) throws BDRCAPIException {
+    public ImageGroupInfo(final Model m, String instanceId, String volumeId) throws BDRCAPIException {
         // result of IIIFPres_workGraph_noItem
         if (volumeId != null) {
             fromModel(m, volumeId);
             return;
         }
-        if (workId.startsWith("bdr:"))
-            workId = BDR + workId.substring(4);
-        final Resource work = m.getResource(workId);
-        final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
-        if (firstVolume != null) {
-            volumeId = firstVolume.getURI();
+        if (instanceId.startsWith("bdr:"))
+            instanceId = BDR + instanceId.substring(4);
+        final Resource instance = m.getResource(instanceId);
+        final Resource firstImageGroup = instance.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstImageGroup"));
+        if (firstImageGroup != null) {
+            volumeId = firstImageGroup.getURI();
             fromModel(m, volumeId);
         } else {
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "cannot get volumeId from work model");
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "cannot get image group from instance model");
         }
     }
 

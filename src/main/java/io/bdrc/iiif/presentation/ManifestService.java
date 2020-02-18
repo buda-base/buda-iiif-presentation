@@ -215,12 +215,12 @@ public class ManifestService {
         if (id.getType() != Identifier.MANIFEST_ID || (id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE)) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
-        if (!vi.workId.startsWith(BDR)) {
+        if (!vi.instanceUri.startsWith(BDR)) {
             throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you can only access BDRC volumes through this API");
         }
         logger.info("building manifest for ID {}", id.getId());
         logger.debug("rootPart: {}", rootPart);
-        final String workLocalId = vi.workId.substring(BDR_len);
+        final String workLocalId = vi.instanceUri.substring(BDR_len);
         List<ImageInfo> imageInfoList;
         try {
             imageInfoList = ImageInfoListService.Instance.getAsync(workLocalId, vi.imageGroup).get();
@@ -409,7 +409,7 @@ public class ManifestService {
     public static Canvas getCanvasForIdentifier(final Identifier id, final ImageGroupInfo vi, final int imgSeqNum, final String volumeId, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
         if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID)
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of canvas");
-        if (!vi.workId.startsWith(BDR))
+        if (!vi.instanceUri.startsWith(BDR))
             throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you can only access BDRC volumes through this API");
         logger.info("building canvas for ID {}, imgSeqNum {}", id.getId(), imgSeqNum);
         final int imageTotal = imageInfoList.size();

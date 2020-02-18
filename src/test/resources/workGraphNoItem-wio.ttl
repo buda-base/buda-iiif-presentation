@@ -23,15 +23,14 @@
 @prefix text:  <http://jena.apache.org/text#> .
 @prefix foaf:  <http://xmlns.com/foaf/0.1/> .
 
-bdr:W22073  a                         bdo:Work ;
+bdr:MW22073  a                         bdo:Instance ;
         adm:gitRevision               "bcb4e78b3e0fb098b897e5d7668c0a6efeab8848" ;
         bdo:itemBDRCHoldingStatement  "tbrc holds digitally scanned images, tiffs and pdf files" ;
         bdo:workBiblioNote            "reproduced photographically from the 1980 lhasa Tibetan people's publishing house edition"@en ;
         bdo:workCatalogInfo           "An episode of the Gesar epic. On the conquest of Hor."@en ;
         bdo:workEditionStatement      "par thengs dang po/"@bo-x-ewts ;
         bdo:workExtentStatement       "2 v." ;
-        bdo:workHasItem               bdr:I22073 ;
-        bdo:workHasItemImageAsset     bdr:I22073 ;
+        bdo:instanceHasReproduction   bdr:W22073 ;
         bdo:workHollis                "014258604" ;
         bdo:workIsAbout               bdr:T248 ;
         bdo:workLangScript            bdr:BoTibt ;
@@ -42,8 +41,8 @@ bdr:W22073  a                         bdo:Work ;
         bdo:workPublisherLocation     "gangtok, sikkim"@en ;
         bdo:workPublisherName         "sherab gyaltsen"@en ;
         bdo:workScanInfo              "Scanned at Tibetan Buddhist Resource Center, 1430 Massachusetts Avenue, Cambridge, MA 02138, USA. Comments: 6/2014"@en ;
-        tmp:firstVolume               bdr:V22073_I1KG17892 ;
-        tmp:inItem                    bdr:I22073 ;
+        tmp:firstImageGroup           bdr:I1KG17892 ;
+        tmp:inImageInstance           bdr:W22073 ;
         tmp:rootAccess                <http://purl.bdrc.io/admindata/AccessOpen> ;
         tmp:rootLicense               <http://purl.bdrc.io/admindata/LicensePublicDomain> ;
         tmp:rootStatus                <http://purl.bdrc.io/admindata/StatusReleased> ;

@@ -9,23 +9,22 @@
 @prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
 @prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
 
-bdr:V22073_I1KG17893  bdo:volumeNumber  2 .
+bdr:I1KG17893  bdo:volumeNumber  2 .
 
-bdr:V22073_I1KG17892  bdo:volumeNumber  1 .
+bdr:I1KG17892  bdo:volumeNumber  1 .
 
-bdr:I22073  a                      bdo:Item , bdo:ItemImageAsset ;
+bdr:W22073  a                      bdo:ImageInstance ;
         adm:gitRevision            "824b1a4b296fa976e0a6003202e9f4a64881a1fe" ;
         adm:status                 bdr:StatusReleased ;
         adm:volumeScanVenue        "TBRC" ;
-        bdo:itemForWork            bdr:W22073 ;
-        bdo:itemHasVolume          bdr:V22073_I1KG17893 , bdr:V22073_I1KG17892 ;
-        bdo:itemImageAssetForWork  bdr:W22073 ;
+        bdo:instanceReproductionOf            bdr:MW22073 ;
+        bdo:instanceHasVolume          bdr:I1KG17893 , bdr:I1KG17892 ;
         bdo:itemVolumes            2 .
 
-<http://purl.bdrc.io/admindata/I22073>
+<http://purl.bdrc.io/admindata/W22073>
         a                      adm:AdminData ;
         adm:access             <http://purl.bdrc.io/admindata/AccessOpen> ;
-        adm:adminAbout         bdr:I22073 ;
+        adm:adminAbout         bdr:W22073 ;
         adm:contentLegal       <http://purl.bdrc.io/admindata/LD_BDRC_PD> ;
         adm:facetIndex         310 ;
         adm:gitPath            "12/I22073.trig" ;

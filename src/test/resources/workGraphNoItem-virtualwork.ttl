@@ -9,27 +9,27 @@
 @prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
 @prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
 
-bdr:W19997_0448  a                bdo:Work ;
+bdr:MW19997_0448  a                bdo:Instance ;
         bdo:legacyOutlineNodeRID  "O1GS447881GS44791" ;
-        bdo:workHasPart           bdr:W19997_0450 , bdr:W19997_0516 , bdr:W19997_0449 , bdr:W19997_0538 , bdr:W19997_0479 ;
+        bdo:workHasPart           bdr:MW19997_0450 , bdr:MW19997_0516 , bdr:MW19997_0449 , bdr:MW19997_0538 , bdr:MW19997_0479 ;
         bdo:workLocation          bdr:WL86C589399D78 ;
         bdo:workPartIndex         3 ;
         bdo:workPartLabel         "ga"@bo-x-ewts ;
-        bdo:workPartOf            bdr:W19997 ;
+        bdo:workPartOf            bdr:MW19997 ;
         bdo:workPartTreeIndex     "3" ;
         skos:prefLabel            "ga"@bo-x-ewts .
 
-bdr:W19997_0171  a                bdo:Work ;
+bdr:MW19997_0171  a                bdo:Instance ;
         bdo:legacyOutlineNodeRID  "O1GS447881GS44790" ;
-        bdo:workHasPart           bdr:W19997_0172 , bdr:W19997_0338 , bdr:W19997_0383 , bdr:W19997_0439 , bdr:W19997_0222 , bdr:W19997_0344 , bdr:W19997_0257 , bdr:W19997_0411 , bdr:W19997_0301 , bdr:W19997_0331 , bdr:W19997_0269 , bdr:W19997_0311 ;
+        bdo:workHasPart           bdr:MW19997_0172 , bdr:MW19997_0338 , bdr:MW19997_0383 , bdr:MW19997_0439 , bdr:MW19997_0222 , bdr:MW19997_0344 , bdr:MW19997_0257 , bdr:MW19997_0411 , bdr:MW19997_0301 , bdr:MW19997_0331 , bdr:MW19997_0269 , bdr:MW19997_0311 ;
         bdo:workLocation          bdr:WLDCE9DA77ADDE ;
         bdo:workPartIndex         2 ;
         bdo:workPartLabel         "kha/"@bo-x-ewts ;
-        bdo:workPartOf            bdr:W19997 ;
+        bdo:workPartOf            bdr:MW19997 ;
         bdo:workPartTreeIndex     "2" ;
         skos:prefLabel            "kha/"@bo-x-ewts .
 
-bdr:W19997  a                         bdo:Work , bdo:PublishedWork ;
+bdr:MW19997  a                         bdo:Instance ;
         bdo:creator                   bdr:CR6E2501AFE362 ;
         bdo:isRoot                    true ;
         bdo:itemBDRCHoldingStatement  "1" ;
@@ -39,8 +39,8 @@ bdr:W19997  a                         bdo:Work , bdo:PublishedWork ;
         bdo:workEvent                 bdr:EV8077B4A0BFAC ;
         bdo:workExtentStatement       "3 v." ;
         bdo:workGenre                 bdr:T1134 ;
-        bdo:workHasItem               bdr:I19997 ;
-        bdo:workHasPart               bdr:W19997_0448 , bdr:W19997_0171 , bdr:W19997_0001 ;
+        bdo:instanceHasReproduction   bdr:W19997 ;
+        bdo:workHasPart               bdr:MW19997_0448 , bdr:MW19997_0171 , bdr:MW19997_0001 ;
         bdo:workHollis                "014254943" ;
         bdo:workIsAbout               bdr:T359 , bdr:G1538 ;
         bdo:workLangScript            bdr:BoTibt ;
@@ -52,9 +52,9 @@ bdr:W19997  a                         bdo:Work , bdo:PublishedWork ;
         bdo:workTitle                 bdr:TT43ADF7E942E1 , bdr:TT385D720BD96B ;
         skos:prefLabel                "dkar mdzes khul gyi dgon sde so so'i lo rgyus gsal bar bshad pa/"@bo-x-ewts .
 
-bdr:W19997_0001  a                bdo:Work ;
+bdr:W19997_0001  a                bdo:Instance ;
         bdo:legacyOutlineNodeRID  "O1GS447881GS44789" ;
-        bdo:workHasPart           bdr:W19997_0050 , bdr:W19997_0004 , bdr:W19997_0002 , bdr:W19997_0113 , bdr:W19997_0006 , bdr:W19997_0003 , bdr:W19997_0005 ;
+        bdo:workHasPart           bdr:MW19997_0050 , bdr:MW19997_0004 , bdr:MW19997_0002 , bdr:MW19997_0113 , bdr:MW19997_0006 , bdr:MW19997_0003 , bdr:MW19997_0005 ;
         bdo:workLocation          bdr:WLAB34E03A35B8 ;
         bdo:workPartIndex         1 ;
         bdo:workPartLabel         "ka"@bo-x-ewts ;
@@ -62,11 +62,11 @@ bdr:W19997_0001  a                bdo:Work ;
         bdo:workPartTreeIndex     "1" ;
         skos:prefLabel            "ka"@bo-x-ewts .
 
-bdr:WSL001_P005  a                 bdo:VirtualWork , bdo:Work ;
-        bdo:workLinkTo             bdr:W19997 ;
+bdr:WSL001_P005  a                 bdo:VirtualWork , bdo:Instance ;
+        bdo:workLinkTo             bdr:MW19997 ;
         bdo:workPartIndex          5 ;
         bdo:workPartOf             bdr:WSL001 ;
-        tmp:inItem                 bdr:I19997 ;
+        tmp:inImageInstance        bdr:W19997 ;
         tmp:rootStatus             <http://purl.bdrc.io/admindata/StatusReleased> ;
         tmp:rootAccess             <http://purl.bdrc.io/admindata/AccessOpen> ;
         tmp:rootLicense            <http://purl.bdrc.io/admindata/LicensePublicDomain> ;

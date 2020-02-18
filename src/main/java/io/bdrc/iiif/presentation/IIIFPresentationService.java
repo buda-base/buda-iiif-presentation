@@ -279,10 +279,10 @@ public class IIIFPresentationService {
 			try {
 				// important: we take the outline of the whole root work, that makes
 				// caching more efficient
-				wo = InstanceOutlineService.Instance.getAsync(vi.workId).get();
+				wo = InstanceOutlineService.Instance.getAsync(vi.instanceUri).get();
 				String shortWorkId = id.getWorkId();
 				if (shortWorkId == null)
-					shortWorkId = "bdr:" + vi.workId.substring(AppConstants.BDR_len);
+					shortWorkId = "bdr:" + vi.instanceUri.substring(AppConstants.BDR_len);
 				rootPart = wo.getPartForWorkId(shortWorkId);
 				// TODO: case of a virtual work pointing to an outline
 				// we should copy the labels of the virtual work...
@@ -350,7 +350,7 @@ public class IIIFPresentationService {
 		}
 		List<ImageInfo> imageInfoList;
 		try {
-			imageInfoList = ImageInfoListService.Instance.getAsync(vi.workId.substring(AppConstants.BDR_len), vi.imageGroup).get();
+			imageInfoList = ImageInfoListService.Instance.getAsync(vi.instanceUri.substring(AppConstants.BDR_len), vi.imageGroup).get();
 		} catch (InterruptedException | ExecutionException e) {
 			throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 		}
@@ -381,7 +381,7 @@ public class IIIFPresentationService {
 		}
 		List<ImageInfo> imageInfoList;
 		try {
-			imageInfoList = ImageInfoListService.Instance.getAsync(vi.workId.substring(AppConstants.BDR_len), vi.imageGroup).get();
+			imageInfoList = ImageInfoListService.Instance.getAsync(vi.instanceUri.substring(AppConstants.BDR_len), vi.imageGroup).get();
 		} catch (InterruptedException | ExecutionException e) {
 			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 		}

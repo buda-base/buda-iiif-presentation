@@ -164,7 +164,7 @@ public class PresentationTest {
         cache.put(cacheKey, ii);
         final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
-        vi.workId = BDR+"W22084";
+        vi.instanceUri = BDR+"W22084";
         vi.imageInstanceUri = BDR+"I22084";
         vi.volumeNumber = 1;
         Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:V22084_I0890", false, wo.getPartForWorkId("bdr:W22084"));
@@ -188,7 +188,7 @@ public class PresentationTest {
         cache.put(cacheKey, ii);
         final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
-        vi.workId = BDR+"W22084";
+        vi.instanceUri = BDR+"W22084";
         vi.imageInstanceUri = BDR+"I22084";
         vi.volumeNumber = 1;
         Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:V22084_I0890", false, wi);

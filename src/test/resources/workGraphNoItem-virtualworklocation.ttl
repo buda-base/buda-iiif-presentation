@@ -31,8 +31,8 @@
 @prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 
-bdr:W1ERI0009001_01_01_01
-        a                          bdo:Work , bdo:VirtualWork ;
+bdr:MW1ERI0009001_01_01_01
+        a                          bdo:Instance , bdo:VirtualWork ;
         bdo:workLocation           [ bdo:workLocationEndPage    318 ;
                                      bdo:workLocationEndVolume  1 ;
                                      bdo:workLocationPage       33 ;
@@ -40,15 +40,15 @@ bdr:W1ERI0009001_01_01_01
                                      bdo:workLocationWork       bdr:W23221
                                    ] ;
         bdo:workPartIndex          1 ;
-        bdo:workPartOf             bdr:W1ERI0009001_01_01 ;
-        tmp:inItem                 bdr:I23221 ;
+        bdo:workPartOf             bdr:MW1ERI0009001_01_01 ;
+        tmp:inImageInstance        bdr:W23221 ;
         tmp:rootAccess             bda:AccessOpen ;
         tmp:rootLicense            bda:LicensePublicDomain ;
         tmp:rootRestrictedInChina  false ;
         tmp:rootStatus             bda:StatusReleased ;
         skos:prefLabel             "སྡོམ་གསུམ་རྣམ་ངེས་མཆན་འགྲེལ་རིག་འཛིན་འཇུག་ངོགས།"@bo .
 
-bdr:W23221  a                         bdo:Work , bdo:PublishedWork ;
+bdr:MW23221  a                        bdo:Instance , bdo:PublishedWork ;
         bdo:creator                   bdr:CR57B61DA00F63 , bdr:CR8FDEE08EB425 ;
         bdo:isRoot                    true ;
         bdo:itemBDRCHoldingStatement  "1" ;
@@ -59,7 +59,7 @@ bdr:W23221  a                         bdo:Work , bdo:PublishedWork ;
         bdo:workEvent                 bdr:EV1C0E02F3E289 ;
         bdo:workExtentStatement       "30, 285 p." ;
         bdo:workGenre                 bdr:T304 ;
-        bdo:workHasItem               bdr:I23221 ;
+        bdo:instanceReproductionOf    bdr:W23221 ;
         bdo:workHollis                "014258858" ;
         bdo:workIsAbout               bdr:T201 ;
         bdo:workLangScript            bdr:BoTibt ;

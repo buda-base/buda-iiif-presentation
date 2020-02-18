@@ -9,22 +9,22 @@
 @prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
 @prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
 
-bdr:V22083_I3773  :volumeNumber  66 .
+bdr:I3773  :volumeNumber  66 .
 
-bdr:I22083  a              bdo:Item , bdo:ItemImageAsset ;
+bdr:W22083  a              bdo:ImageInstance ;
         bdo:isRoot         true ;
-        bdo:itemForWork    bdr:W22083 ;
-        :itemHasVolume     bdr:V22083_I3773 , bdr:V22083_I3745 , bdr:V22083_I3709 ;
+        bdo:instanceReproductionOf    bdr:MW22083 ;
+        bdo:instanceHasVolume     bdr:I3773 , bdr:I3745 , bdr:I3709 ;
         bdo:itemVolumes    103 .
 
-bdr:V22083_I3745  :volumeNumber  38 .
+bdr:I3745  :volumeNumber  38 .
 
-bdr:V22083_I3709  :volumeNumber  2 .
+bdr:I3709  :volumeNumber  2 .
 
-<http://purl.bdrc.io/admindata/I22083>
+<http://purl.bdrc.io/admindata/W22083>
         a                      adm:AdminData ;
         adm:access             <http://purl.bdrc.io/admindata/AccessOpen> ;
-        adm:adminAbout         bdr:I22083 ;
+        adm:adminAbout         bdr:W22083 ;
         adm:contentLegal       <http://purl.bdrc.io/admindata/LD_BDRC_PD> ;
         adm:facetIndex         310 ;
         adm:gitPath            "12/I22083.trig" ;
