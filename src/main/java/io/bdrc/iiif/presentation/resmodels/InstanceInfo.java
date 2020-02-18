@@ -30,9 +30,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
-public class WorkInfo extends PartInfo {
+public class InstanceInfo extends PartInfo {
     
-    private static final Logger logger = LoggerFactory.getLogger(WorkInfo.class);
+    private static final Logger logger = LoggerFactory.getLogger(InstanceInfo.class);
 
     @JsonProperty("rootAccess")
     public AccessType rootAccess = null;
@@ -57,7 +57,7 @@ public class WorkInfo extends PartInfo {
     @JsonProperty("isVirtual")
     public boolean isVirtual = false;
 
-    public WorkInfo() {}
+    public InstanceInfo() {}
 
     public void readLocation(final Model m, final Resource location) {
         this.location = new Location(m, location);
@@ -67,7 +67,7 @@ public class WorkInfo extends PartInfo {
         this.hasLocation = true;
     }
 
-    public WorkInfo(final Model m, String workId) throws BDRCAPIException {
+    public InstanceInfo(final Model m, String workId) throws BDRCAPIException {
         // the model is supposed to come from the IIIFPres_workInfo_noItem graph query
         if (workId.startsWith("bdr:"))
             workId = BDR+workId.substring(4);

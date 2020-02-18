@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import io.bdrc.auth.AuthProps;
 import io.bdrc.iiif.presentation.resmodels.AccessType;
 import io.bdrc.iiif.presentation.resmodels.ImageInfo;
-import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
 
@@ -51,7 +51,7 @@ public class PathTest {
         final List<ImageInfo> ii = PresentationTest.getTestImageList("W22084-0890.json");
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
         cache.put(cacheKey, ii);
-        final VolumeInfo vi = new VolumeInfo();
+        final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
         vi.workId = BDR+"W22084";
         vi.itemId = BDR+"I22084";

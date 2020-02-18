@@ -22,7 +22,7 @@ import io.bdrc.iiif.presentation.ManifestService;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
 
-public class ItemInfo {
+public class ImageInstanceInfo {
     
     static public class VolumeInfoSmall implements Comparable<VolumeInfoSmall> {
         @JsonProperty("volumeNumber")
@@ -80,7 +80,7 @@ public class ItemInfo {
     @JsonProperty("volumes")
     public List<VolumeInfoSmall> volumes;
     
-    public ItemInfo() {}
+    public ImageInstanceInfo() {}
     
     public static final Property adminAbout = ResourceFactory.createProperty(ADM+"adminAbout");
     
@@ -93,7 +93,7 @@ public class ItemInfo {
         return null;
     }
     
-    public ItemInfo(final Model m, String itemId) throws BDRCAPIException {
+    public ImageInstanceInfo(final Model m, String itemId) throws BDRCAPIException {
         // the model is supposed to come from the IIIFPres_itemGraph graph query
         if (itemId.startsWith("bdr:"))
             itemId = BDR+itemId.substring(4);

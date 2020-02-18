@@ -90,7 +90,7 @@ public class ConcurrentResourceService<T> {
 		resId = normalizeId(resId);
 		T resT = getFromCache(resId);
 		if (resT != null) {
-			logger.debug("found cache for " + resId);
+			logger.debug("found cache for {}", resId);
 			CompletableFuture<T> resCached = new CompletableFuture<>();
 			resCached.complete(resT);
 			return resCached;

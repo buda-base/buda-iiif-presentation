@@ -61,7 +61,7 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
 		return String.format("%032x", bigInt).substring(0, 2);
 	}
 
-	private static AmazonS3 getClient() {
+	private synchronized static AmazonS3 getClient() {
 		if (s3Client == null) {
 			AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard().withRegion(AuthProps.getProperty("awsRegion"));
 			s3Client = clientBuilder.build();

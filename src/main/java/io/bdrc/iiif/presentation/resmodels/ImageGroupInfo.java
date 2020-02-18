@@ -24,9 +24,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.resservices.VolumeInfoService;
+import io.bdrc.iiif.presentation.resservices.ImageGroupInfoService;
 
-public class VolumeInfo {
+public class ImageGroupInfo {
 
     @JsonProperty("access")
     public AccessType access;
@@ -55,10 +55,10 @@ public class VolumeInfo {
     @JsonProperty("partInfo")
     public List<PartInfo> partInfo = null;
 
-    private static final Logger logger = LoggerFactory.getLogger(VolumeInfoService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ImageGroupInfoService.class);
 
     // result of volumeInfo query
-    public VolumeInfo(final QuerySolution sol) {
+    public ImageGroupInfo(final QuerySolution sol) {
         logger.debug("creating VolumeInfo for solution {}", sol.toString());
         this.access = AccessType.fromString(sol.getResource("access").getURI());
         this.statusUri = sol.getResource("status").getURI();
@@ -181,15 +181,15 @@ public class VolumeInfo {
             this.restrictedInChina = restrictedInChinaS.getBoolean();
         }
 
-        this.partInfo = WorkInfo.getParts(m, work, null);
+        this.partInfo = InstanceInfo.getParts(m, work, null);
         // this.labels = getLabels(m, volume);
     }
 
-    public VolumeInfo(final Model m, final String volumeId) throws BDRCAPIException {
+    public ImageGroupInfo(final Model m, final String volumeId) throws BDRCAPIException {
         fromModel(m, volumeId);
     }
 
-    public VolumeInfo(final Model m, String workId, String volumeId) throws BDRCAPIException {
+    public ImageGroupInfo(final Model m, String workId, String volumeId) throws BDRCAPIException {
         // result of IIIFPres_workGraph_noItem
         if (volumeId != null) {
             fromModel(m, volumeId);
@@ -239,7 +239,7 @@ public class VolumeInfo {
         return iiifManifest;
     }
 
-    public VolumeInfo() {
+    public ImageGroupInfo() {
     }
 
     @Override

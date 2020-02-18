@@ -23,23 +23,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
 
-public class VolumeInfoService extends ConcurrentResourceService<VolumeInfo> {
+public class ImageGroupInfoService extends ConcurrentResourceService<ImageGroupInfo> {
 
-	private static final Logger logger = LoggerFactory.getLogger(VolumeInfoService.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImageGroupInfoService.class);
 
-	public static final VolumeInfoService Instance = new VolumeInfoService();
+	public static final ImageGroupInfoService Instance = new ImageGroupInfoService();
 
-	VolumeInfoService() {
+	ImageGroupInfoService() {
 		super(CACHEPREFIX_VI);
 	}
 
 	@Override
-	final public VolumeInfo getFromApi(final String volumeId) throws BDRCAPIException {
+	final public ImageGroupInfo getFromApi(final String volumeId) throws BDRCAPIException {
 		logger.info("fetch volume info on LDS for {}", volumeId);
 		final HttpClient httpClient = HttpClientBuilder.create().build(); // Use this instead
-		final VolumeInfo resVolumeInfo;
+		final ImageGroupInfo resVolumeInfo;
 		try {
 			final HttpPost request = new HttpPost(LDS_VOLUME_QUERY);
 			// we suppose that the volumeId is well formed, which is checked by the
@@ -58,7 +58,7 @@ public class VolumeInfoService extends ConcurrentResourceService<VolumeInfo> {
 				throw new BDRCAPIException(500, CANNOT_FIND_VOLUME_ERROR_CODE, "cannot find volume " + volumeId + " in the database");
 			}
 			final QuerySolution sol = res.next();
-			resVolumeInfo = new VolumeInfo(sol);
+			resVolumeInfo = new ImageGroupInfo(sol);
 			if (res.hasNext()) {
 				throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "more than one volume found in the database for " + volumeId + ", this shouldn't happen");
 			}

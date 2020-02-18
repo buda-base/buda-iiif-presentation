@@ -15,14 +15,14 @@ import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.resmodels.ItemInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.LangString;
 import io.bdrc.iiif.presentation.resmodels.Location;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
-import io.bdrc.iiif.presentation.resmodels.WorkInfo;
-import io.bdrc.iiif.presentation.resmodels.ItemInfo.VolumeInfoSmall;
-import io.bdrc.iiif.presentation.resservices.ItemInfoService;
-import io.bdrc.iiif.presentation.resservices.WorkInfoService;
+import io.bdrc.iiif.presentation.resmodels.InstanceInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInstanceInfo.VolumeInfoSmall;
+import io.bdrc.iiif.presentation.resservices.ImageInstanceInfoService;
+import io.bdrc.iiif.presentation.resservices.InstanceInfoService;
 import io.bdrc.libraries.Identifier;
 
 public class CollectionService {
@@ -37,9 +37,9 @@ public class CollectionService {
     }
 
     public static Collection getCollectionForIdentifier(final Identifier id, boolean continuous) throws BDRCAPIException {
-        final WorkInfo wi;
+        final InstanceInfo wi;
         try {
-            wi = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
+            wi = InstanceInfoService.Instance.getAsync(id.getWorkId()).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
@@ -56,7 +56,7 @@ public class CollectionService {
     }
 
     // not used anymore but quite convenient
-    public static void addManifestsForLocation(final Collection c, final WorkInfo wi, final ItemInfo ii, final boolean continuous) {
+    public static void addManifestsForLocation(final Collection c, final InstanceInfo wi, final ImageInstanceInfo ii, final boolean continuous) {
         if (!wi.hasLocation)
             return;
         final Location loc = wi.location;
@@ -87,7 +87,7 @@ public class CollectionService {
         }
     }
     
-    public static void addManifestsForWorkInVolumes(final Collection c, final WorkInfo wi, final ItemInfo ii, final boolean continuous, final String workId) {
+    public static void addManifestsForWorkInVolumes(final Collection c, final InstanceInfo wi, final ImageInstanceInfo ii, final boolean continuous, final String workId) {
         if (!wi.hasLocation)
             return;
         final Location loc = wi.location;
@@ -132,8 +132,8 @@ public class CollectionService {
         return collection;
     }
 
-    public static Collection getCollectionForOutline(final Collection collection, final Identifier id, final WorkInfo wi, final boolean continuous) throws BDRCAPIException {
-        final ItemInfo ii;
+    public static Collection getCollectionForOutline(final Collection collection, final Identifier id, final InstanceInfo wi, final boolean continuous) throws BDRCAPIException {
+        final ImageInstanceInfo ii;
         logger.info("building outline collection for ID {}", id.getId());
         collection.setLabel(getLabels(id.getWorkId(), wi.labels));
         if (wi.parts != null) {
@@ -147,13 +147,13 @@ public class CollectionService {
         }
         if (id.getItemId() != null) {
             try {
-                ii = ItemInfoService.Instance.getAsync(id.getItemId()).get();
+                ii = ImageInstanceInfoService.Instance.getAsync(id.getItemId()).get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
             }
         } else if (wi.itemId != null) {
             try {
-                ii = ItemInfoService.Instance.getAsync(wi.itemId).get();
+                ii = ImageInstanceInfoService.Instance.getAsync(wi.itemId).get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
             }
@@ -169,7 +169,7 @@ public class CollectionService {
         } else if (wi.isRoot || id.getWorkId().equals(getPrefixedForm(ii.workId))) {
             final String volPrefix = "vo:";
             boolean needsVolumeIndication = ii.volumes.size() > 1;
-            for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
+            for (ImageInstanceInfo.VolumeInfoSmall vi : ii.volumes) {
                 final String manifestId = volPrefix + vi.getPrefixedUri();
                 String manifestUrl;
                 if (vi.iiifManifest != null) {
@@ -188,18 +188,18 @@ public class CollectionService {
         return collection;
     }
 
-    public static Collection getCollectionForItem(final Collection collection, final Identifier id, final WorkInfo wi, final boolean continuous) throws BDRCAPIException {
+    public static Collection getCollectionForItem(final Collection collection, final Identifier id, final InstanceInfo wi, final boolean continuous) throws BDRCAPIException {
         final String itemId = (id.getItemId() == null) ? wi.itemId : id.getItemId();
-        final ItemInfo ii;
+        final ImageInstanceInfo ii;
         try {
-            ii = ItemInfoService.Instance.getAsync(itemId).get();
+            ii = ImageInstanceInfoService.Instance.getAsync(itemId).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
         }
         logger.info("building item collection for ID {}", id.getId());
         collection.addLabel(id.getItemId());
         final String volPrefix = id.getSubType() == Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE ? "vo:" : "v:";
-        for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
+        for (ImageInstanceInfo.VolumeInfoSmall vi : ii.volumes) {
             final String manifestId = volPrefix + vi.getPrefixedUri();
             String manifestUrl;
             if (vi.iiifManifest != null) {

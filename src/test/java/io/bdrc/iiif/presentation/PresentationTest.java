@@ -31,14 +31,14 @@ import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.ImageInfo;
-import io.bdrc.iiif.presentation.resmodels.ItemInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
-import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
-import io.bdrc.iiif.presentation.resmodels.WorkInfo;
-import io.bdrc.iiif.presentation.resmodels.WorkOutline;
+import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
+import io.bdrc.iiif.presentation.resmodels.InstanceInfo;
+import io.bdrc.iiif.presentation.resmodels.InstanceOutline;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
-import io.bdrc.iiif.presentation.resservices.VolumeInfoService;
+import io.bdrc.iiif.presentation.resservices.ImageGroupInfoService;
 import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
 
@@ -63,7 +63,7 @@ public class PresentationTest {
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "itemInfoGraph.ttl").lang(RDFLanguages.TTL);
         // .canonicalLiterals(true);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
-        ItemInfo itemInfo = new ItemInfo(m, "bdr:I22083");
+        ImageInstanceInfo itemInfo = new ImageInstanceInfo(m, "bdr:I22083");
         om.writeValue(System.out, itemInfo);
     }
 
@@ -73,7 +73,7 @@ public class PresentationTest {
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphItem.ttl").lang(RDFLanguages.TTL);
         // .canonicalLiterals(true);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
-        WorkInfo workInfo = new WorkInfo(m, "bdr:W12827_0047");
+        InstanceInfo workInfo = new InstanceInfo(m, "bdr:W12827_0047");
         om.writerWithDefaultPrettyPrinter().writeValue(System.out, workInfo);
 //        ItemInfo itemInfo = new ItemInfo(m, "bdr:I12827");
 //        om.writeValue(System.out, itemInfo);
@@ -91,7 +91,7 @@ public class PresentationTest {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualwork.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
-        final WorkInfo wi = new WorkInfo(m, "bdr:WSL001_P005");
+        final InstanceInfo wi = new InstanceInfo(m, "bdr:WSL001_P005");
         // om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:WSL001_P005", Identifier.COLLECTION_ID);
         final Collection collection = CollectionService.getCommonCollection(id);
@@ -114,7 +114,7 @@ public class PresentationTest {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualworkpart.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
-        final WorkInfo wi = new WorkInfo(m, "bdr:WSL001");
+        final InstanceInfo wi = new InstanceInfo(m, "bdr:WSL001");
         // om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:WSL001", Identifier.COLLECTION_ID);
         //final Collection collection = CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id), id, wi, false);
@@ -127,7 +127,7 @@ public class PresentationTest {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualworklinktopart.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
-        final WorkInfo wi = new WorkInfo(m, "bdr:W1ERI0009001_01_02_02");
+        final InstanceInfo wi = new InstanceInfo(m, "bdr:W1ERI0009001_01_02_02");
         //om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:W1ERI0009001_01_02_02", Identifier.COLLECTION_ID);
         //final Collection collection = CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id), id, wi, false);
@@ -140,7 +140,7 @@ public class PresentationTest {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualworklocation.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
-        final WorkInfo wi = new WorkInfo(m, "bdr:W1ERI0009001_01_01_01");
+        final InstanceInfo wi = new InstanceInfo(m, "bdr:W1ERI0009001_01_01_01");
         //om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:W1ERI0009001_01_01_01", Identifier.COLLECTION_ID);
         //final Collection collection = CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id), id, wi, false);
@@ -153,7 +153,7 @@ public class PresentationTest {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workOutline.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
-        final WorkOutline wo = new WorkOutline(m, "bdr:W22084");
+        final InstanceOutline wo = new InstanceOutline(m, "bdr:W22084");
         //final File fout = new File("/tmp/workOutline.json");
         //om.writeValue(fout, wo);
         final Identifier id = new Identifier("wvo:bdr:W22084::bdr:V22084_I0890", Identifier.MANIFEST_ID);
@@ -162,7 +162,7 @@ public class PresentationTest {
         
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
         cache.put(cacheKey, ii);
-        final VolumeInfo vi = new VolumeInfo();
+        final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
         vi.workId = BDR+"W22084";
         vi.itemId = BDR+"I22084";
@@ -178,7 +178,7 @@ public class PresentationTest {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workOutline.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
-        final WorkInfo wi = new WorkInfo(m, "bdr:W22084_01_01");
+        final InstanceInfo wi = new InstanceInfo(m, "bdr:W22084_01_01");
         System.out.println(wi.toString());
         //final File fout = new File("/tmp/wv.json");
         //om.writeValue(fout, wi);
@@ -187,7 +187,7 @@ public class PresentationTest {
         final List<ImageInfo> ii = getTestImageList("W22084-0890.json");
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
         cache.put(cacheKey, ii);
-        final VolumeInfo vi = new VolumeInfo();
+        final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
         vi.workId = BDR+"W22084";
         vi.itemId = BDR+"I22084";
@@ -204,7 +204,7 @@ public class PresentationTest {
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-wio.ttl").lang(RDFLanguages.TTL);
         // .canonicalLiterals(true);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
-        final WorkInfo wi = new WorkInfo(m, "bdr:W22073");
+        final InstanceInfo wi = new InstanceInfo(m, "bdr:W22073");
         // System.out.println(wi.itemId);
         final Identifier id = new Identifier("wio:bdr:W22073", Identifier.COLLECTION_ID);
         final Collection collection = CollectionService.getCommonCollection(id);
@@ -214,13 +214,13 @@ public class PresentationTest {
         // .canonicalLiterals(true);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         // m.write(System.out, "TTL");
-        final ItemInfo ii = new ItemInfo(m, "bdr:I22073");
+        final ImageInstanceInfo ii = new ImageInstanceInfo(m, "bdr:I22073");
         if (wi.hasLocation) {
             CollectionService.addManifestsForLocation(collection, wi, ii, false);
         } else if (wi.isRoot) {
             final String volPrefix = "v:";
             boolean needsVolumeIndication = ii.volumes.size() > 1;
-            for (ItemInfo.VolumeInfoSmall vi : ii.volumes) {
+            for (ImageInstanceInfo.VolumeInfoSmall vi : ii.volumes) {
                 final String manifestId = volPrefix + vi.getPrefixedUri();
                 String manifestUrl;
                 if (vi.iiifManifest != null) {

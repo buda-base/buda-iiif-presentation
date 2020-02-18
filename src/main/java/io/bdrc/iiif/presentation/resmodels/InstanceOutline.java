@@ -17,14 +17,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
-public class WorkOutline {
+public class InstanceOutline {
 
     @JsonProperty("firstVolumeId")
     public String firstVolumeId = null;
     @JsonProperty("shortIdPartMap")
     public Map<String,PartInfo> shortIdPartMap = new HashMap<>();
     
-    public WorkOutline(final Model m, String workId) throws BDRCAPIException {
+    public InstanceOutline(final Model m, String workId) throws BDRCAPIException {
         if (workId.startsWith("bdr:"))
             workId = BDR+workId.substring(4);
         final Resource work = m.getResource(workId);
@@ -34,9 +34,9 @@ public class WorkOutline {
         // code although it would probably be good to implement it at some point
         PartInfo rootPi = new PartInfo();
         this.shortIdPartMap.put("bdr:"+work.getLocalName(), rootPi);
-        rootPi.labels = WorkInfo.getLabels(m, work);
+        rootPi.labels = InstanceInfo.getLabels(m, work);
         // this is recursive
-        rootPi.parts = WorkInfo.getParts(m, work, this.shortIdPartMap);
+        rootPi.parts = InstanceInfo.getParts(m, work, this.shortIdPartMap);
         final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
         if (firstVolume != null) {
             this.firstVolumeId = "bdr:"+firstVolume.getLocalName();
@@ -52,10 +52,10 @@ public class WorkOutline {
                 rootPi.linkToType = linkToType.getLocalName();
             }
             if (rootPi.parts == null) {
-                rootPi.parts = WorkInfo.getParts(m, linkTo, null);
+                rootPi.parts = InstanceInfo.getParts(m, linkTo, null);
             }
             if (rootPi.labels == null) {
-                rootPi.labels = WorkInfo.getLabels(m, linkTo);
+                rootPi.labels = InstanceInfo.getLabels(m, linkTo);
             }
             if (rootPi.location == null) {
                 location = linkTo.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));

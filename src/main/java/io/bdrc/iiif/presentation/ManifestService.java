@@ -34,8 +34,8 @@ import io.bdrc.iiif.presentation.resmodels.ImageInfo;
 import io.bdrc.iiif.presentation.resmodels.LangString;
 import io.bdrc.iiif.presentation.resmodels.Location;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
-import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
-import io.bdrc.iiif.presentation.resmodels.WorkOutline;
+import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
+import io.bdrc.iiif.presentation.resmodels.InstanceOutline;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.libraries.Identifier;
 
@@ -74,7 +74,7 @@ public class ManifestService {
         return res;
     }
 
-    public static PropertyValue getLabelForImage(final int imageIndex, final VolumeInfo vi) {
+    public static PropertyValue getLabelForImage(final int imageIndex, final ImageGroupInfo vi) {
         final PropertyValue res = new PropertyValue();
         if (imageIndex < (vi.pagesIntroTbrc + 1)) {
             // this shouldn't really happen anymore
@@ -111,7 +111,7 @@ public class ManifestService {
         }
     }
 
-    public static Canvas addOneCanvas(final int imgSeqNum, final Identifier id, final List<ImageInfo> imageInfoList, final VolumeInfo vi, final String volumeId, final Sequence mainSeq) {
+    public static Canvas addOneCanvas(final int imgSeqNum, final Identifier id, final List<ImageInfo> imageInfoList, final ImageGroupInfo vi, final String volumeId, final Sequence mainSeq) {
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum - 1);
         final Integer size = imageInfo.size;
         if (size != null && size > 1000000)
@@ -147,7 +147,7 @@ public class ManifestService {
         return canvas;
     }
 
-    public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList, final VolumeInfo vi, final String volumeId, final int beginIndex, final int endIndex, final boolean fairUse) throws BDRCAPIException {
+    public static Sequence getSequenceFrom(final Identifier id, final List<ImageInfo> imageInfoList, final ImageGroupInfo vi, final String volumeId, final int beginIndex, final int endIndex, final boolean fairUse) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence(IIIFPresPrefix + id.getId() + "/sequence/main");
         // all indices start at 1
         mainSeq.setViewingDirection(getViewingDirection(imageInfoList));
@@ -211,7 +211,7 @@ public class ManifestService {
         return label;
     }
 
-    public static Manifest getManifestForIdentifier(final Identifier id, final VolumeInfo vi, boolean continuous, final String volumeId, final boolean fairUse, final PartInfo rootPart) throws BDRCAPIException {
+    public static Manifest getManifestForIdentifier(final Identifier id, final ImageGroupInfo vi, boolean continuous, final String volumeId, final boolean fairUse, final PartInfo rootPart) throws BDRCAPIException {
         if (id.getType() != Identifier.MANIFEST_ID || (id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE)) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
@@ -285,10 +285,10 @@ public class ManifestService {
         return ct;
     }
 
-    public static void addRangesToManifest(final Manifest m, final Identifier id, final VolumeInfo vi, final String volumeId, final boolean fairUse, final List<ImageInfo> imageInfoList, final PartInfo rootPi) throws BDRCAPIException {
+    public static void addRangesToManifest(final Manifest m, final Identifier id, final ImageGroupInfo vi, final String volumeId, final boolean fairUse, final List<ImageInfo> imageInfoList, final PartInfo rootPi) throws BDRCAPIException {
         if (rootPi == null)
             return;
-        final PartInfo volumeRoot = WorkOutline.getRootPiForVolumeR(rootPi, vi.volumeNumber);
+        final PartInfo volumeRoot = InstanceOutline.getRootPiForVolumeR(rootPi, vi.volumeNumber);
         if (volumeRoot == null)
             return;
         final Range r = new Range(IIIFPresPrefix + "v:" + id.getVolumeId() + "/range/top", "Table of Contents");
@@ -299,7 +299,7 @@ public class ManifestService {
         m.addRange(r);
     }
 
-    public static void addSubRangeToRange(final Manifest m, final Range r, final Identifier id, final PartInfo part, final VolumeInfo vi, final String volumeId, final List<ImageInfo> imageInfoList, final boolean fairUse) throws BDRCAPIException {
+    public static void addSubRangeToRange(final Manifest m, final Range r, final Identifier id, final PartInfo part, final ImageGroupInfo vi, final String volumeId, final List<ImageInfo> imageInfoList, final boolean fairUse) throws BDRCAPIException {
         // do not add ranges where there is no location nor subparts
         if (part.location == null && part.parts == null)
             return;
@@ -364,7 +364,7 @@ public class ManifestService {
 
     public static final PropertyValue pngHint = new PropertyValue("png", "jpg");
 
-    public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final List<ImageInfo> imageInfoList, final String volumeId, final VolumeInfo vi) {
+    public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final List<ImageInfo> imageInfoList, final String volumeId, final ImageGroupInfo vi) {
         // imgSeqNum starts at 1
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum - 1);
         final PropertyValue label = getLabelForImage(imgSeqNum, vi);
@@ -406,7 +406,7 @@ public class ManifestService {
         return null;
     }
 
-    public static Canvas getCanvasForIdentifier(final Identifier id, final VolumeInfo vi, final int imgSeqNum, final String volumeId, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
+    public static Canvas getCanvasForIdentifier(final Identifier id, final ImageGroupInfo vi, final int imgSeqNum, final String volumeId, final List<ImageInfo> imageInfoList) throws BDRCAPIException {
         if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID)
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of canvas");
         if (!vi.workId.startsWith(BDR))

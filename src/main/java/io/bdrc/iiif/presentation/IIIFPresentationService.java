@@ -36,17 +36,17 @@ import io.bdrc.auth.AuthProps;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.AccessType;
 import io.bdrc.iiif.presentation.resmodels.ImageInfo;
-import io.bdrc.iiif.presentation.resmodels.ItemInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
-import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
-import io.bdrc.iiif.presentation.resmodels.WorkInfo;
-import io.bdrc.iiif.presentation.resmodels.WorkOutline;
+import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
+import io.bdrc.iiif.presentation.resmodels.InstanceInfo;
+import io.bdrc.iiif.presentation.resmodels.InstanceOutline;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
-import io.bdrc.iiif.presentation.resservices.ItemInfoService;
+import io.bdrc.iiif.presentation.resservices.ImageInstanceInfoService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
-import io.bdrc.iiif.presentation.resservices.VolumeInfoService;
-import io.bdrc.iiif.presentation.resservices.WorkInfoService;
-import io.bdrc.iiif.presentation.resservices.WorkOutlineService;
+import io.bdrc.iiif.presentation.resservices.ImageGroupInfoService;
+import io.bdrc.iiif.presentation.resservices.InstanceInfoService;
+import io.bdrc.iiif.presentation.resservices.InstanceOutlineService;
 import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -94,15 +94,15 @@ public class IIIFPresentationService {
 		// this is quite repetitive unfortunately but I couldn't find another way...
 		switch (prefix) {
 		case AppConstants.CACHEPREFIX_WI:
-			return ResponseEntity.ok().body((WorkInfo) res);
+			return ResponseEntity.ok().body((InstanceInfo) res);
 		case AppConstants.CACHEPREFIX_WO:
-			return ResponseEntity.ok().body((WorkOutline) res);
+			return ResponseEntity.ok().body((InstanceOutline) res);
 		case AppConstants.CACHEPREFIX_II:
-			return ResponseEntity.ok().body((ItemInfo) res);
+			return ResponseEntity.ok().body((ImageInstanceInfo) res);
 		case AppConstants.CACHEPREFIX_IIL:
 			return ResponseEntity.ok().body((List<ImageInfo>) res);
 		case AppConstants.CACHEPREFIX_VI:
-			return ResponseEntity.ok().body((VolumeInfo) res);
+			return ResponseEntity.ok().body((ImageGroupInfo) res);
 		default:
 			throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, "unhandled key prefix, this shouldn't happen");
 		}
@@ -137,9 +137,9 @@ public class IIIFPresentationService {
 		switch (subType) {
 		case Identifier.COLLECTION_ID_ITEM:
 		case Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE:
-			ItemInfo ii;
+			ImageInstanceInfo ii;
 			try {
-				ii = ItemInfoService.Instance.getAsync(id.getItemId()).get();
+				ii = ImageInstanceInfoService.Instance.getAsync(id.getItemId()).get();
 			} catch (InterruptedException | ExecutionException e1) {
 				Metrics.counter("exit.status", "result", "500").increment();
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
@@ -150,9 +150,9 @@ public class IIIFPresentationService {
 			itemId = id.getItemId();
 			break;
 		case Identifier.COLLECTION_ID_WORK_IN_ITEM:
-			WorkInfo winf;
+			InstanceInfo winf;
 			try {
-				winf = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
+				winf = InstanceInfoService.Instance.getAsync(id.getWorkId()).get();
 			} catch (InterruptedException | ExecutionException e) {
 				Metrics.counter("exit.status", "result", "500").increment();
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
@@ -163,9 +163,9 @@ public class IIIFPresentationService {
 			itemId = id.getItemId();
 			break;
 		case Identifier.COLLECTION_ID_WORK_OUTLINE:
-			WorkInfo winf1;
+			InstanceInfo winf1;
 			try {
-				winf1 = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
+				winf1 = InstanceInfoService.Instance.getAsync(id.getWorkId()).get();
 			} catch (InterruptedException | ExecutionException e2) {
 				Metrics.counter("exit.status", "result", "500").increment();
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e2);
@@ -220,22 +220,22 @@ public class IIIFPresentationService {
 			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 		}
 		PartInfo rootPart = null;
-		WorkInfo wi = null;
+		InstanceInfo wi = null;
 		if (id.getWorkId() != null && (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_ITEM || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID)) {
 			try {
-				wi = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
+				wi = InstanceInfoService.Instance.getAsync(id.getWorkId()).get();
 				rootPart = wi;
 				logger.debug("for {} got workInfo {}", identifier, wi);
 			} catch (InterruptedException | ExecutionException e) {
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 			}
 		}
-		WorkOutline wo = null;
+		InstanceOutline wo = null;
 		// quite specific: we want to compute wo here only if we don't have the volume
 		// id
 		if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE && id.getWorkId() != null && id.getVolumeId() == null) {
 			try {
-				wo = WorkOutlineService.Instance.getAsync(id.getWorkId()).get();
+				wo = InstanceOutlineService.Instance.getAsync(id.getWorkId()).get();
 				rootPart = wo.getPartForWorkId(id.getWorkId());
 			} catch (InterruptedException | ExecutionException e) {
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
@@ -251,9 +251,9 @@ public class IIIFPresentationService {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).cacheControl(CacheControl.noCache()).body(getStream("\"Cannot find volume ID\""));
 			}
 		}
-		VolumeInfo vi;
+		ImageGroupInfo vi;
 		try {
-			vi = VolumeInfoService.Instance.getAsync(volumeId).get();
+			vi = ImageGroupInfoService.Instance.getAsync(volumeId).get();
 		} catch (InterruptedException | ExecutionException e) {
 			throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 		}
@@ -279,7 +279,7 @@ public class IIIFPresentationService {
 			try {
 				// important: we take the outline of the whole root work, that makes
 				// caching more efficient
-				wo = WorkOutlineService.Instance.getAsync(vi.workId).get();
+				wo = InstanceOutlineService.Instance.getAsync(vi.workId).get();
 				String shortWorkId = id.getWorkId();
 				if (shortWorkId == null)
 					shortWorkId = "bdr:" + vi.workId.substring(AppConstants.BDR_len);
@@ -294,7 +294,7 @@ public class IIIFPresentationService {
 		    // case of a virtual work with a location
 		    if (wi == null && id.getWorkId() != null) {
 		        try {
-		            wi = WorkInfoService.Instance.getAsync(id.getWorkId()).get();
+		            wi = InstanceInfoService.Instance.getAsync(id.getWorkId()).get();
 		        } catch (InterruptedException | ExecutionException e) {
 	                throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 	            }
@@ -327,9 +327,9 @@ public class IIIFPresentationService {
 		} catch (IdentifierException e) {
 			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 		}
-		VolumeInfo vi;
+		ImageGroupInfo vi;
 		try {
-			vi = VolumeInfoService.Instance.getAsync(id.getVolumeId()).get();
+			vi = ImageGroupInfoService.Instance.getAsync(id.getVolumeId()).get();
 		} catch (InterruptedException | ExecutionException e1) {
 			throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
 		} // not entirely sure about the false
@@ -373,9 +373,9 @@ public class IIIFPresentationService {
 	@RequestMapping(value = "/il/v:{volumeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<Object> getImageList(@PathVariable String volumeId, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
 		resp.setContentType("application/json;charset=UTF-8");
-		VolumeInfo vi;
+		ImageGroupInfo vi;
 		try {
-			vi = VolumeInfoService.Instance.getAsync(volumeId).get();
+			vi = ImageGroupInfoService.Instance.getAsync(volumeId).get();
 		} catch (InterruptedException | ExecutionException e1) {
 			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
 		}

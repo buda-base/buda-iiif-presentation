@@ -21,22 +21,22 @@ import org.slf4j.LoggerFactory;
 
 import io.bdrc.iiif.presentation.AppConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.resmodels.WorkOutline;
+import io.bdrc.iiif.presentation.resmodels.InstanceOutline;
 
-public class WorkOutlineService extends ConcurrentResourceService<WorkOutline> {
-	private static final Logger logger = LoggerFactory.getLogger(WorkOutlineService.class);
+public class InstanceOutlineService extends ConcurrentResourceService<InstanceOutline> {
+	private static final Logger logger = LoggerFactory.getLogger(InstanceOutlineService.class);
 
-	public static final WorkOutlineService Instance = new WorkOutlineService();
+	public static final InstanceOutlineService Instance = new InstanceOutlineService();
 
-	WorkOutlineService() {
+	InstanceOutlineService() {
 		super(CACHEPREFIX_WO);
 	}
 
 	@Override
-	final public WorkOutline getFromApi(final String workId) throws BDRCAPIException {
+	final public InstanceOutline getFromApi(final String workId) throws BDRCAPIException {
 		logger.debug("fetch workOutline on LDS for {}", workId);
 		final HttpClient httpClient = HttpClientBuilder.create().build();
-		final WorkOutline res;
+		final InstanceOutline res;
 		final String queryUrl = AppConstants.LDS_WORKOUTLINE_QUERY;
 		logger.debug("query {} with argument R_RES={}", queryUrl, workId);
 		try {
@@ -54,7 +54,7 @@ public class WorkOutlineService extends ConcurrentResourceService<WorkOutline> {
 			final InputStream body = response.getEntity().getContent();
 			final Model m = ModelFactory.createDefaultModel();
 			m.read(body, null, "TURTLE");
-			res = new WorkOutline(m, workId);
+			res = new InstanceOutline(m, workId);
 		} catch (IOException ex) {
 			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
 		}

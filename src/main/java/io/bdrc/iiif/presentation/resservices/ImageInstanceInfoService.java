@@ -21,22 +21,22 @@ import org.slf4j.LoggerFactory;
 
 import io.bdrc.iiif.presentation.AppConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.resmodels.ItemInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInstanceInfo;
 
-public class ItemInfoService extends ConcurrentResourceService<ItemInfo> {
-	private static final Logger logger = LoggerFactory.getLogger(ItemInfoService.class);
+public class ImageInstanceInfoService extends ConcurrentResourceService<ImageInstanceInfo> {
+	private static final Logger logger = LoggerFactory.getLogger(ImageInstanceInfoService.class);
 
-	public static final ItemInfoService Instance = new ItemInfoService();
+	public static final ImageInstanceInfoService Instance = new ImageInstanceInfoService();
 
-	ItemInfoService() {
+	ImageInstanceInfoService() {
 		super(CACHEPREFIX_II);
 	}
 
 	@Override
-	final public ItemInfo getFromApi(final String itemId) throws BDRCAPIException {
+	final public ImageInstanceInfo getFromApi(final String itemId) throws BDRCAPIException {
 		logger.debug("fetch itemInfo on LDS for {}", itemId);
 		final HttpClient httpClient = HttpClientBuilder.create().build(); // Use this instead
-		final ItemInfo resItemInfo;
+		final ImageInstanceInfo resItemInfo;
 		final String queryUrl = AppConstants.LDS_ITEMGRAPH_QUERY;
 		logger.debug("query {} with argument R_RES={}", queryUrl, itemId);
 		try {
@@ -55,7 +55,7 @@ public class ItemInfoService extends ConcurrentResourceService<ItemInfo> {
 			final Model m = ModelFactory.createDefaultModel();
 			// TODO: prefixes
 			m.read(body, null, "TURTLE");
-			resItemInfo = new ItemInfo(m, itemId);
+			resItemInfo = new ImageInstanceInfo(m, itemId);
 		} catch (IOException ex) {
 			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
 		}

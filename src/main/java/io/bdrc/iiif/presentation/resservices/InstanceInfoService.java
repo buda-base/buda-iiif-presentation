@@ -21,18 +21,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.resmodels.WorkInfo;
+import io.bdrc.iiif.presentation.resmodels.InstanceInfo;
 
-public class WorkInfoService extends ConcurrentResourceService<WorkInfo> {
-	private static final Logger logger = LoggerFactory.getLogger(WorkInfoService.class);
+public class InstanceInfoService extends ConcurrentResourceService<InstanceInfo> {
+	private static final Logger logger = LoggerFactory.getLogger(InstanceInfoService.class);
 
-	public static final WorkInfoService Instance = new WorkInfoService();
+	public static final InstanceInfoService Instance = new InstanceInfoService();
 
-	WorkInfoService() {
+	InstanceInfoService() {
 		super(CACHEPREFIX_WI);
 	}
 
-	final public WorkInfo getFromApi(final String workId) throws BDRCAPIException {
+	final public InstanceInfo getFromApi(final String workId) throws BDRCAPIException {
 		logger.debug("fetch workInfo on LDS for {}", workId);
 		final HttpClient httpClient = HttpClientBuilder.create().build(); // Use this instead
 		final Model resModel;
@@ -59,7 +59,7 @@ public class WorkInfoService extends ConcurrentResourceService<WorkInfo> {
 			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
 		}
 		logger.debug("found workModel: {}", resModel);
-		return new WorkInfo(resModel, workId);
+		return new InstanceInfo(resModel, workId);
 	}
 
 }
