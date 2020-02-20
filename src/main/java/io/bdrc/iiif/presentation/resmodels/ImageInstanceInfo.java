@@ -93,39 +93,39 @@ public class ImageInstanceInfo {
         return null;
     }
     
-    public ImageInstanceInfo(final Model m, String itemId) throws BDRCAPIException {
+    public ImageInstanceInfo(final Model m, String iinstanceId) throws BDRCAPIException {
         // the model is supposed to come from the IIIFPres_itemGraph graph query
-        if (itemId.startsWith("bdr:"))
-            itemId = BDR+itemId.substring(4);
-        final Resource item = m.getResource(itemId);
-        this.instanceUri = item.getPropertyResourceValue(m.getProperty(BDO, "itemForWork")).getURI();
-        final Resource itemAdmin =  getAdminForResource(m, item);
-        if (itemAdmin == null) {
+        if (iinstanceId.startsWith("bdr:"))
+            iinstanceId = BDR+iinstanceId.substring(4);
+        final Resource iinstance = m.getResource(iinstanceId);
+        this.instanceUri = iinstance.getPropertyResourceValue(m.getProperty(BDO, "instanceReproductionOf")).getURI();
+        final Resource iinstanceAdmin =  getAdminForResource(m, iinstance);
+        if (iinstanceAdmin == null) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no admin data for item");
         }
-        final Resource itemStatus = itemAdmin.getPropertyResourceValue(m.getProperty(ADM, "status"));
+        final Resource itemStatus = iinstanceAdmin.getPropertyResourceValue(m.getProperty(ADM, "status"));
         if (itemStatus == null) {
             this.statusUri = null;
         } else {
             this.statusUri = itemStatus.getURI();
         }
-        final Resource itemAccess = itemAdmin.getPropertyResourceValue(m.getProperty(ADM, "access"));
-        final Statement restrictedInChinaS = itemAdmin.getProperty(m.getProperty(ADM, "restrictedInChina"));
+        final Resource iinstanceAccess = iinstanceAdmin.getPropertyResourceValue(m.getProperty(ADM, "access"));
+        final Statement restrictedInChinaS = iinstanceAdmin.getProperty(m.getProperty(ADM, "restrictedInChina"));
         if (restrictedInChinaS == null) {
             this.restrictedInChina = true;
         } else {
             this.restrictedInChina = restrictedInChinaS.getBoolean();
         }
-        final Resource legalData = itemAdmin.getPropertyResourceValue(m.getProperty(ADM, "contentLegal"));
+        final Resource legalData = iinstanceAdmin.getPropertyResourceValue(m.getProperty(ADM, "contentLegal"));
         if (legalData == null) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no legal data for item admin data");
         }
-        final Resource workLicense = legalData.getPropertyResourceValue(m.getProperty(ADM, "license"));
-        if (itemAccess == null || workLicense == null)
+        final Resource license = legalData.getPropertyResourceValue(m.getProperty(ADM, "license"));
+        if (iinstanceAccess == null || license == null)
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no access or license");
-        this.access = AccessType.fromString(itemAccess.getURI());
-        this.license = LicenseType.fromString(workLicense.getURI());
-        final StmtIterator volumesItr = item.listProperties(m.getProperty(BDO, "itemHasVolume"));
+        this.access = AccessType.fromString(iinstanceAccess.getURI());
+        this.license = LicenseType.fromString(license.getURI());
+        final StmtIterator volumesItr = iinstance.listProperties(m.getProperty(BDO, "instanceHasVolume"));
         if (!volumesItr.hasNext())
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "no volume in item");
         final List<VolumeInfoSmall> volumes = new ArrayList<>();

@@ -236,7 +236,7 @@ public class IIIFPresentationService {
 		if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE && id.getWorkId() != null && id.getVolumeId() == null) {
 			try {
 				wo = InstanceOutlineService.Instance.getAsync(id.getWorkId()).get();
-				rootPart = wo.getPartForWorkId(id.getWorkId());
+				rootPart = wo.getPartForInstanceId(id.getWorkId());
 			} catch (InterruptedException | ExecutionException e) {
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 			}
@@ -283,7 +283,7 @@ public class IIIFPresentationService {
 				String shortWorkId = id.getWorkId();
 				if (shortWorkId == null)
 					shortWorkId = "bdr:" + vi.instanceUri.substring(AppConstants.BDR_len);
-				rootPart = wo.getPartForWorkId(shortWorkId);
+				rootPart = wo.getPartForInstanceId(shortWorkId);
 				// TODO: case of a virtual work pointing to an outline
 				// we should copy the labels of the virtual work...
 			} catch (InterruptedException | ExecutionException e) {

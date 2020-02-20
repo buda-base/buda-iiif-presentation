@@ -167,7 +167,7 @@ public class PresentationTest {
         vi.instanceUri = BDR+"W22084";
         vi.imageInstanceUri = BDR+"I22084";
         vi.volumeNumber = 1;
-        Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:V22084_I0890", false, wo.getPartForWorkId("bdr:W22084"));
+        Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:V22084_I0890", false, wo.getPartForInstanceId("bdr:W22084"));
         //final File fout2 = new File("/tmp/workOutline-manifest.json");
         //IIIFApiObjectMapperProvider.writer.writeValue(fout2, man);
     }

@@ -61,58 +61,58 @@ public class InstanceInfo extends PartInfo {
 
     public void readLocation(final Model m, final Resource location) {
         this.location = new Location(m, location);
-        final Property locationWorkP = m.getProperty(BDO, "workLocationWork");
-        if (location.hasProperty(locationWorkP))
-            this.rootInstanceQname = "bdr:"+location.getProperty(locationWorkP).getResource().getLocalName();
+        final Property locationInstanceP = m.getProperty(BDO, "contentLocationInstance");
+        if (location.hasProperty(locationInstanceP))
+            this.rootInstanceQname = "bdr:"+location.getProperty(locationInstanceP).getResource().getLocalName();
         this.hasLocation = true;
     }
 
-    public InstanceInfo(final Model m, String workId) throws BDRCAPIException {
+    public InstanceInfo(final Model m, String instanceId) throws BDRCAPIException {
         // the model is supposed to come from the IIIFPres_workInfo_noItem graph query
-        if (workId.startsWith("bdr:"))
-            workId = BDR+workId.substring(4);
-        final Resource work = m.getResource(workId);
-        if (work == null)
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: missing work");
+        if (instanceId.startsWith("bdr:"))
+            instanceId = BDR+instanceId.substring(4);
+        final Resource instance = m.getResource(instanceId);
+        if (instance == null)
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: missing instance");
         // checking type (needs to be a bdo:Work)
-        final Triple isWorkT = new Triple(work.asNode(), RDF.type.asNode(), m.getResource(BDO+"Work").asNode());
-        ExtendedIterator<Triple> ext = m.getGraph().find(isWorkT);
+        final Triple isInstanceT = new Triple(instance.asNode(), RDF.type.asNode(), m.getResource(BDO+"Instance").asNode());
+        ExtendedIterator<Triple> ext = m.getGraph().find(isInstanceT);
         if (!ext.hasNext()) {
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: not a work");
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: not an instance");
         }
-        final Triple isVirtualWorkT = new Triple(work.asNode(), RDF.type.asNode(), m.getResource(BDO+"VirtualWork").asNode());
-        ext = m.getGraph().find(isVirtualWorkT);
+        final Triple isVirtualInstanceT = new Triple(instance.asNode(), RDF.type.asNode(), m.getResource(BDO+"VirtualInstance").asNode());
+        ext = m.getGraph().find(isVirtualInstanceT);
         if (ext.hasNext()) {
             this.isVirtual = true;
         }
-        final Resource partOf = work.getPropertyResourceValue(m.getProperty(BDO, "workPartOf"));
+        final Resource partOf = instance.getPropertyResourceValue(m.getProperty(BDO, "partOf"));
         this.isRoot = (partOf == null);
-        Resource item = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "inItem"));
+        Resource item = instance.getPropertyResourceValue(m.getProperty(TMPPREFIX, "inImageInstance"));
         if (item != null) {
             this.imageInstanceQname = "bdr:"+item.getLocalName();
         }
-        final Resource location = work.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
+        final Resource location = instance.getPropertyResourceValue(m.getProperty(BDO, "contentLocation"));
         if (location == null) {
             this.hasLocation = false;
         } else {
             readLocation(m, location);
         }
-        final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
-        if (firstVolume != null) {
-            this.firstImageGroupQname = "bdr:"+firstVolume.getLocalName();
+        final Resource firstImageGroup = instance.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstImageGroup"));
+        if (firstImageGroup != null) {
+            this.firstImageGroupQname = "bdr:"+firstImageGroup.getLocalName();
         }
         
-        final Resource root_access = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootAccess"));
+        final Resource root_access = instance.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootAccess"));
         if (root_access != null) {
             this.rootAccess = AccessType.fromString(root_access.getURI());
         }
-        final Statement restrictedInChinaS = work.getProperty(m.getProperty(TMPPREFIX, "rootRestrictedInChina"));
+        final Statement restrictedInChinaS = instance.getProperty(m.getProperty(TMPPREFIX, "rootRestrictedInChina"));
         if (restrictedInChinaS == null) {
             this.rootRestrictedInChina = true;
         } else {
             this.rootRestrictedInChina = restrictedInChinaS.getBoolean();
         }
-        final Statement rootStatusS = work.getProperty(m.getProperty(TMPPREFIX, "rootStatus"));
+        final Statement rootStatusS = instance.getProperty(m.getProperty(TMPPREFIX, "rootStatus"));
         if (rootStatusS == null) {
             this.rootStatusUri = null;
             if (this.isVirtual) {
@@ -121,7 +121,7 @@ public class InstanceInfo extends PartInfo {
         } else {
             this.rootStatusUri = rootStatusS.getResource().getURI();
         }
-        final Resource access = work.getPropertyResourceValue(m.getProperty(ADM, "access"));
+        final Resource access = instance.getPropertyResourceValue(m.getProperty(ADM, "access"));
         if (access != null) {
             this.rootAccess = AccessType.fromString(access.getURI());
         }
@@ -129,15 +129,15 @@ public class InstanceInfo extends PartInfo {
             if (this.isVirtual) {
                 this.rootAccess = AccessType.OPEN;
             } else {
-                logger.warn("cannot find model access for {}", workId);
+                logger.warn("cannot find model access for {}", instanceId);
                 this.rootAccess = AccessType.RESTR_BDRC;                
             }
         }
 
-        this.parts = getParts(m, work, null);
-        this.labels = getLabels(m, work);
+        this.parts = getParts(m, instance, null);
+        this.labels = getLabels(m, instance);
         
-        final Resource linkTo = work.getPropertyResourceValue(m.getProperty(BDO, "workLinkTo"));
+        final Resource linkTo = instance.getPropertyResourceValue(m.getProperty(BDO, "virtualLinkTo"));
         if (linkTo != null) {
             this.linkToQname = "bdr:"+linkTo.getLocalName();
             final Resource linkToType = linkTo.getPropertyResourceValue(RDF.type);
@@ -151,15 +151,15 @@ public class InstanceInfo extends PartInfo {
                 this.labels = getLabels(m, linkTo);
             }
             if (!this.hasLocation) {
-                final Resource linkToLocation = linkTo.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
+                final Resource linkToLocation = linkTo.getPropertyResourceValue(m.getProperty(BDO, "contentLocation"));
                 if (linkToLocation != null)
                     readLocation(m, linkToLocation);
             }
-            this.isRoot = (linkTo.getPropertyResourceValue(m.getProperty(BDO, "workPartOf")) == null);
+            this.isRoot = (linkTo.getPropertyResourceValue(m.getProperty(BDO, "partOf")) == null);
         }
         
         // creator labels
-        final StmtIterator creatorLabelItr = work.listProperties(m.createProperty(TMPPREFIX, "workCreatorLit"));
+        final StmtIterator creatorLabelItr = instance.listProperties(m.createProperty(TMPPREFIX, "workCreatorLit"));
         if (creatorLabelItr.hasNext()) {
             final List<LangString> creatorLabels = new ArrayList<>();
             while (creatorLabelItr.hasNext()) {
@@ -187,9 +187,9 @@ public class InstanceInfo extends PartInfo {
     
     // this is recursive, and assumes no loop
     public static List<PartInfo> getParts(final Model m, final Resource work, final Map<String,PartInfo> shortIdPartMap) {
-        final StmtIterator partsItr = work.listProperties(m.getProperty(BDO, "workHasPart"));
+        final StmtIterator partsItr = work.listProperties(m.getProperty(BDO, "hasPart"));
         if (partsItr.hasNext()) {
-            final Property partIndexP = m.getProperty(BDO, "workPartIndex");
+            final Property partIndexP = m.getProperty(BDO, "partIndex");
             final List<PartInfo> parts = new ArrayList<>();
             while (partsItr.hasNext()) {
                 final Statement s = partsItr.next();
@@ -203,7 +203,7 @@ public class InstanceInfo extends PartInfo {
                     partInfo = new PartInfo(partId, partIndexS.getInt());
                 if (shortIdPartMap != null)
                     shortIdPartMap.put(partId, partInfo);
-                final Resource linkTo = part.getPropertyResourceValue(m.getProperty(BDO, "workLinkTo"));
+                final Resource linkTo = part.getPropertyResourceValue(m.getProperty(BDO, "virtualLinkTo"));
                 if (linkTo != null) {
                     partInfo.linkToQname = "bdr:"+linkTo.getLocalName();
                     final Resource linkToType = linkTo.getPropertyResourceValue(RDF.type);
@@ -211,7 +211,7 @@ public class InstanceInfo extends PartInfo {
                         partInfo.linkToTypeLname = linkToType.getLocalName();
                     }
                 }
-                final Resource location = part.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
+                final Resource location = part.getPropertyResourceValue(m.getProperty(BDO, "contentLocation"));
                 if (location != null)
                     partInfo.location = new Location(m, location);
                 partInfo.labels = getLabels(m, part);

@@ -24,14 +24,14 @@ public class Location {
     
     
     public Location(final Model m, final Resource location) {
-        final Property locationVolumeP = m.getProperty(BDO, "workLocationVolume");
+        final Property locationVolumeP = m.getProperty(BDO, "contentLocationVolume");
         if (!location.hasProperty(locationVolumeP))
             this.bvolnum = 1; // probable reasonable default...
         else 
             this.bvolnum = location.getProperty(locationVolumeP).getInt();
-        final Property locationEndVolumeP = m.getProperty(BDO, "workLocationEndVolume");
+        final Property locationEndVolumeP = m.getProperty(BDO, "contentLocationEndVolume");
         // a stupid temporary mistake in the data
-        final Property locationEndVolumeTmpP = m.getProperty(BDO, "workLocationVolumeEnd");
+        final Property locationEndVolumeTmpP = m.getProperty(BDO, "contentLocationVolumeEnd");
         if (location.hasProperty(locationEndVolumeP)) {
             this.evolnum = location.getProperty(locationEndVolumeP).getInt();
         } else if (location.hasProperty(locationEndVolumeTmpP)) {
@@ -39,17 +39,17 @@ public class Location {
         } else {
             this.evolnum = this.bvolnum;
         }
-        final Property locationPageP = m.getProperty(BDO, "workLocationPage");
+        final Property locationPageP = m.getProperty(BDO, "contentLocationPage");
         if (location.hasProperty(locationPageP))
             this.bpagenum = location.getProperty(locationPageP).getInt();
         else
             this.bpagenum = 0;
-        final Property locationEndPageP = m.getProperty(BDO, "workLocationEndPage");
+        final Property locationEndPageP = m.getProperty(BDO, "contentLocationEndPage");
         if (location.hasProperty(locationEndPageP))
             this.epagenum = location.getProperty(locationEndPageP).getInt();
         else
             this.epagenum = -1;
-        final Property workLocationWorkP = m.getProperty(BDO, "workLocationWork");
+        final Property workLocationWorkP = m.getProperty(BDO, "contentLocationInstance");
         if (location.hasProperty(workLocationWorkP))
             this.instanceUri = location.getPropertyResourceValue(workLocationWorkP).getURI();
     }

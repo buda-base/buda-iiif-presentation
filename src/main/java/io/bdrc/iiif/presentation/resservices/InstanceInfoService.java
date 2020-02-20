@@ -3,7 +3,7 @@ package io.bdrc.iiif.presentation.resservices;
 import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_WI;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
-import static io.bdrc.iiif.presentation.AppConstants.LDS_WORKGRAPH_QUERY;
+import static io.bdrc.iiif.presentation.AppConstants.LDS_INSTANCEGRAPH_QUERY;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +36,7 @@ public class InstanceInfoService extends ConcurrentResourceService<InstanceInfo>
 		logger.debug("fetch workInfo on LDS for {}", workId);
 		final HttpClient httpClient = HttpClientBuilder.create().build(); // Use this instead
 		final Model resModel;
-		final String queryUrl = LDS_WORKGRAPH_QUERY;
+		final String queryUrl = LDS_INSTANCEGRAPH_QUERY;
 		logger.debug("query {} with argument R_RES={}", queryUrl, workId);
 		try {
 			final HttpPost request = new HttpPost(queryUrl);

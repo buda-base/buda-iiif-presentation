@@ -24,27 +24,27 @@ public class InstanceOutline {
     @JsonProperty("shortIdPartMap")
     public Map<String,PartInfo> partQnameToPartInfo = new HashMap<>();
     
-    public InstanceOutline(final Model m, String workId) throws BDRCAPIException {
-        if (workId.startsWith("bdr:"))
-            workId = BDR+workId.substring(4);
-        final Resource work = m.getResource(workId);
-        if (work == null)
+    public InstanceOutline(final Model m, String intanceId) throws BDRCAPIException {
+        if (intanceId.startsWith("bdr:"))
+            intanceId = BDR+intanceId.substring(4);
+        final Resource instance = m.getResource(intanceId);
+        if (instance == null)
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: missing work");
         // we currently ignore linkTo, this should never happen with the current
         // code although it would probably be good to implement it at some point
         PartInfo rootPi = new PartInfo();
-        this.partQnameToPartInfo.put("bdr:"+work.getLocalName(), rootPi);
-        rootPi.labels = InstanceInfo.getLabels(m, work);
+        this.partQnameToPartInfo.put("bdr:"+instance.getLocalName(), rootPi);
+        rootPi.labels = InstanceInfo.getLabels(m, instance);
         // this is recursive
-        rootPi.parts = InstanceInfo.getParts(m, work, this.partQnameToPartInfo);
-        final Resource firstVolume = work.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstVolume"));
+        rootPi.parts = InstanceInfo.getParts(m, instance, this.partQnameToPartInfo);
+        final Resource firstVolume = instance.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstImageGroup"));
         if (firstVolume != null) {
             this.firstImageGroupQname = "bdr:"+firstVolume.getLocalName();
         }
-        Resource location = work.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
+        Resource location = instance.getPropertyResourceValue(m.getProperty(BDO, "contentLocation"));
         if (location != null)
             rootPi.location = new Location(m, location);
-        final Resource linkTo = work.getPropertyResourceValue(m.getProperty(BDO, "workLinkTo"));
+        final Resource linkTo = instance.getPropertyResourceValue(m.getProperty(BDO, "virtualLinkTo"));
         if (linkTo != null) {
             rootPi.linkToQname = "bdr:"+linkTo.getLocalName();
             final Resource linkToType = linkTo.getPropertyResourceValue(RDF.type);
@@ -58,18 +58,18 @@ public class InstanceOutline {
                 rootPi.labels = InstanceInfo.getLabels(m, linkTo);
             }
             if (rootPi.location == null) {
-                location = linkTo.getPropertyResourceValue(m.getProperty(BDO, "workLocation"));
+                location = linkTo.getPropertyResourceValue(m.getProperty(BDO, "contentLocation"));
                 if (location != null)
                     rootPi.location = new Location(m, location);
             }
         }
     }
     
-    public PartInfo getPartForWorkId(String workId) {
-        if (workId.startsWith(BDR)) {
-            workId = "bdr:"+workId.substring(BDR_len);
+    public PartInfo getPartForInstanceId(String instanceId) {
+        if (instanceId.startsWith(BDR)) {
+            instanceId = "bdr:"+instanceId.substring(BDR_len);
         }
-        return this.partQnameToPartInfo.get(workId);
+        return this.partQnameToPartInfo.get(instanceId);
     }
     
     // function finding the first node of the tree having two or more

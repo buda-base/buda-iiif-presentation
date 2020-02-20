@@ -30,11 +30,11 @@ public class AppConstants {
     public static final String IIIFPresPrefix_coll = IIIFPresPrefix + "collection/";
 
     public static final String LDS_QUERYPREFIX = AuthProps.getProperty("dataserver");
-    public static final String LDS_WORKGRAPH_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_workGraph_noItem";
-    public static final String LDS_ITEMGRAPH_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_itemGraph";
+    public static final String LDS_INSTANCEGRAPH_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_instanceGraph_noItem";
+    public static final String LDS_IMAGEINSTANCEGRAPH_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_imageInstanceGraph";
     public static final String LDS_VOLUME_QUERY = LDS_QUERYPREFIX + "query/table/IIIFPres_volumeInfo";
     public static final String LDS_VOLUME_OUTLINE_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_volumeOutline";
-    public static final String LDS_WORKOUTLINE_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_workOutline";
+    public static final String LDS_INSTANCEOUTLINE_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_instanceOutline";
 
     public static final String IIIF_IMAGE_PREFIX = AuthProps.getProperty("imageserver");
     public static final String PDF_URL_PREFIX = IIIF_IMAGE_PREFIX + "download/pdf/";

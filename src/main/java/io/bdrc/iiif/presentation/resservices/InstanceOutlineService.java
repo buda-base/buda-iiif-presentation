@@ -37,7 +37,7 @@ public class InstanceOutlineService extends ConcurrentResourceService<InstanceOu
 		logger.debug("fetch workOutline on LDS for {}", workId);
 		final HttpClient httpClient = HttpClientBuilder.create().build();
 		final InstanceOutline res;
-		final String queryUrl = AppConstants.LDS_WORKOUTLINE_QUERY;
+		final String queryUrl = AppConstants.LDS_INSTANCEOUTLINE_QUERY;
 		logger.debug("query {} with argument R_RES={}", queryUrl, workId);
 		try {
 			final HttpPost request = new HttpPost(queryUrl);

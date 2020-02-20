@@ -70,11 +70,11 @@ public class ImageGroupInfo {
         if (sol.contains("?pagesIntroTbrc")) {
             this.pagesIntroTbrc = sol.get("?pagesIntroTbrc").asLiteral().getInt();
         }
-        if (sol.contains("imageGroup")) {
-            this.imageGroup = sol.getLiteral("imageGroup").getString();
+        if (sol.contains("?imageGroup")) {
+            this.imageGroup = sol.getLiteral("?imageGroup").getString();
         }
-        if (sol.contains("iiifManifest")) {
-            final String manifestURIString = sol.getResource("iiifManifest").getURI();
+        if (sol.contains("?iiifManifest")) {
+            final String manifestURIString = sol.getResource("?iiifManifest").getURI();
             try {
                 this.iiifManifestUri = new URI(manifestURIString);
             } catch (URISyntaxException e) {

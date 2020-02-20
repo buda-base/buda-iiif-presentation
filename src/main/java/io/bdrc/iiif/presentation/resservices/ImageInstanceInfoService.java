@@ -37,7 +37,7 @@ public class ImageInstanceInfoService extends ConcurrentResourceService<ImageIns
 		logger.debug("fetch itemInfo on LDS for {}", itemId);
 		final HttpClient httpClient = HttpClientBuilder.create().build(); // Use this instead
 		final ImageInstanceInfo resItemInfo;
-		final String queryUrl = AppConstants.LDS_ITEMGRAPH_QUERY;
+		final String queryUrl = AppConstants.LDS_IMAGEINSTANCEGRAPH_QUERY;
 		logger.debug("query {} with argument R_RES={}", queryUrl, itemId);
 		try {
 			final HttpPost request = new HttpPost(queryUrl);
