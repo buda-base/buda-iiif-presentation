@@ -95,7 +95,7 @@ public class PresentationTest {
         // om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:MWSL001_P005", Identifier.COLLECTION_ID);
         final Collection collection = CollectionService.getCommonCollection(id);
-        collection.setLabel(CollectionService.getLabels(id.getWorkId(), wi.labels));
+        collection.setLabel(CollectionService.getLabels(id.getInstanceId(), wi.labels));
         if (wi.parts != null) {
             for (final PartInfo pi : wi.parts) {
                 final String collectionId = "wio:" + pi.partQname;
@@ -206,7 +206,7 @@ public class PresentationTest {
         // System.out.println(wi.itemId);
         final Identifier id = new Identifier("wio:bdr:MW22073", Identifier.COLLECTION_ID);
         final Collection collection = CollectionService.getCommonCollection(id);
-        collection.setLabel(CollectionService.getLabels(id.getWorkId(), wi.labels));
+        collection.setLabel(CollectionService.getLabels(id.getInstanceId(), wi.labels));
         m = ModelFactory.createDefaultModel();
         pb = RDFParser.create().source(TESTDIR + "itemInfoGraph-wio.ttl").lang(RDFLanguages.TTL);
         // .canonicalLiterals(true);

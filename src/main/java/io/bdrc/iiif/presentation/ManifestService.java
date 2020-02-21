@@ -291,7 +291,7 @@ public class ManifestService {
         final PartInfo volumeRoot = InstanceOutline.getRootPiForVolumeR(rootPi, vi.volumeNumber);
         if (volumeRoot == null)
             return;
-        final Range r = new Range(IIIFPresPrefix + "v:" + id.getVolumeId() + "/range/top", "Table of Contents");
+        final Range r = new Range(IIIFPresPrefix + "v:" + id.getImageGroupId() + "/range/top", "Table of Contents");
         r.setViewingHints("top");
         for (final PartInfo part : volumeRoot.parts) {
             addSubRangeToRange(m, r, id, part, vi, volumeId, imageInfoList, fairUse);

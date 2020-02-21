@@ -125,7 +125,6 @@ public class IIIFPresentationService {
 		try {
 			id = new Identifier(identifier, Identifier.COLLECTION_ID);
 		} catch (IdentifierException e) {
-			e.printStackTrace();
 			Metrics.counter("exit.status", "result", "404").increment();
 			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e.getMessage());
 		}
@@ -137,22 +136,22 @@ public class IIIFPresentationService {
 		switch (subType) {
 		case Identifier.COLLECTION_ID_ITEM:
 		case Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE:
-			ImageInstanceInfo ii;
+			ImageInstanceInfo iiInf;
 			try {
-				ii = ImageInstanceInfoService.Instance.getAsync(id.getItemId()).get();
+				iiInf = ImageInstanceInfoService.Instance.getAsync(id.getImageInstanceId()).get();
 			} catch (InterruptedException | ExecutionException e1) {
 				Metrics.counter("exit.status", "result", "500").increment();
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
 			}
-			access = ii.access;
-			statusUri = ii.statusUri;
-			restrictedInChina = ii.restrictedInChina;
-			itemId = id.getItemId();
+			access = iiInf.access;
+			statusUri = iiInf.statusUri;
+			restrictedInChina = iiInf.restrictedInChina;
+			itemId = id.getImageInstanceId();
 			break;
 		case Identifier.COLLECTION_ID_WORK_IN_ITEM:
 			InstanceInfo winf;
 			try {
-				winf = InstanceInfoService.Instance.getAsync(id.getWorkId()).get();
+				winf = InstanceInfoService.Instance.getAsync(id.getInstanceId()).get();
 			} catch (InterruptedException | ExecutionException e) {
 				Metrics.counter("exit.status", "result", "500").increment();
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
@@ -160,12 +159,12 @@ public class IIIFPresentationService {
 			access = winf.rootAccess;
 			statusUri = winf.rootStatusUri;
 			restrictedInChina = winf.rootRestrictedInChina;
-			itemId = id.getItemId();
+			itemId = id.getImageInstanceId();
 			break;
 		case Identifier.COLLECTION_ID_WORK_OUTLINE:
 			InstanceInfo winf1;
 			try {
-				winf1 = InstanceInfoService.Instance.getAsync(id.getWorkId()).get();
+				winf1 = InstanceInfoService.Instance.getAsync(id.getInstanceId()).get();
 			} catch (InterruptedException | ExecutionException e2) {
 				Metrics.counter("exit.status", "result", "500").increment();
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e2);
@@ -220,12 +219,12 @@ public class IIIFPresentationService {
 			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 		}
 		PartInfo rootPart = null;
-		InstanceInfo wi = null;
-		if (id.getWorkId() != null && (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_ITEM || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID)) {
+		InstanceInfo iInf = null;
+		if (id.getInstanceId() != null && (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_ITEM || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID)) {
 			try {
-				wi = InstanceInfoService.Instance.getAsync(id.getWorkId()).get();
-				rootPart = wi;
-				logger.debug("for {} got workInfo {}", identifier, wi);
+				iInf = InstanceInfoService.Instance.getAsync(id.getInstanceId()).get();
+				rootPart = iInf;
+				logger.debug("for {} got workInfo {}", identifier, iInf);
 			} catch (InterruptedException | ExecutionException e) {
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 			}
@@ -233,18 +232,18 @@ public class IIIFPresentationService {
 		InstanceOutline wo = null;
 		// quite specific: we want to compute wo here only if we don't have the volume
 		// id
-		if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE && id.getWorkId() != null && id.getVolumeId() == null) {
+		if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE && id.getInstanceId() != null && id.getImageGroupId() == null) {
 			try {
-				wo = InstanceOutlineService.Instance.getAsync(id.getWorkId()).get();
-				rootPart = wo.getPartForInstanceId(id.getWorkId());
+				wo = InstanceOutlineService.Instance.getAsync(id.getInstanceId()).get();
+				rootPart = wo.getPartForInstanceId(id.getInstanceId());
 			} catch (InterruptedException | ExecutionException e) {
 				throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 			}
 		}
-		String volumeId = id.getVolumeId();
+		String volumeId = id.getImageGroupId();
 		if (volumeId == null) {
-			if (wi != null)
-				volumeId = wi.firstImageGroupQname;
+			if (iInf != null)
+				volumeId = iInf.firstImageGroupQname;
 			if (wo != null)
 				volumeId = wo.firstImageGroupQname;
 			if (volumeId == null) {
@@ -280,7 +279,7 @@ public class IIIFPresentationService {
 				// important: we take the outline of the whole root work, that makes
 				// caching more efficient
 				wo = InstanceOutlineService.Instance.getAsync(vi.instanceUri).get();
-				String shortWorkId = id.getWorkId();
+				String shortWorkId = id.getInstanceId();
 				if (shortWorkId == null)
 					shortWorkId = "bdr:" + vi.instanceUri.substring(AppConstants.BDR_len);
 				rootPart = wo.getPartForInstanceId(shortWorkId);
@@ -292,14 +291,14 @@ public class IIIFPresentationService {
 		}
 		if (rootPart == null) {
 		    // case of a virtual work with a location
-		    if (wi == null && id.getWorkId() != null) {
+		    if (iInf == null && id.getInstanceId() != null) {
 		        try {
-		            wi = InstanceInfoService.Instance.getAsync(id.getWorkId()).get();
+		            iInf = InstanceInfoService.Instance.getAsync(id.getInstanceId()).get();
 		        } catch (InterruptedException | ExecutionException e) {
 	                throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
 	            }
 		    }
-		    rootPart = wi;
+		    rootPart = iInf;
 		}
 		// TODO: case where a part is asked with an outline, we need to make sure that
 		// we get the part asked by the user
@@ -329,7 +328,7 @@ public class IIIFPresentationService {
 		}
 		ImageGroupInfo vi;
 		try {
-			vi = ImageGroupInfoService.Instance.getAsync(id.getVolumeId()).get();
+			vi = ImageGroupInfoService.Instance.getAsync(id.getImageGroupId()).get();
 		} catch (InterruptedException | ExecutionException e1) {
 			throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
 		} // not entirely sure about the false
@@ -362,7 +361,7 @@ public class IIIFPresentationService {
 				return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401)).cacheControl(CacheControl.noCache()).body(getStream("\"Insufficient rights (" + vi.access + ")\""));
 			}
 		}
-		final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgSeqNum, id.getVolumeId(), imageInfoList);
+		final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgSeqNum, id.getImageGroupId(), imageInfoList);
 		if (vi.access == AccessType.OPEN) {
 			return ResponseEntity.status(HttpStatus.OK).cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(getStream(res));
 		} else {

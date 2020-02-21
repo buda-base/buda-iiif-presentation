@@ -39,7 +39,7 @@ public class CollectionService {
     public static Collection getCollectionForIdentifier(final Identifier id, boolean continuous) throws BDRCAPIException {
         final InstanceInfo wi;
         try {
-            wi = InstanceInfoService.Instance.getAsync(id.getWorkId()).get();
+            wi = InstanceInfoService.Instance.getAsync(id.getInstanceId()).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
@@ -132,12 +132,12 @@ public class CollectionService {
         return collection;
     }
 
-    public static Collection getCollectionForOutline(final Collection collection, final Identifier id, final InstanceInfo wi, final boolean continuous) throws BDRCAPIException {
-        final ImageInstanceInfo ii;
+    public static Collection getCollectionForOutline(final Collection collection, final Identifier id, final InstanceInfo iInf, final boolean continuous) throws BDRCAPIException {
+        final ImageInstanceInfo iiInf;
         logger.info("building outline collection for ID {}", id.getId());
-        collection.setLabel(getLabels(id.getWorkId(), wi.labels));
-        if (wi.parts != null) {
-            for (final PartInfo pi : wi.parts) {
+        collection.setLabel(getLabels(id.getInstanceId(), iInf.labels));
+        if (iInf.parts != null) {
+            for (final PartInfo pi : iInf.parts) {
                 final String collectionId = "wio:" + pi.partQname;
                 final Collection subcollection = new Collection(IIIFPresPrefix_coll + collectionId);
                 final PropertyValue labels = ManifestService.getPropForLabels(pi.labels);
@@ -145,15 +145,15 @@ public class CollectionService {
                 collection.addCollection(subcollection);
             }
         }
-        if (id.getItemId() != null) {
+        if (id.getImageInstanceId() != null) {
             try {
-                ii = ImageInstanceInfoService.Instance.getAsync(id.getItemId()).get();
+                iiInf = ImageInstanceInfoService.Instance.getAsync(id.getImageInstanceId()).get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
             }
-        } else if (wi.imageInstanceQname != null) {
+        } else if (iInf.imageInstanceQname != null) {
             try {
-                ii = ImageInstanceInfoService.Instance.getAsync(wi.imageInstanceQname).get();
+                iiInf = ImageInstanceInfoService.Instance.getAsync(iInf.imageInstanceQname).get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
             }
@@ -162,14 +162,14 @@ public class CollectionService {
             // returned
             return collection;
         }
-        if (wi.hasLocation) {
+        if (iInf.hasLocation) {
             // addManifestsForLocation(collection, wi, ii, continuous);
-            addManifestsForWorkInVolumes(collection, wi, ii, continuous, id.getWorkId());
+            addManifestsForWorkInVolumes(collection, iInf, iiInf, continuous, id.getInstanceId());
          // special case for the Taisho where we have many items
-        } else if (wi.isRoot || id.getWorkId().equals(getQname(ii.instanceUri))) {
+        } else if (iInf.isRoot || id.getInstanceId().equals(getQname(iiInf.instanceUri))) {
             final String volPrefix = "vo:";
-            boolean needsVolumeIndication = ii.volumes.size() > 1;
-            for (ImageInstanceInfo.VolumeInfoSmall vi : ii.volumes) {
+            boolean needsVolumeIndication = iiInf.volumes.size() > 1;
+            for (ImageInstanceInfo.VolumeInfoSmall vi : iiInf.volumes) {
                 final String manifestId = volPrefix + vi.getPrefixedUri();
                 String manifestUrl;
                 if (vi.iiifManifestUri != null) {
@@ -181,7 +181,7 @@ public class CollectionService {
                     }
                 }
                 final Manifest manifest = new Manifest(manifestUrl);
-                manifest.setLabel(ManifestService.getLabel(vi.volumeNumber, wi.labels, needsVolumeIndication));
+                manifest.setLabel(ManifestService.getLabel(vi.volumeNumber, iInf.labels, needsVolumeIndication));
                 collection.addManifest(manifest);
             }
         }
@@ -189,7 +189,7 @@ public class CollectionService {
     }
 
     public static Collection getCollectionForItem(final Collection collection, final Identifier id, final InstanceInfo wi, final boolean continuous) throws BDRCAPIException {
-        final String itemId = (id.getItemId() == null) ? wi.imageInstanceQname : id.getItemId();
+        final String itemId = (id.getImageInstanceId() == null) ? wi.imageInstanceQname : id.getImageInstanceId();
         final ImageInstanceInfo ii;
         try {
             ii = ImageInstanceInfoService.Instance.getAsync(itemId).get();
@@ -197,7 +197,7 @@ public class CollectionService {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
         }
         logger.info("building item collection for ID {}", id.getId());
-        collection.addLabel(id.getItemId());
+        collection.addLabel(id.getImageInstanceId());
         final String volPrefix = id.getSubType() == Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE ? "vo:" : "v:";
         for (ImageInstanceInfo.VolumeInfoSmall vi : ii.volumes) {
             final String manifestId = volPrefix + vi.getPrefixedUri();
