@@ -7,13 +7,13 @@ import static io.bdrc.iiif.presentation.AppConstants.LDS_INSTANCEGRAPH_QUERY;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -39,13 +39,12 @@ public class InstanceInfoService extends ConcurrentResourceService<InstanceInfo>
 		final String queryUrl = LDS_INSTANCEGRAPH_QUERY;
 		logger.debug("query {} with argument R_RES={}", queryUrl, workId);
 		try {
-			final HttpPost request = new HttpPost(queryUrl);
-			// we suppose that the volumeId is well formed, which is checked by the
-			// Identifier constructor
-			final StringEntity params = new StringEntity("{\"R_RES\":\"" + workId + "\"}", ContentType.APPLICATION_JSON);
-			request.addHeader(HttpHeaders.ACCEPT, "text/turtle");
-			request.setEntity(params);
-			final HttpResponse response = httpClient.execute(request);
+			URIBuilder builder = new URIBuilder(queryUrl);
+            builder.setParameter("R_RES", workId);
+            builder.setParameter("format", "json");
+            final HttpGet request = new HttpGet(builder.build());
+            request.addHeader(HttpHeaders.ACCEPT, "text/turtle");
+            final HttpResponse response = httpClient.execute(request);
 			int code = response.getStatusLine().getStatusCode();
 			if (code != 200) {
 				// should indicate the actual LDS http code (mostly 404 instead of 500)
@@ -55,7 +54,7 @@ public class InstanceInfoService extends ConcurrentResourceService<InstanceInfo>
 			resModel = ModelFactory.createDefaultModel();
 			// TODO: prefixes
 			resModel.read(body, null, "TURTLE");
-		} catch (IOException ex) {
+		} catch (IOException | URISyntaxException ex) {
 			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
 		}
 		logger.debug("found workModel: {}", resModel);

@@ -37,7 +37,7 @@ bdr:MW1ERI0009001_01_01_01
                                      bdo:contentLocationEndVolume  1 ;
                                      bdo:contentLocationPage       33 ;
                                      bdo:contentLocationVolume     1 ;
-                                     bdo:contentLocationWork       bdr:W23221
+                                     bdo:contentLocationInstance       bdr:W23221
                                    ] ;
         bdo:partIndex          1 ;
         bdo:partOf             bdr:MW1ERI0009001_01_01 ;

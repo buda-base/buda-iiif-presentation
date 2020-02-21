@@ -6,13 +6,13 @@ import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -40,13 +40,12 @@ public class ImageInstanceInfoService extends ConcurrentResourceService<ImageIns
 		final String queryUrl = AppConstants.LDS_IMAGEINSTANCEGRAPH_QUERY;
 		logger.debug("query {} with argument R_RES={}", queryUrl, itemId);
 		try {
-			final HttpPost request = new HttpPost(queryUrl);
-			// we suppose that the volumeId is well formed, which is checked by the
-			// Identifier constructor
-			final StringEntity params = new StringEntity("{\"R_RES\":\"" + itemId + "\"}", ContentType.APPLICATION_JSON);
-			request.addHeader(HttpHeaders.ACCEPT, "text/turtle");
-			request.setEntity(params);
+		    URIBuilder builder = new URIBuilder(queryUrl);
+            builder.setParameter("R_RES", itemId);
+            builder.setParameter("format", "json");
+            final HttpGet request = new HttpGet(builder.build());
 			final HttpResponse response = httpClient.execute(request);
+			request.addHeader(HttpHeaders.ACCEPT, "text/turtle");
 			int code = response.getStatusLine().getStatusCode();
 			if (code != 200) {
 				throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error", "request:\n" + request.toString() + "\nresponse:\n" + response.toString(), "");
@@ -56,7 +55,7 @@ public class ImageInstanceInfoService extends ConcurrentResourceService<ImageIns
 			// TODO: prefixes
 			m.read(body, null, "TURTLE");
 			resItemInfo = new ImageInstanceInfo(m, itemId);
-		} catch (IOException ex) {
+		} catch (IOException | URISyntaxException ex) {
 			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
 		}
 		logger.debug("found itemInfo: {}", resItemInfo);

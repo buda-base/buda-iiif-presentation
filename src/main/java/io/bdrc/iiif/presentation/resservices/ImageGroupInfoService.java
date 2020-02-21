@@ -8,12 +8,12 @@ import static io.bdrc.iiif.presentation.AppConstants.LDS_VOLUME_QUERY;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
@@ -41,12 +41,10 @@ public class ImageGroupInfoService extends ConcurrentResourceService<ImageGroupI
 		final HttpClient httpClient = HttpClientBuilder.create().build(); // Use this instead
 		final ImageGroupInfo resVolumeInfo;
 		try {
-			final HttpPost request = new HttpPost(LDS_VOLUME_QUERY);
-			// we suppose that the volumeId is well formed, which is checked by the
-			// Identifier constructor
-			final StringEntity params = new StringEntity("{\"R_RES\":\"" + volumeId + "\"}", ContentType.APPLICATION_JSON);
-			// request.addHeader(HttpHeaders.ACCEPT, "application/json");
-			request.setEntity(params);
+	        URIBuilder builder = new URIBuilder(LDS_VOLUME_QUERY);
+	        builder.setParameter("R_RES", volumeId);
+	        builder.setParameter("format", "json");
+	        final HttpGet request = new HttpGet(builder.build());
 			final HttpResponse response = httpClient.execute(request);
 			int code = response.getStatusLine().getStatusCode();
 			if (code != 200) {
@@ -62,7 +60,7 @@ public class ImageGroupInfoService extends ConcurrentResourceService<ImageGroupI
 			if (res.hasNext()) {
 				throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "more than one volume found in the database for " + volumeId + ", this shouldn't happen");
 			}
-		} catch (IOException ex) {
+		} catch (IOException | URISyntaxException ex) {
 			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
 		}
 		logger.info("found volume info: {}", resVolumeInfo);

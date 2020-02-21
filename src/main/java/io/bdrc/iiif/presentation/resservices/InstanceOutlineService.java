@@ -6,11 +6,14 @@ import static io.bdrc.iiif.presentation.AppConstants.GENERIC_LDS_ERROR;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -40,12 +43,11 @@ public class InstanceOutlineService extends ConcurrentResourceService<InstanceOu
 		final String queryUrl = AppConstants.LDS_INSTANCEOUTLINE_QUERY;
 		logger.debug("query {} with argument R_RES={}", queryUrl, workId);
 		try {
-			final HttpPost request = new HttpPost(queryUrl);
-			// we suppose that the volumeId is well formed, which is checked by the
-			// Identifier constructor
-			final StringEntity params = new StringEntity("{\"R_RES\":\"" + workId + "\"}", ContentType.APPLICATION_JSON);
-			request.addHeader(HttpHeaders.ACCEPT, "text/turtle");
-			request.setEntity(params);
+	        URIBuilder builder = new URIBuilder(queryUrl);
+	        builder.setParameter("R_RES", workId);
+	        builder.setParameter("format", "json");
+	        final HttpGet request = new HttpGet(builder.build());
+	        request.addHeader(HttpHeaders.ACCEPT, "text/turtle");
 			final HttpResponse response = httpClient.execute(request);
 			int code = response.getStatusLine().getStatusCode();
 			if (code != 200) {
@@ -55,7 +57,7 @@ public class InstanceOutlineService extends ConcurrentResourceService<InstanceOu
 			final Model m = ModelFactory.createDefaultModel();
 			m.read(body, null, "TURTLE");
 			res = new InstanceOutline(m, workId);
-		} catch (IOException ex) {
+		} catch (IOException | URISyntaxException ex) {
 			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
 		}
 		logger.debug("found itemInfo: {}", res);
