@@ -53,13 +53,13 @@ public class PathTest {
         cache.put(cacheKey, ii);
         final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
-        vi.instanceUri = BDR+"W22084";
-        vi.imageInstanceUri = BDR+"I22084";
+        vi.instanceUri = BDR+"MW22084";
+        vi.imageInstanceUri = BDR+"W22084";
         vi.volumeNumber = 1;
         vi.access = AccessType.OPEN;
         vi.restrictedInChina = false;
         vi.statusUri = "http://purl.bdrc.io/admindata/StatusReleased";
-        cache.put("vi:bdr:V22084_I0890", vi);
+        cache.put("vi:bdr:I0890", vi);
         InputStream input = AuthCheck.class.getClassLoader().getResourceAsStream("iiifpres.properties");
         Properties props = new Properties();
         props.load(input);
@@ -68,7 +68,7 @@ public class PathTest {
 
 	@Test
 	public void testPathWithVersion() throws ClientProtocolException, IOException {
-		ResponseEntity<String> res = this.restTemplate.getForEntity("http://localhost:" + environment.getProperty("local.server.port") + "/2.1.1/v:bdr:V22084_I0890/manifest",
+		ResponseEntity<String> res = this.restTemplate.getForEntity("http://localhost:" + environment.getProperty("local.server.port") + "/2.1.1/v:bdr:I0890/manifest",
                 String.class);
 		//System.out.println(res.getBody());
 		assert(res.getStatusCode().equals(HttpStatus.OK));
@@ -76,7 +76,7 @@ public class PathTest {
 
 	@Test
 	public void testPathNoVersion() throws ClientProtocolException, IOException {
-		ResponseEntity<String> res = this.restTemplate.getForEntity("http://localhost:" + environment.getProperty("local.server.port") + "/v:bdr:V22084_I0890/manifest",
+		ResponseEntity<String> res = this.restTemplate.getForEntity("http://localhost:" + environment.getProperty("local.server.port") + "/v:bdr:I0890/manifest",
             String.class);
 		//System.out.println(res.getBody());
 		assert(res.getStatusCode().equals(HttpStatus.OK));
