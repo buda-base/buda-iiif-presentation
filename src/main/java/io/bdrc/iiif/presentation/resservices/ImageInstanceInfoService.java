@@ -42,7 +42,7 @@ public class ImageInstanceInfoService extends ConcurrentResourceService<ImageIns
 		try {
 		    URIBuilder builder = new URIBuilder(queryUrl);
             builder.setParameter("R_RES", itemId);
-            builder.setParameter("format", "json");
+            builder.setParameter("format", "ttl");
             final HttpGet request = new HttpGet(builder.build());
 			final HttpResponse response = httpClient.execute(request);
 			request.addHeader(HttpHeaders.ACCEPT, "text/turtle");

@@ -41,7 +41,7 @@ public class InstanceInfoService extends ConcurrentResourceService<InstanceInfo>
 		try {
 			URIBuilder builder = new URIBuilder(queryUrl);
             builder.setParameter("R_RES", workId);
-            builder.setParameter("format", "json");
+            builder.setParameter("format", "ttl");
             final HttpGet request = new HttpGet(builder.build());
             request.addHeader(HttpHeaders.ACCEPT, "text/turtle");
             final HttpResponse response = httpClient.execute(request);
@@ -53,6 +53,7 @@ public class InstanceInfoService extends ConcurrentResourceService<InstanceInfo>
 			final InputStream body = response.getEntity().getContent();
 			resModel = ModelFactory.createDefaultModel();
 			// TODO: prefixes
+			//body.transferTo(System.out);
 			resModel.read(body, null, "TURTLE");
 		} catch (IOException | URISyntaxException ex) {
 			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);

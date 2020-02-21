@@ -45,7 +45,7 @@ public class InstanceOutlineService extends ConcurrentResourceService<InstanceOu
 		try {
 	        URIBuilder builder = new URIBuilder(queryUrl);
 	        builder.setParameter("R_RES", workId);
-	        builder.setParameter("format", "json");
+	        builder.setParameter("format", "ttl");
 	        final HttpGet request = new HttpGet(builder.build());
 	        request.addHeader(HttpHeaders.ACCEPT, "text/turtle");
 			final HttpResponse response = httpClient.execute(request);

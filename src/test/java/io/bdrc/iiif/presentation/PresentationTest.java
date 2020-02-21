@@ -37,8 +37,8 @@ import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
 import io.bdrc.iiif.presentation.resmodels.InstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.InstanceOutline;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
+import io.bdrc.iiif.presentation.resservices.InstanceInfoService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
-import io.bdrc.iiif.presentation.resservices.ImageGroupInfoService;
 import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
 
@@ -52,6 +52,12 @@ public class PresentationTest {
         ServiceCache.init();
     }
 
+    //@Test
+    //public void getApi() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
+    //    InstanceInfo ii = InstanceInfoService.Instance.getFromApi("bdr:MW22084");
+    //    System.out.println(ii);
+    //}
+    
     @Test
     public void accessHeaderTest() {
         assertTrue("123".equals(IIIFPresAuthFilter.getToken("Bearer 123")));
