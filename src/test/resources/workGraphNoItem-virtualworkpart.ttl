@@ -9,14 +9,14 @@
 @prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
 @prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
 
-bdr:MW19997  a                         bdo:Instance , bdo:PublishedWork ;
+bdr:MW19997  a                         bdo:Instance ;
         skos:prefLabel                "dkar mdzes khul gyi dgon sde so so'i lo rgyus gsal bar bshad pa/"@bo-x-ewts .
 
-bdr:MWSL001_P005  a                 bdo:VirtualWork , bdo:Instance ;
+bdr:MWSL001_P005  a                 bdo:VirtualInstance , bdo:Instance ;
         bdo:workLinkTo             bdr:MW19997 ;
-        bdo:workPartIndex          5 ;
-        bdo:workPartOf             bdr:WSL001  .
+        bdo:partIndex          5 ;
+        bdo:partOf             bdr:WSL001  .
 
-bdr:MWSL001  a                 bdo:VirtualWork , bdo:Instance ;
-        bdo:workHasPart            bdr:MWSL001_P005 ;
+bdr:MWSL001  a                 bdo:VirtualInstance , bdo:Instance ;
+        bdo:hasPart            bdr:MWSL001_P005 ;
         skos:prefLabel             "དཀར་མཛེས་ཁུལ་གྱི་དགོན་སྡེ་སོ་སོའི་ལོ་རྒྱུས་གསལ་བར་བཤད་པ།"@bo .

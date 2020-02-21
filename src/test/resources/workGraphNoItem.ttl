@@ -8,9 +8,9 @@ bdr:MW12827_0053  a           :Instance ;
         adm:workLegacyNode   "O01CT00424CZ206428" ;
         :workColophon        "'od gsal spyod pa'i gnad yig bdud rtsi rgyal po zhes bya ba/ theg pa mchog gi rnal 'byor pa klong chen rab 'byams kyis bkod pa rdzogs so//"@bo-x-ewts ;
         :workIsAbout         bdr:T2564 ;
-        :workPartIndex       6 ;
-        :workPartOf          bdr:MW12827_0047 ;
-        :workPartTreeIndex   "1.2.1.1.06" ;
+        :partIndex       6 ;
+        :partOf          bdr:MW12827_0047 ;
+        :partTreeIndex   "1.2.1.1.06" ;
         :work_desc_location  "ff. 43v-45r (pp. 230-233)" ;
         skos:prefLabel       "'od gsal spyod pa'i gnad yig bdud rtsi rgyal po/"@bo-x-ewts .
 
@@ -18,23 +18,23 @@ bdr:MW12827_0059  a           :Instance ;
         adm:workLegacyNode   "O01CT00424CZ206434" ;
         :workColophon        "gsang ba snying tig gi gnad las/ rig pa sems kyi gegs sel ye shes dri med ces bya ba/ theg pa mchog gi rnal 'byor pa klong chen rab 'byams kyis bkod pa rdzogs so//"@bo-x-ewts ;
         :workIsAbout         bdr:T2038 ;
-        :workPartIndex       12 ;
-        :workPartOf          bdr:MW12827_0047 ;
-        :workPartTreeIndex   "1.2.1.1.12" ;
+        :partIndex       12 ;
+        :partOf          bdr:MW12827_0047 ;
+        :partTreeIndex   "1.2.1.1.12" ;
         :work_desc_location  "ff. 72v-75v (pp. 288-294)" ;
         skos:prefLabel       "rig pa sems kyi gegs sel ye shes dri med/"@bo-x-ewts .
 
 bdr:MW12827_0047  a           :Instance ;
         adm:workLegacyNode   "O01CT00424CZ206422" ;
-        :workHasPart          bdr:MW12827_0053 , bdr:MW12827_0059 ;
-        :workLocation        [ :workLocationEndPage  426 ;
-                               :workLocationPage     153 ;
-                               :workLocationVolume   2 ;
-                               :workLocationWork     bdr:MW12827
+        :hasPart          bdr:MW12827_0053 , bdr:MW12827_0059 ;
+        :contentLocation        [ :contentLocationEndPage  426 ;
+                               :contentLocationPage     153 ;
+                               :contentLocationVolume   2 ;
+                               :contentLocationInstance     bdr:MW12827
                              ] ;
-        :workPartIndex       1 ;
-        :workPartOf          bdr:MW12827_0046 ;
-        :workPartTreeIndex   "1.2.1.1" ;
+        :partIndex       1 ;
+        :partOf          bdr:MW12827_0046 ;
+        :partTreeIndex   "1.2.1.1" ;
         :work_desc_location  "137 ff. (145-418)" ;
         tmp:inImageInstance           bdr:W12827 ;
         skos:prefLabel       "gzhi snang ye shes sgron me sogs/"@bo-x-ewts .

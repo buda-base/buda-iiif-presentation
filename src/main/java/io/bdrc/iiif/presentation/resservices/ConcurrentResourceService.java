@@ -29,11 +29,12 @@ public class ConcurrentResourceService<T> {
 
 	@SuppressWarnings("unchecked")
 	T getFromCache(final String resId) {
+	    logger.debug("getFromCache: {}{}", cachePrefix, resId);
 		return (T) ServiceCache.getObjectFromCache(cachePrefix + resId);
 	}
 
 	void putInCache(final String resId, final T res) {
-		logger.info("PUT INTO CACHE ");
+		logger.debug("putInCache: {}{}", cachePrefix, resId);
 		ServiceCache.put(res, cachePrefix + resId);
 	}
 
@@ -51,7 +52,7 @@ public class ConcurrentResourceService<T> {
 		resId = normalizeId(resId);
 		T resT = getFromCache(resId);
 		if (resT != null) {
-			logger.debug("found cache for " + resId);
+			logger.debug("found cache for {}", resId);
 			return resT;
 		}
 		resT = getFromApi(resId);

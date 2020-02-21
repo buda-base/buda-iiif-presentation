@@ -33,21 +33,21 @@
 
 bdr:MW22084_0002  a  bdo:Instance ;
    skos:prefLabel  "so sor thar ba'i mdo/"@bo-x-ewts , "pra ti mo k+Sha sU tra"@sa-x-ewts ;
-   bdo:workColophon  "so sor thar ba'i mdo rdzogs s+ho/ dbang phyug dam pa'i mnga' bdag dpal lha btsan po'i bka' lung gis 'phags pa gzhi thams cad yod par smra ba'i 'dul ba 'dzin ba slob dpon dzin mi tra dang / zhus chen gyi lo tsA ba ban de cog ro klu'i rgyal mtshan gyis bsgyur cing zhus te gtan la phab pa/"@bo-x-ewts ;
+   bdo:colophon  "so sor thar ba'i mdo rdzogs s+ho/ dbang phyug dam pa'i mnga' bdag dpal lha btsan po'i bka' lung gis 'phags pa gzhi thams cad yod par smra ba'i 'dul ba 'dzin ba slob dpon dzin mi tra dang / zhus chen gyi lo tsA ba ban de cog ro klu'i rgyal mtshan gyis bsgyur cing zhus te gtan la phab pa/"@bo-x-ewts ;
    bdo:instanceOf  bdr:WA0RKT0002 ;
    bdo:workKaTenSiglaD  "2" ;
-   bdo:workLocation  [ bdo:workLocationEndLine  7 ;
-                       bdo:workLocationEndPage  42 ;
-                       bdo:workLocationLine  1 ;
-                       bdo:workLocationPage  4 ;
-                       bdo:workLocationVolume  5 ;
-                       bdo:workLocationWork  bdr:MW22084
+   bdo:contentLocation  [ bdo:contentLocationEndLine  7 ;
+                       bdo:contentLocationEndPage  42 ;
+                       bdo:contentLocationLine  1 ;
+                       bdo:contentLocationPage  4 ;
+                       bdo:contentLocationVolume  5 ;
+                       bdo:contentLocationInstance  bdr:MW22084
                      ] ;
-   bdo:workPartIndex  2 ;
-   bdo:workPartOf  bdr:MW22084_S0001 ;
-   bdo:workPartTreeIndex  "01.02" ;
-   bdo:workPartType  bdr:WorkText ;
-   bdo:workTitle  bdr:MW22084_0002_TT73d7d9d87489 , bdr:MW22084_0002_TTd390e2386427 ;
+   bdo:partIndex  2 ;
+   bdo:partOf  bdr:MW22084_S0001 ;
+   bdo:partTreeIndex  "01.02" ;
+   bdo:partType  bdr:WorkText ;
+   bdo:hasTitle  bdr:MW22084_0002_TT73d7d9d87489 , bdr:MW22084_0002_TTd390e2386427 ;
    tmp:inImageInstance    bdr:W22084 ;
    tmp:rootAccess  bda:AccessOpen ;
    tmp:rootStatus  bda:StatusReleased ;

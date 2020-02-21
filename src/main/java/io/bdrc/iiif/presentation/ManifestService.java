@@ -215,15 +215,15 @@ public class ManifestService {
         if (id.getType() != Identifier.MANIFEST_ID || (id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE)) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
-        if (!vi.instanceUri.startsWith(BDR)) {
+        if (!vi.imageInstanceUri.startsWith(BDR)) {
             throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you can only access BDRC volumes through this API");
         }
         logger.info("building manifest for ID {}", id.getId());
         logger.debug("rootPart: {}", rootPart);
-        final String workLocalId = vi.instanceUri.substring(BDR_len);
+        final String imageInstanceLocalName = vi.imageInstanceUri.substring(BDR_len);
         List<ImageInfo> imageInfoList;
         try {
-            imageInfoList = ImageInfoListService.Instance.getAsync(workLocalId, vi.imageGroup).get();
+            imageInfoList = ImageInfoListService.Instance.getAsync(imageInstanceLocalName, vi.imageGroup).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
         }

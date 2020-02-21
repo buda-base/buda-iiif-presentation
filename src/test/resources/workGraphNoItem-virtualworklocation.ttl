@@ -33,14 +33,14 @@
 
 bdr:MW1ERI0009001_01_01_01
         a                          bdo:Instance , bdo:VirtualWork ;
-        bdo:workLocation           [ bdo:workLocationEndPage    318 ;
-                                     bdo:workLocationEndVolume  1 ;
-                                     bdo:workLocationPage       33 ;
-                                     bdo:workLocationVolume     1 ;
-                                     bdo:workLocationWork       bdr:W23221
+        bdo:contentLocation           [ bdo:contentLocationEndPage    318 ;
+                                     bdo:contentLocationEndVolume  1 ;
+                                     bdo:contentLocationPage       33 ;
+                                     bdo:contentLocationVolume     1 ;
+                                     bdo:contentLocationWork       bdr:W23221
                                    ] ;
-        bdo:workPartIndex          1 ;
-        bdo:workPartOf             bdr:MW1ERI0009001_01_01 ;
+        bdo:partIndex          1 ;
+        bdo:partOf             bdr:MW1ERI0009001_01_01 ;
         tmp:inImageInstance        bdr:W23221 ;
         tmp:rootAccess             bda:AccessOpen ;
         tmp:rootLicense            bda:LicensePublicDomain ;

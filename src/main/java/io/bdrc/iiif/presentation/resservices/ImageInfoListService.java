@@ -69,10 +69,10 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
 		return s3Client;
 	}
 
-	public static String getKey(final String workLocalId, String imageGroupId) {
-		final String md5firsttwo = getFirstMd5Nums(workLocalId);
-		imageGroupId = getS3ImageGroupId(imageGroupId);
-		return "Works/" + md5firsttwo + "/" + workLocalId + "/images/" + workLocalId + "-" + imageGroupId + "/dimensions.json";
+	public static String getKey(final String imageInstanceLocalName, String imageGroupLocalName) {
+		final String md5firsttwo = getFirstMd5Nums(imageInstanceLocalName);
+		imageGroupLocalName = getS3ImageGroupId(imageGroupLocalName);
+		return "Works/" + md5firsttwo + "/" + imageInstanceLocalName + "/images/" + imageInstanceLocalName + "-" + imageGroupLocalName + "/dimensions.json";
 	}
 
 	public static final Pattern oldImageGroupPattern = Pattern.compile("^I\\d{4}$");

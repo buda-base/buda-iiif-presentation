@@ -11,22 +11,22 @@
 
 bdr:MW19997_0448  a                bdo:Instance ;
         bdo:legacyOutlineNodeRID  "O1GS447881GS44791" ;
-        bdo:workHasPart           bdr:MW19997_0450 , bdr:MW19997_0516 , bdr:MW19997_0449 , bdr:MW19997_0538 , bdr:MW19997_0479 ;
+        bdo:hasPart           bdr:MW19997_0450 , bdr:MW19997_0516 , bdr:MW19997_0449 , bdr:MW19997_0538 , bdr:MW19997_0479 ;
         bdo:workLocation          bdr:WL86C589399D78 ;
-        bdo:workPartIndex         3 ;
-        bdo:workPartLabel         "ga"@bo-x-ewts ;
-        bdo:workPartOf            bdr:MW19997 ;
-        bdo:workPartTreeIndex     "3" ;
+        bdo:partIndex         3 ;
+        bdo:partLabel         "ga"@bo-x-ewts ;
+        bdo:partOf            bdr:MW19997 ;
+        bdo:partTreeIndex     "3" ;
         skos:prefLabel            "ga"@bo-x-ewts .
 
 bdr:MW19997_0171  a                bdo:Instance ;
         bdo:legacyOutlineNodeRID  "O1GS447881GS44790" ;
-        bdo:workHasPart           bdr:MW19997_0172 , bdr:MW19997_0338 , bdr:MW19997_0383 , bdr:MW19997_0439 , bdr:MW19997_0222 , bdr:MW19997_0344 , bdr:MW19997_0257 , bdr:MW19997_0411 , bdr:MW19997_0301 , bdr:MW19997_0331 , bdr:MW19997_0269 , bdr:MW19997_0311 ;
+        bdo:hasPart           bdr:MW19997_0172 , bdr:MW19997_0338 , bdr:MW19997_0383 , bdr:MW19997_0439 , bdr:MW19997_0222 , bdr:MW19997_0344 , bdr:MW19997_0257 , bdr:MW19997_0411 , bdr:MW19997_0301 , bdr:MW19997_0331 , bdr:MW19997_0269 , bdr:MW19997_0311 ;
         bdo:workLocation          bdr:WLDCE9DA77ADDE ;
-        bdo:workPartIndex         2 ;
-        bdo:workPartLabel         "kha/"@bo-x-ewts ;
-        bdo:workPartOf            bdr:MW19997 ;
-        bdo:workPartTreeIndex     "2" ;
+        bdo:partIndex         2 ;
+        bdo:partLabel         "kha/"@bo-x-ewts ;
+        bdo:partOf            bdr:MW19997 ;
+        bdo:partTreeIndex     "2" ;
         skos:prefLabel            "kha/"@bo-x-ewts .
 
 bdr:MW19997  a                         bdo:Instance ;
@@ -40,7 +40,7 @@ bdr:MW19997  a                         bdo:Instance ;
         bdo:workExtentStatement       "3 v." ;
         bdo:workGenre                 bdr:T1134 ;
         bdo:instanceHasReproduction   bdr:W19997 ;
-        bdo:workHasPart               bdr:MW19997_0448 , bdr:MW19997_0171 , bdr:MW19997_0001 ;
+        bdo:hasPart               bdr:MW19997_0448 , bdr:MW19997_0171 , bdr:MW19997_0001 ;
         bdo:workHollis                "014254943" ;
         bdo:workIsAbout               bdr:T359 , bdr:G1538 ;
         bdo:workLangScript            bdr:BoTibt ;
@@ -52,20 +52,20 @@ bdr:MW19997  a                         bdo:Instance ;
         bdo:workTitle                 bdr:TT43ADF7E942E1 , bdr:TT385D720BD96B ;
         skos:prefLabel                "dkar mdzes khul gyi dgon sde so so'i lo rgyus gsal bar bshad pa/"@bo-x-ewts .
 
-bdr:W19997_0001  a                bdo:Instance ;
+bdr:MW19997_0001  a                bdo:Instance ;
         bdo:legacyOutlineNodeRID  "O1GS447881GS44789" ;
-        bdo:workHasPart           bdr:MW19997_0050 , bdr:MW19997_0004 , bdr:MW19997_0002 , bdr:MW19997_0113 , bdr:MW19997_0006 , bdr:MW19997_0003 , bdr:MW19997_0005 ;
+        bdo:hasPart           bdr:MW19997_0050 , bdr:MW19997_0004 , bdr:MW19997_0002 , bdr:MW19997_0113 , bdr:MW19997_0006 , bdr:MW19997_0003 , bdr:MW19997_0005 ;
         bdo:workLocation          bdr:WLAB34E03A35B8 ;
-        bdo:workPartIndex         1 ;
-        bdo:workPartLabel         "ka"@bo-x-ewts ;
-        bdo:workPartOf            bdr:W19997 ;
-        bdo:workPartTreeIndex     "1" ;
+        bdo:partIndex         1 ;
+        bdo:partLabel         "ka"@bo-x-ewts ;
+        bdo:partOf            bdr:W19997 ;
+        bdo:partTreeIndex     "1" ;
         skos:prefLabel            "ka"@bo-x-ewts .
 
-bdr:WSL001_P005  a                 bdo:VirtualWork , bdo:Instance ;
-        bdo:workLinkTo             bdr:MW19997 ;
-        bdo:workPartIndex          5 ;
-        bdo:workPartOf             bdr:WSL001 ;
+bdr:MWSL001_P005  a                 bdo:VirtualInstance , bdo:Instance ;
+        bdo:virtualLinkTo             bdr:MW19997 ;
+        bdo:partIndex          5 ;
+        bdo:partOf             bdr:MWSL001 ;
         tmp:inImageInstance        bdr:W19997 ;
         tmp:rootStatus             <http://purl.bdrc.io/admindata/StatusReleased> ;
         tmp:rootAccess             <http://purl.bdrc.io/admindata/AccessOpen> ;

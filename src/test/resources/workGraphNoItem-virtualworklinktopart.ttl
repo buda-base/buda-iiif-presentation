@@ -31,17 +31,17 @@
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix ldp:   <http://www.w3.org/ns/ldp#> .
 
-bdr:WLE3F98859B677  a            bdo:WorkLocation ;
-        bdo:workLocationEndPage  54 ;
-        bdo:workLocationPage     11 ;
-        bdo:workLocationVolume   1 ;
-        bdo:workLocationWork     bdr:MW5062 .
+bdr:WLE3F98859B677  a            bdo:ContentLocation ;
+        bdo:contentLocationEndPage  54 ;
+        bdo:contentLocationPage     11 ;
+        bdo:contentLocationVolume   1 ;
+        bdo:contentLocationInstance     bdr:MW5062 .
 
-bdr:W1ERI0009001_01_02_02
-        a                          bdo:Instance , bdo:VirtualWork ;
-        bdo:workLinkTo             bdr:MW5062_0004 ;
-        bdo:workPartIndex          2 ;
-        bdo:workPartOf             bdr:W1ERI0009001_01_02 ;
+bdr:MW1ERI0009001_01_02_02
+        a                          bdo:Instance , bdo:VirtualInstance ;
+        bdo:virtualLinkTo             bdr:MW5062_0004 ;
+        bdo:partIndex          2 ;
+        bdo:partOf             bdr:W1ERI0009001_01_02 ;
         tmp:inImageInstance        bdr:W5062 ;
         tmp:rootAccess             bda:AccessOpen ;
         tmp:rootLicense            bda:LicensePublicDomain ;
@@ -51,11 +51,11 @@ bdr:W1ERI0009001_01_02_02
 
 bdr:MW5062_0004  a                 bdo:Instance ;
         bdo:legacyOutlineNodeRID   "O4CZ232624CZ280192" ;
-        bdo:workLocation           bdr:WLE3F98859B677 ;
-        bdo:workLocationStatement  "22 ff. (pp.1-44)" ;
-        bdo:workPartIndex          3 ;
-        bdo:workPartOf             bdr:MW5062_0001 ;
-        bdo:workPartTreeIndex      "01.3" ;
+        bdo:contentLocation           bdr:WLE3F98859B677 ;
+        bdo:contentLocationStatement  "22 ff. (pp.1-44)" ;
+        bdo:partIndex          3 ;
+        bdo:partOf             bdr:MW5062_0001 ;
+        bdo:partTreeIndex      "01.3" ;
         bdo:workRefIsIAO           "deest" ;
         bdo:workTitle              bdr:TTA48295635D76 , bdr:TT140973938B47 ;
         skos:prefLabel             "dge tshul kA ri kA'i mchan 'grel nor bu'i phreng ba/"@bo-x-ewts .
