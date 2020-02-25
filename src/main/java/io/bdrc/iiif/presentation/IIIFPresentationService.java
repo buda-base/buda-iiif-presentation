@@ -1,7 +1,12 @@
 package io.bdrc.iiif.presentation;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.NoSuchAlgorithmException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -9,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +54,8 @@ import io.bdrc.iiif.presentation.resservices.ServiceCache;
 import io.bdrc.iiif.presentation.resservices.ImageGroupInfoService;
 import io.bdrc.iiif.presentation.resservices.InstanceInfoService;
 import io.bdrc.iiif.presentation.resservices.InstanceOutlineService;
+import io.bdrc.libraries.GitHelpers;
+import io.bdrc.libraries.GlobalHelpers;
 import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -56,62 +65,63 @@ import io.micrometer.core.instrument.Metrics;
 @RequestMapping("/")
 public class IIIFPresentationService {
 
-	private static final Logger logger = LoggerFactory.getLogger(IIIFPresentationService.class);
-	static final int ACCESS_CONTROL_MAX_AGE_IN_SECONDS = 24 * 60 * 60;
+    private static final Logger logger = LoggerFactory.getLogger(IIIFPresentationService.class);
+    static final int ACCESS_CONTROL_MAX_AGE_IN_SECONDS = 24 * 60 * 60;
 
-	final static ObjectMapper om = new ObjectMapper();
+    final static ObjectMapper om = new ObjectMapper();
 
-	@Autowired
-	MeterRegistry registry;
+    @Autowired
+    MeterRegistry registry;
 
-	// no robots on manifests
-	@RequestMapping(value = "/robots.txt", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
-	public ResponseEntity<String> getRobots(HttpServletResponse response) {
-		return ResponseEntity.ok("User-agent: *\nDisallow: /");
-	}
+    // no robots on manifests
+    @RequestMapping(value = "/robots.txt", method = RequestMethod.GET, produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> getRobots(HttpServletResponse response) {
+        return ResponseEntity.ok("User-agent: *\nDisallow: /");
+    }
 
-	@RequestMapping(value = "/clearcache", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
-	public ResponseEntity<String> clearCache() {
-		logger.info("clearing cache >>");
-		if (ServiceCache.clearCache()) {
-			return ResponseEntity.ok("OK");
-		} else {
-			return ResponseEntity.ok("ERROR");
-		}
-	}
+    @RequestMapping(value = "/clearcache", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> clearCache() {
+        logger.info("clearing cache >>");
+        if (ServiceCache.clearCache()) {
+            return ResponseEntity.ok("OK");
+        } else {
+            return ResponseEntity.ok("ERROR");
+        }
+    }
 
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/admin/cache/{region}/{key}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<Object> getKey(@PathVariable String region, @PathVariable final String key) throws BDRCAPIException {
-		if (!AppConstants.CACHENAME.equals(region))
-			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "unknown region");
-		if (key.length() < 4)
-			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "key is too short");
-		final String prefix = key.substring(0, 3);
-		final Object res = ServiceCache.getObjectFromCache(key);
-		if (res == null)
-			throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "key not found");
-		// this is quite repetitive unfortunately but I couldn't find another way...
-		switch (prefix) {
-		case AppConstants.CACHEPREFIX_WI:
-			return ResponseEntity.ok().body((InstanceInfo) res);
-		case AppConstants.CACHEPREFIX_WO:
-			return ResponseEntity.ok().body((InstanceOutline) res);
-		case AppConstants.CACHEPREFIX_II:
-			return ResponseEntity.ok().body((ImageInstanceInfo) res);
-		case AppConstants.CACHEPREFIX_IIL:
-			return ResponseEntity.ok().body((List<ImageInfo>) res);
-		case AppConstants.CACHEPREFIX_VI:
-			return ResponseEntity.ok().body((ImageGroupInfo) res);
-		default:
-			throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, "unhandled key prefix, this shouldn't happen");
-		}
-	}
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/admin/cache/{region}/{key}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<Object> getKey(@PathVariable String region, @PathVariable final String key) throws BDRCAPIException {
+        if (!AppConstants.CACHENAME.equals(region))
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "unknown region");
+        if (key.length() < 4)
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "key is too short");
+        final String prefix = key.substring(0, 3);
+        final Object res = ServiceCache.getObjectFromCache(key);
+        if (res == null)
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "key not found");
+        // this is quite repetitive unfortunately but I couldn't find another way...
+        switch (prefix) {
+        case AppConstants.CACHEPREFIX_WI:
+            return ResponseEntity.ok().body((InstanceInfo) res);
+        case AppConstants.CACHEPREFIX_WO:
+            return ResponseEntity.ok().body((InstanceOutline) res);
+        case AppConstants.CACHEPREFIX_II:
+            return ResponseEntity.ok().body((ImageInstanceInfo) res);
+        case AppConstants.CACHEPREFIX_IIL:
+            return ResponseEntity.ok().body((List<ImageInfo>) res);
+        case AppConstants.CACHEPREFIX_VI:
+            return ResponseEntity.ok().body((ImageGroupInfo) res);
+        default:
+            throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, "unhandled key prefix, this shouldn't happen");
+        }
+    }
 
-	@RequestMapping(value = "/collection/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<StreamingResponseBody> getCollectionNoVer(@PathVariable String identifier, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
-		return getCollection(identifier, "", request, resp);
-	}
+    @RequestMapping(value = "/collection/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<StreamingResponseBody> getCollectionNoVer(@PathVariable String identifier, HttpServletRequest request,
+            HttpServletResponse resp) throws BDRCAPIException {
+        return getCollection(identifier, "", request, resp);
+    }
 
 	@RequestMapping(value = "/{version:.+}/collection/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<StreamingResponseBody> getCollection(@PathVariable String identifier, @PathVariable String version, HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
@@ -198,10 +208,11 @@ public class IIIFPresentationService {
 		}
 	}
 
-	@RequestMapping(value = "/{identifier}/manifest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<StreamingResponseBody> getManifestNoVer(@PathVariable String identifier, HttpServletRequest req, HttpServletResponse resp) throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
-		return getManifest(identifier, "", req, resp);
-	}
+    @RequestMapping(value = "/{identifier}/manifest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<StreamingResponseBody> getManifestNoVer(@PathVariable String identifier, HttpServletRequest req, HttpServletResponse resp)
+            throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+        return getManifest(identifier, "", req, resp);
+    }
 
 	@RequestMapping(value = "/{version:.+}/{identifier}/manifest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<StreamingResponseBody> getManifest(@PathVariable String identifier, @PathVariable String version, HttpServletRequest req, HttpServletResponse resp)
@@ -310,11 +321,11 @@ public class IIIFPresentationService {
 		}
 	}
 
-	@RequestMapping(value = "/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public ResponseEntity<StreamingResponseBody> getCanvasNoVer(@PathVariable String identifier, @PathVariable String filename, HttpServletRequest req, HttpServletResponse resp)
-			throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
-		return getCanvas(identifier, "", filename, req, resp);
-	}
+    @RequestMapping(value = "/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<StreamingResponseBody> getCanvasNoVer(@PathVariable String identifier, @PathVariable String filename,
+            HttpServletRequest req, HttpServletResponse resp) throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+        return getCanvas(identifier, "", filename, req, resp);
+    }
 
 	@RequestMapping(value = "/{version:.+}/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<StreamingResponseBody> getCanvas(@PathVariable String identifier, @PathVariable String version, @PathVariable String filename, HttpServletRequest req, HttpServletResponse resp)
@@ -394,13 +405,62 @@ public class IIIFPresentationService {
 		return st.substring(st.lastIndexOf("/") + 1);
 	}
 
-	private StreamingResponseBody getStream(Object obj) {
-		final StreamingResponseBody stream = new StreamingResponseBody() {
-			@Override
-			public void writeTo(final OutputStream os) throws IOException {
-				AppConstants.IIIFMAPPER.writer().writeValue(os, obj);
-			}
-		};
-		return stream;
-	}
+    @RequestMapping(value = "/bvm/{resource}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<String> getImageInfoFile(@PathVariable String resource, HttpServletRequest request, HttpServletResponse resp)
+            throws BDRCAPIException, IOException {
+        String json = "";
+        try {
+            String res = resource.substring(resource.indexOf(":") + 1);
+            String filename = System.getProperty("iiifpres.configpath") + "gitData/buda-volume-manifests/" + GlobalHelpers.getTwoLettersBucket(res)
+                    + "/" + res + ".json";
+            json = GlobalHelpers.readFileContent(filename);
+        } catch (Exception e) {
+            throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, e);
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(json);
+    }
+
+    @RequestMapping(value = "/bvm/{resource}", method = RequestMethod.PUT)
+    public ResponseEntity<String> writeImageInfoFile(@PathVariable String resource, @RequestBody String json, HttpServletRequest request,
+            HttpServletResponse resp) throws BDRCAPIException, NoSuchAlgorithmException {
+        try {
+            String repoBase = System.getProperty("iiifpres.configpath") + "gitData/buda-volume-manifests/";
+            Repository repo = GitHelpers.ensureGitRepo(repoBase);
+            GitHelpers.pull(repo);
+            String res = resource.substring(resource.indexOf(":") + 1);
+            String filename = repoBase + GlobalHelpers.getTwoLettersBucket(res) + "/" + res + ".json";
+            File f = new File(repoBase + GlobalHelpers.getTwoLettersBucket(res) + "/");
+            if (!f.exists()) {
+                f.mkdir();
+            }
+            BufferedWriter br = new BufferedWriter(new FileWriter(new File(filename)));
+            br.write(json);
+            br.close();
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            GitHelpers.commitChanges(repo, "Added/updated " + res + ".json");
+            GitHelpers.push(repo, AuthProps.getProperty("gitRemoteUrl"), AuthProps.getProperty("gitUser"), AuthProps.getProperty("gitPass"));
+        } catch (Exception e) {
+            throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, e);
+        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(json);
+    }
+
+    public static String getShortName(final String st) {
+        if (st == null || st.isEmpty()) {
+            return null;
+        }
+        return st.substring(st.lastIndexOf("/") + 1);
+    }
+
+    private StreamingResponseBody getStream(Object obj) {
+        final StreamingResponseBody stream = new StreamingResponseBody() {
+            @Override
+            public void writeTo(final OutputStream os) throws IOException {
+                AppConstants.IIIFMAPPER.writer().writeValue(os, obj);
+            }
+        };
+        return stream;
+    }
 }

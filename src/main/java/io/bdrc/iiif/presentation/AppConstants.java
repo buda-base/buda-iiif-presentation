@@ -29,7 +29,7 @@ public class AppConstants {
     public static final String IIIFPresPrefix = "https://iiifpres.bdrc.io/";
     public static final String IIIFPresPrefix_coll = IIIFPresPrefix + "collection/";
 
-    public static final String LDS_QUERYPREFIX = "http://ldspdi-dev.bdrc.io/";//AuthProps.getProperty("dataserver");
+    public static final String LDS_QUERYPREFIX = AuthProps.getProperty("dataserver");
     public static final String LDS_INSTANCEGRAPH_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_instanceGraph_noItem";
     public static final String LDS_IMAGEINSTANCEGRAPH_QUERY = LDS_QUERYPREFIX + "query/graph/IIIFPres_imageInstanceGraph";
     public static final String LDS_VOLUME_QUERY = LDS_QUERYPREFIX + "query/table/IIIFPres_volumeInfo";
