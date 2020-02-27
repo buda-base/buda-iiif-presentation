@@ -43,7 +43,7 @@ public class Location {
         if (location.hasProperty(locationPageP))
             this.bpagenum = location.getProperty(locationPageP).getInt();
         else
-            this.bpagenum = 0;
+            this.bpagenum = 1;
         final Property locationEndPageP = m.getProperty(BDO, "contentLocationEndPage");
         if (location.hasProperty(locationEndPageP))
             this.epagenum = location.getProperty(locationEndPageP).getInt();
