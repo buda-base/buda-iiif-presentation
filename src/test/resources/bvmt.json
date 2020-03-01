@@ -1,0 +1,80 @@
+{
+	"for-volume": "bdr:I1KG9128",
+	"spec-version": "0.1.0",
+	"rev": "860f508e-608e-484d-9fc3-62392fab0b12",
+	"attribution": "data contributed by rKTs",
+	"note": [{"@value":"not sure about the order of page 2"}],
+	"changes": [
+		{
+			"time": 1568463794,
+			"user": "bdr:U0002",
+			"message": "initial version"
+		}
+	],
+	"pagination": [
+		{   
+			"id": "pgfolios",
+			"type": "folios",
+			"note": "from the original blockprint"
+		},
+		{   
+			"id": "bates",
+			"type": "simple",
+			"note": "bates numbers added on the xerox reprint"
+		}
+	],
+	"sections": [
+		{
+			"id": "intro",
+			"name": {"value": "intro", "lang": "en"}
+		},
+		{
+			"id": "s1",
+			"name": {"value": "section1", "lang": "bo-x-ewts"}
+		},
+		{
+			"id": "s2",
+			"name": {"value": "section2", "lang": "bo-x-ewts"}
+		}
+	],
+	"default-view": "view1",
+	"view": {
+		"view1": {
+			"imagelist": [
+				{
+					"filename": "I1KG9128001.tif",
+					"pagination": { "pgfolios": {"value": "1a", "section": "intro"} },
+					"note": [
+						{"@value": "this is an intro page, some editions would have that before the scans", "@language": "en"}
+					]
+				},
+				{
+					"filename": "I1KG9128002.tif",
+					"pagination": { "pgfolios": {"value": "1a", "section": "intro"} },
+					"indication": { "@value": "kha", "@language": "bo-x-ewts" },
+					"tags": ["T0021", "T0011"]
+				},
+				{
+					"subtype": "from-scan",
+					"pagination": "1'b",
+					"tags": ["T0020"]
+				},
+				{
+					"filename": "I1KG9128003.tif",
+					"pagination": {"default": "1b", "bates": "2", "original": null, "section": "s1"},
+				},
+				{
+					"type": "duplicate",
+					"filename": "I1KG9128005.tif",
+					"display": false,
+					"scan-duplicate-of": "I1KG9128004.tif"
+				},
+				{
+					"filename": "I1KG9128004.tif",
+					"pagination": "1'a",
+					"rotation": 180
+				},
+			]
+		}
+	}
+}

@@ -1,9 +1,11 @@
 package io.bdrc.iiif.presentation.resmodels;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ImageInfo {
@@ -13,6 +15,7 @@ public class ImageInfo {
     public int height;
     @JsonProperty("filename")
     public String filename;
+    @JsonInclude(Include.NON_NULL)
     @JsonProperty("size")
     public Integer size = null;
     
