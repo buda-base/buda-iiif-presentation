@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
+import io.bdrc.iiif.presentation.CaffeineStats;
 import io.bdrc.iiif.presentation.SpringBootIIIFPres;
 import io.bdrc.iiif.presentation.metrics.CacheMetrics;
 
@@ -18,7 +19,7 @@ public class CaffeineCache {
     public final static Logger log = LoggerFactory.getLogger(CaffeineCache.class.getName());
 
     public static void init() {
-        cache = Caffeine.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES)
+        cache = Caffeine.newBuilder().expireAfterWrite(15, TimeUnit.MINUTES).recordStats()
                 .maximumSize(Long.parseLong(SpringBootIIIFPres.getProperty("mainCacheSize"))).build();
     }
 
@@ -53,7 +54,10 @@ public class CaffeineCache {
         } catch (Exception e) {
             return false;
         }
+    }
 
+    public CaffeineStats getStats() {
+        return new CaffeineStats(cache);
     }
 
 }
