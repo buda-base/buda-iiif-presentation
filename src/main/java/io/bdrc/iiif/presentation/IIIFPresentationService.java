@@ -49,9 +49,9 @@ import io.bdrc.iiif.presentation.resmodels.PartInfo;
 import io.bdrc.iiif.presentation.resmodels.VolumeInfo;
 import io.bdrc.iiif.presentation.resmodels.WorkInfo;
 import io.bdrc.iiif.presentation.resmodels.WorkOutline;
+import io.bdrc.iiif.presentation.resservices.CaffeineCache;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.iiif.presentation.resservices.ItemInfoService;
-import io.bdrc.iiif.presentation.resservices.ServiceCache;
 import io.bdrc.iiif.presentation.resservices.VolumeInfoService;
 import io.bdrc.iiif.presentation.resservices.WorkInfoService;
 import io.bdrc.iiif.presentation.resservices.WorkOutlineService;
@@ -83,7 +83,7 @@ public class IIIFPresentationService {
     @RequestMapping(value = "/clearcache", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> clearCache() {
         logger.info("clearing cache >>");
-        if (ServiceCache.clearCache()) {
+        if (CaffeineCache.clearCache()) {
             return ResponseEntity.ok("OK");
         } else {
             return ResponseEntity.ok("ERROR");
@@ -98,7 +98,7 @@ public class IIIFPresentationService {
         if (key.length() < 4)
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "key is too short");
         final String prefix = key.substring(0, 3);
-        final Object res = ServiceCache.getObjectFromCache(key);
+        final Object res = CaffeineCache.getObjectFromCache(key);
         if (res == null)
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "key not found");
         // this is quite repetitive unfortunately but I couldn't find another way...

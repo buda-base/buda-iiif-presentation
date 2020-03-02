@@ -87,7 +87,12 @@
 	    <relativePath></relativePath>    
 	    <version>2.1.8.RELEASE</version>    
     </parent>  
-    <dependencies>
+    <dependencies>        
+        <!-- https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>            
+        </dependency>    
         <dependency>
           <groupId>io.bdrc.libraries</groupId>
           <artifactId>bdrc-libraries</artifactId>
@@ -140,7 +145,7 @@
 		    <groupId>io.micrometer</groupId>
 		    <artifactId>micrometer-registry-prometheus</artifactId>		    
 		</dependency>
-         <dependency> 
+        <dependency> 
           <groupId>javax.servlet</groupId>
           <artifactId>javax.servlet-api</artifactId>
         </dependency>

@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Primary;
 
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.rdf.RdfAuthModel;
-import io.bdrc.iiif.presentation.resservices.ServiceCache;
+import io.bdrc.iiif.presentation.resservices.CaffeineCache;
 
 @SpringBootApplication
 @Configuration
@@ -30,6 +30,7 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
     public final static Logger log = LoggerFactory.getLogger(SpringBootIIIFPres.class.getName());
 
     public static void main(String[] args) throws Exception {
+
         final String configPath = System.getProperty("iiifpres.configpath");
         try {
             InputStream input = SpringBootIIIFPres.class.getClassLoader().getResourceAsStream("iiifpres.properties");
@@ -50,7 +51,7 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
                 RdfAuthModel.init();
                 RdfAuthModel.getFullModel().write(System.out, "TURTLE");
             }
-            ServiceCache.init();
+            CaffeineCache.init();
 
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -59,6 +60,10 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
 
         log.info("SpringBootIIIFPres has been properly initialized");
         SpringApplication.run(SpringBootIIIFPres.class, args);
+    }
+
+    public static String getProperty(String key) {
+        return AuthProps.getProperty(key);
     }
 
 }
