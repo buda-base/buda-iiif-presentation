@@ -4,12 +4,16 @@ import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.jena.rdf.model.Literal;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
@@ -92,20 +96,57 @@ public class BVM {
     }
     
     public static final class ChangeLogItem {
-        @JsonProperty("user")
+        @JsonProperty(value="user", required=true)
         public String userQname = null;
-        @JsonProperty("message")
+        @JsonProperty(value="message", required=true)
         public LangString message = null;
-        @JsonProperty("time")
+        @JsonProperty(value="time", required=true)
         public Instant time = null;
       
-        public ChangeLogItem(String userQname, LangString message, Instant time) {
-            this.userQname = userQname;
-            this.message = message;
-            this.time = time;
+        public ChangeLogItem() { }
+        
+        public void validate() throws BDRCAPIException {
+            if (this.userQname == null || this.message == null || this.time == null)
+                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: invalid change, missing field");
         }
     }
 
+    @JsonIdentityInfo(
+            generator = ObjectIdGenerators.PropertyGenerator.class, 
+            property = "id")
+    public static final class BVMPagination {
+        @JsonProperty(value="id", required=true)
+        public String id = null;
+        @JsonProperty(value="type", required=true)
+        public PaginationType type = null;
+        @JsonInclude(Include.NON_NULL)
+        @JsonProperty("note")
+        public List<LangString> note = null;
+      
+        public BVMPagination() { }
+    }
+
+    @JsonIdentityInfo(
+            generator = ObjectIdGenerators.PropertyGenerator.class, 
+            property = "id")
+    public static final class BVMSection {
+        @JsonProperty(value="id", required=true)
+        public String id = null;
+        @JsonProperty("name")
+        public LangString name = null;
+      
+        public BVMSection() { }
+    }
+
+    public static final class BVMPaginationItem {
+        @JsonProperty(value="value", required=true)
+        public String value = null;
+        @JsonProperty("section")
+        public String section = null;
+      
+        public BVMPaginationItem() { }
+    }
+    
     public static final class BVMImageInfo {
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("tags")
@@ -113,42 +154,98 @@ public class BVM {
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("filename")
         public String filename = null;
+        @JsonInclude(Include.NON_NULL)
         @JsonProperty("indication")
         public LangString indication = null;
-      
+        @JsonInclude(Include.NON_NULL)
+        @JsonProperty("note")
+        public List<LangString> note = null;
+        @JsonInclude(Include.NON_NULL)
+        @JsonProperty("rotation")
+        public Integer rotation = null;
+        @JsonInclude(Include.NON_NULL)
+        @JsonProperty("of")
+        public String of = null;
+        @JsonInclude(Include.NON_NULL)
+        @JsonProperty("pagination")
+        public Map<String,BVMPaginationItem> pagination = null; 
+        
+        public void validate() throws BDRCAPIException {
+            boolean filenameShouldBeEmpty = false;
+            boolean emptyOfOk = true;
+            for (Tag t : this.tags) {
+                if (t == Tag.T0019 || t == Tag.T0020)
+                    filenameShouldBeEmpty = true;
+                if (t == Tag.T0016 || t == Tag.T0017 || t == Tag.T0018)
+                    emptyOfOk = false;
+            }
+            boolean filenameIsEmpty = (this.filename == null || this.filename.isEmpty());
+            if ((filenameShouldBeEmpty && !filenameIsEmpty) || (!filenameShouldBeEmpty && filenameIsEmpty))
+                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: missing filename or filename on an image tagged as missing");
+            if (!emptyOfOk && this.of == null)
+                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: missing of field");
+        }
+    }
+
+    public static final class BVMView {
+        @JsonProperty(value="imagelist", required=true)
+        public List<BVMImageInfo> imageList = null;
+        
+        public void validate() throws BDRCAPIException {
+            if (imageList == null)
+                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: no image list in view");
+            for (BVMImageInfo ii : this.imageList) {
+                ii.validate();
+            }
+        }
     }
     
-    // class BVMImageInfo
-    
-    // function validate
-    
-    // function getDefaultView()
-    
-    @JsonProperty("rev")
-    public UUID rev;
-    @JsonProperty("for-volume")
-    public String imageGroupQname;
-    @JsonProperty("spec-version")
-    public String specVersion;
-    @JsonProperty("default-view")
-    public String defaultView;
+    @JsonProperty(value="rev", required=true)
+    public UUID rev = null;
+    @JsonProperty(value="for-volume", required=true)
+    public String imageGroupQname = null;
+    @JsonProperty(value="spec-version", required=true)
+    public String specVersion = null;
+    @JsonProperty(value="default-view", required=true)
+    public String defaultView = null;
     
     @JsonInclude(Include.NON_NULL)
     @JsonProperty("attribution")
-    public List<LangString> attribution;
+    public List<LangString> attribution = null;
     @JsonInclude(Include.NON_NULL)
     @JsonProperty("note")
-    public List<LangString> note;
+    public List<LangString> note = null;
     @JsonInclude(Include.NON_NULL)
-    @JsonProperty("changes")
-    public List<ChangeLogItem> changes;
+    @JsonProperty(value="changes", required=true)
+    public List<ChangeLogItem> changes = null;
+    @JsonProperty(value="view", required=true)
+    public Map<String,BVMView> views = null;
+    @JsonIgnore
+    public List<BVMImageInfo> defaultImageList = null;
     
+    public List<BVMImageInfo> getDefaultImageList() {
+        if (this.defaultImageList != null)
+            return this.defaultImageList;
+        this.defaultImageList = this.views.get(this.defaultView).imageList;
+        return this.defaultImageList;
+    }
     
     
     public void validate() throws BDRCAPIException {
-        if (!specVersion.equals("0.1.0")) {
+        if (!"0.1.0".equals(this.specVersion))
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: spec must be 0.1.0");
-        }
+        if (this.imageGroupQname == null || !this.imageGroupQname.startsWith("bdr:I"))
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: for-volume must start with 'bdr:I'");
+        if (this.changes == null)
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: missing changes");
+        for (ChangeLogItem ci : this.changes)
+            ci.validate();
+        if (this.defaultView == null)
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: missing default-view");
+        if (!this.views.containsKey(this.defaultView))
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: not view in the view list corresponding to default-view");
+        for (BVMView v : this.views.values())
+            v.validate();
     }
     
 }
