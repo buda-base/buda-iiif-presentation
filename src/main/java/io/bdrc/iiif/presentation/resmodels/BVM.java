@@ -270,6 +270,9 @@ public class BVM {
     @JsonProperty("note")
     public List<LangString> note = null;
     @JsonInclude(Include.NON_NULL)
+    @JsonProperty("volume-label")
+    public List<LangString> label = null;
+    @JsonInclude(Include.NON_NULL)
     @JsonProperty(value="changes", required=true)
     public List<ChangeLogItem> changes = null;
     @JsonProperty(value="view", required=true)
