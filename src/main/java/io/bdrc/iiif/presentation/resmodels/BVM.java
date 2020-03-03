@@ -138,7 +138,7 @@ public class BVM {
         
         public void validate() throws BDRCAPIException {
             if (this.userQname == null || this.message == null || this.time == null)
-                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: invalid change, missing field");
+                throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: invalid change, missing field");
         }
     }
 
@@ -173,7 +173,7 @@ public class BVM {
         
         public void validate(PaginationType type) throws BDRCAPIException {
             if (!type.getTestPattern().matcher(this.value).matches())
-                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: invalid pagination value "+this.value);
+                throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: invalid pagination value "+this.value);
         }
     }
     
@@ -216,16 +216,16 @@ public class BVM {
             }
             boolean filenameIsEmpty = (this.filename == null || this.filename.isEmpty());
             if ((filenameShouldBeEmpty && !filenameIsEmpty) || (!filenameShouldBeEmpty && filenameIsEmpty))
-                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: missing filename or filename on an image tagged as missing");
+                throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: missing filename or filename on an image tagged as missing");
             if (!emptyOfOk && this.of == null)
-                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: missing of field");
+                throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: missing of field");
             
             if (this.pagination != null) {
                 final Map<String, PaginationType> paginationMap = root.getPaginationMap();
                 for (final Entry<String,BVMPaginationItem> e : this.pagination.entrySet()) {
                     PaginationType t = paginationMap.get(e.getKey());
                     if (t == null)
-                        throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: invalid pagination type "+e.getKey());
+                        throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: invalid pagination type "+e.getKey());
                     e.getValue().validate(t);
                 }
             }
@@ -248,7 +248,7 @@ public class BVM {
         
         public void validate(final BVM root) throws BDRCAPIException {
             if (imageList == null)
-                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: no image list in view");
+                throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: no image list in view");
             for (BVMImageInfo ii : this.imageList) {
                 ii.validate(root);
             }
@@ -256,7 +256,7 @@ public class BVM {
     }
     
     @JsonProperty(value="rev", required=true)
-    public UUID rev = null;
+    public String rev = null;
     @JsonProperty(value="for-volume", required=true)
     public String imageGroupQname = null;
     @JsonProperty(value="spec-version", required=true)
@@ -311,17 +311,17 @@ public class BVM {
     
     public void validate() throws BDRCAPIException {
         if (!"0.1.0".equals(this.specVersion))
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: spec must be 0.1.0");
+            throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: spec must be 0.1.0");
         if (this.imageGroupQname == null || !this.imageGroupQname.startsWith("bdr:I"))
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: for-volume must start with 'bdr:I'");
+            throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: for-volume must start with 'bdr:I'");
         if (this.changes == null)
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: missing changes");
+            throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: missing changes");
         for (ChangeLogItem ci : this.changes)
             ci.validate();
         if (this.defaultView == null)
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: missing default-view");
+            throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: missing default-view");
         if (!this.views.containsKey(this.defaultView))
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: not view in the view list corresponding to default-view");
+            throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: not view in the view list corresponding to default-view");
         for (BVMView v : this.views.values())
             v.validate(this);
     }

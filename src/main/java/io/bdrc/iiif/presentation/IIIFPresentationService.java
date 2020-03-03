@@ -1,19 +1,26 @@
 package io.bdrc.iiif.presentation;
 
+import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Hex;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +38,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
@@ -42,6 +52,7 @@ import io.bdrc.auth.Access.AccessLevel;
 import io.bdrc.auth.AuthProps;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.AccessType;
+import io.bdrc.iiif.presentation.resmodels.BVM;
 import io.bdrc.iiif.presentation.resmodels.ImageInfo;
 import io.bdrc.iiif.presentation.resmodels.ImageInstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
@@ -68,7 +79,7 @@ public class IIIFPresentationService {
     private static final Logger logger = LoggerFactory.getLogger(IIIFPresentationService.class);
     static final int ACCESS_CONTROL_MAX_AGE_IN_SECONDS = 24 * 60 * 60;
 
-    final static ObjectMapper om = new ObjectMapper();
+    final static ObjectMapper om = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Autowired
     MeterRegistry registry;
@@ -420,31 +431,80 @@ public class IIIFPresentationService {
         return ResponseEntity.status(HttpStatus.OK)
                 .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(json);
     }
-
-    @RequestMapping(value = "/bvm/{resource}", method = RequestMethod.PUT)
-    public ResponseEntity<String> writeImageInfoFile(@PathVariable String resource, @RequestBody String json, HttpServletRequest request,
-            HttpServletResponse resp) throws BDRCAPIException, NoSuchAlgorithmException {
+    
+    public static String getTwoLettersBucket(String st) {
+        MessageDigest md;
         try {
-            String repoBase = System.getProperty("iiifpres.configpath") + "gitData/buda-volume-manifests/";
-            Repository repo = GitHelpers.ensureGitRepo(repoBase);
-            GitHelpers.pull(repo);
-            String res = resource.substring(resource.indexOf(":") + 1);
-            String filename = repoBase + GlobalHelpers.getTwoLettersBucket(res) + "/" + res + ".json";
-            File f = new File(repoBase + GlobalHelpers.getTwoLettersBucket(res) + "/");
-            if (!f.exists()) {
-                f.mkdir();
-            }
-            BufferedWriter br = new BufferedWriter(new FileWriter(new File(filename)));
-            br.write(json);
-            br.close();
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-            GitHelpers.commitChanges(repo, "Added/updated " + res + ".json");
-            GitHelpers.push(repo, AuthProps.getProperty("gitRemoteUrl"), AuthProps.getProperty("gitUser"), AuthProps.getProperty("gitPass"));
-        } catch (Exception e) {
-            throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, e);
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            // this is too stupid to throw
+            return "";
         }
-        return ResponseEntity.status(HttpStatus.OK)
-                .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(json);
+        md.reset();
+        md.update(st.getBytes(Charset.forName("UTF8")));
+        return new String(Hex.encodeHex(md.digest())).substring(0, 2);
+    }
+    
+    @RequestMapping(value = "/bvm/{resource}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<String> writeImageInfoFile(@PathVariable String resource, @RequestBody String json, HttpServletRequest request,
+            HttpServletResponse resp) throws BDRCAPIException {
+        BVM bvm;
+        try {
+            bvm = om.readValue(json, BVM.class);
+        } catch (IOException e) {
+            throw new BDRCAPIException(400, AppConstants.GENERIC_APP_ERROR_CODE, e);
+        }
+        bvm.validate();
+        if (!bvm.imageGroupQname.equals(resource))
+            throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvmt: for-volume doesn't match the resource url "+resource);
+        String repoBase = System.getProperty("iiifpres.configpath") + "gitData/buda-volume-manifests/";
+        Repository repo = GitHelpers.ensureGitRepo(repoBase);
+        //GitHelpers.pull(repo);
+        String res = resource.substring(resource.indexOf(":") + 1);
+        final String twoLetters = getTwoLettersBucket(res);
+        String filename = repoBase + twoLetters + "/" + res + ".json";
+        File dir = new File(repoBase + twoLetters + "/");
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+        // super basic multiversion concurrency control, à la CouchDB
+        File f = new File(filename);
+        boolean created = false;
+        if (f.exists()) {
+            JsonNode oldBvm = null;
+            try {
+                oldBvm = om.readTree(f);
+            } catch (IOException e) {
+                throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "impossible to read old BVM: "+resource);
+            }
+            if (oldBvm != null && oldBvm.has("rev")) {
+                final String oldrev = oldBvm.get("rev").textValue();
+                if (oldrev != null && !oldrev.equals(bvm.rev)) {
+                    throw new BDRCAPIException(409, AppConstants.GENERIC_APP_ERROR_CODE, "document update conflict, please update to the latest version.");
+                }
+            } else {
+                throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "old bvm doens't have a rev: "+resource);
+            }
+        } else {
+            created = true;
+        }
+        String newrev = UUID.randomUUID().toString();
+        bvm.rev = newrev;
+        try {
+            om.writeValue(f, bvm);
+        } catch (IOException e) {
+            throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "error when writing bvm");
+        }
+        GitHelpers.commitChanges(repo, "Added/updated " + res + ".json");
+        try {
+            GitHelpers.push(repo, AuthProps.getProperty("gitRemoteUrl"), AuthProps.getProperty("gitUser"), AuthProps.getProperty("gitPass"));
+        } catch (GitAPIException e) {
+            throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "error when pushing git repo");
+        }
+        return ResponseEntity.status(created ? HttpStatus.CREATED : HttpStatus.OK)
+                .eTag(newrev)
+                // TODO: add location? sort of expected for HttpStatus 201
+                .body("{\"ok:\" true, \"rev\": \""+newrev+"\"}");
     }
 
     public static String getShortName(final String st) {
