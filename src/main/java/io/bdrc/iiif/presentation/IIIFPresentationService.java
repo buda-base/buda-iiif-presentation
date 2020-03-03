@@ -46,6 +46,7 @@ import io.bdrc.auth.AuthProps;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.AccessType;
 import io.bdrc.iiif.presentation.resmodels.BVM;
+import io.bdrc.iiif.presentation.resmodels.BVM.ChangeLogItem;
 import io.bdrc.iiif.presentation.resmodels.ImageInfo;
 import io.bdrc.iiif.presentation.resmodels.ImageInstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
@@ -409,13 +410,15 @@ public class IIIFPresentationService {
 		return st.substring(st.lastIndexOf("/") + 1);
 	}
 
-    @RequestMapping(value = "/bvm/{resource}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> getImageInfoFile(@PathVariable String resource, HttpServletRequest request, HttpServletResponse resp)
+    @RequestMapping(value = "/bvm/ig:{resource}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<String> getImageInfoFile(@PathVariable String resourceQname, HttpServletRequest request, HttpServletResponse resp)
             throws BDRCAPIException {
-        String json = "";
-        String res = resource.substring(resource.indexOf(":") + 1);
-        String filename = System.getProperty("iiifpres.configpath") + "gitData/buda-volume-manifests/" + getTwoLettersBucket(res)
-                + "/" + res + ".json";
+        String json = null;
+        if (!resourceQname.startsWith("bdr:I"))
+            throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, "no resource "+resourceQname);
+        String resourceLocalName = resourceQname.substring(4);
+        String filename = System.getProperty("iiifpres.configpath") + "gitData/buda-volume-manifests/" + getTwoLettersBucket(resourceLocalName)
+                + "/" + resourceQname + ".json";
         try {
             json = GlobalHelpers.readFileContent(filename);
         } catch (IOException e) {
@@ -438,24 +441,28 @@ public class IIIFPresentationService {
         return new String(Hex.encodeHex(md.digest())).substring(0, 2);
     }
     
-    @RequestMapping(value = "/bvm/{resource}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> writeImageInfoFile(@PathVariable String resource, @RequestBody String json, HttpServletRequest request,
+    @RequestMapping(value = "/bvm/ig:{resource}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<String> writeImageInfoFile(@PathVariable String resourceQname, @RequestBody String json, HttpServletRequest request,
             HttpServletResponse resp) throws BDRCAPIException {
         BVM bvm;
+        if (!resourceQname.startsWith("bdr:I"))
+            throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, "no resource "+resourceQname);
         try {
             bvm = om.readValue(json, BVM.class);
         } catch (IOException e) {
             throw new BDRCAPIException(400, AppConstants.GENERIC_APP_ERROR_CODE, e);
         }
         bvm.validate();
-        if (!bvm.imageGroupQname.equals(resource))
-            throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvmt: for-volume doesn't match the resource url "+resource);
+        ChangeLogItem cli = bvm.getLatestChangeLogItem();
+        // TODO: check last change against current user
+        if (!bvm.imageGroupQname.equals(resourceQname))
+            throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvmt: for-volume doesn't match the resource url "+resourceQname);
         String repoBase = System.getProperty("iiifpres.configpath") + "gitData/buda-volume-manifests/";
         Repository repo = GitHelpers.ensureGitRepo(repoBase);
         //GitHelpers.pull(repo);
-        String res = resource.substring(resource.indexOf(":") + 1);
-        final String twoLetters = getTwoLettersBucket(res);
-        String filename = repoBase + twoLetters + "/" + res + ".json";
+        String resourceLocalName = resourceQname.substring(4);
+        final String twoLetters = getTwoLettersBucket(resourceLocalName);
+        String filename = repoBase + twoLetters + "/" + resourceLocalName + ".json";
         File dir = new File(repoBase + twoLetters + "/");
         if (!dir.exists()) {
             dir.mkdir();
@@ -468,7 +475,7 @@ public class IIIFPresentationService {
             try {
                 oldBvm = om.readTree(f);
             } catch (IOException e) {
-                throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "impossible to read old BVM: "+resource);
+                throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "impossible to read old BVM: "+resourceQname);
             }
             if (oldBvm != null && oldBvm.has("rev")) {
                 final String oldrev = oldBvm.get("rev").textValue();
@@ -476,7 +483,7 @@ public class IIIFPresentationService {
                     throw new BDRCAPIException(409, AppConstants.GENERIC_APP_ERROR_CODE, "document update conflict, please update to the latest version.");
                 }
             } else {
-                throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "old bvm doens't have a rev: "+resource);
+                throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "old bvm doens't have a rev: "+resourceQname);
             }
         } else {
             created = true;
@@ -488,7 +495,7 @@ public class IIIFPresentationService {
         } catch (IOException e) {
             throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "error when writing bvm");
         }
-        GitHelpers.commitChanges(repo, "Added/updated " + res + ".json");
+        GitHelpers.commitChanges(repo, cli.message.value);
         try {
             GitHelpers.push(repo, AuthProps.getProperty("gitRemoteUrl"), AuthProps.getProperty("gitUser"), AuthProps.getProperty("gitPass"));
         } catch (GitAPIException e) {

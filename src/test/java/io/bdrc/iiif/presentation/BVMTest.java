@@ -14,6 +14,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.BVM;
+import io.bdrc.iiif.presentation.resmodels.BVM.ChangeLogItem;
 
 public class BVMTest {
 
@@ -25,6 +26,7 @@ public class BVMTest {
         InputStream is = BVMTest.class.getClassLoader().getResourceAsStream("bvmt.json");
         BVM bvm = om.readValue(is, BVM.class);
         bvm.validate();
+        ChangeLogItem cli = bvm.getLatestChangeLogItem();
     }
 
 }

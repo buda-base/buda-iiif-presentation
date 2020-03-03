@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -308,6 +307,11 @@ public class BVM {
         return this.paginationMap;
     }
     
+    public ChangeLogItem getLatestChangeLogItem() {
+        if (this.changes == null)
+            return null;
+        return this.changes.get(this.changes.size()-1);
+    }
     
     public void validate() throws BDRCAPIException {
         if (!"0.1.0".equals(this.specVersion))
