@@ -4,6 +4,7 @@
 	"rev": "860f508e-608e-484d-9fc3-62392fab0b12",
 	"attribution": [{"@value": "data contributed by rKTs", "@language": "en"}],
 	"note": [{"@value":"not sure about the order of page 2"}],
+	"viewing-direction": "left-to-right",
 	"changes": [
 		{
 			"time": "2020-02-03T11:35:30.00Z",
@@ -74,5 +75,12 @@
 				}
 			]
 		}
-	}
+	},
+	"appData": {
+        "default-string-lang": "en",
+        "show-checked-images": true,
+        "show-hidden-images": true,
+        "margin-indication-odd": "{volname}-{sectionname}-{pagenum:bo}",
+        "margin-indication-even": ""
+    }
 }

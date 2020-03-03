@@ -3,21 +3,17 @@ package io.bdrc.iiif.presentation.resmodels;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
-import org.apache.jena.rdf.model.Literal;
-
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
@@ -53,8 +49,9 @@ public class BVM {
             this.setLocalName(localName);
         }
 
+        @JsonValue
         public String getLocalName() {
-            return localName;
+            return this.localName;
         }
 
         public void setLocalName(String localName) {
@@ -71,6 +68,32 @@ public class BVM {
         }
     }
 
+    public static enum ViewingDirection {
+        LTR("left-to-right"),
+        RTL("right-to-left"),
+        TTB("top-to-bottom");
+
+        private String localName;
+
+        private ViewingDirection(String localName) {
+            this.localName = localName;
+        }
+        
+        @JsonValue
+        public String getLocalName() {
+            return this.localName;
+        }
+
+        public static ViewingDirection fromString(String tag) {
+            for (ViewingDirection at : ViewingDirection.values()) {
+                if (at.localName.equals(tag)) {
+                    return at;
+                }
+            }
+            return null;
+        }
+    }
+    
     public static enum PaginationType {
         folios("folios", Pattern.compile("^\\d+'*[ab]")),
         simple("simple", Pattern.compile("^\\d+")),
@@ -84,8 +107,9 @@ public class BVM {
             this.testPattern = testPattern;
         }
 
+        @JsonValue
         public String getLocalName() {
-            return localName;
+            return this.localName;
         }
 
         public Pattern getTestPattern() {
@@ -256,6 +280,12 @@ public class BVM {
     public List<BVMSection> sections = null;
     @JsonProperty(value="pagination", required=true)
     public List<BVMPagination> pagination = null;
+    @JsonInclude(Include.NON_NULL)
+    @JsonProperty(value="viewing-direction")
+    public ViewingDirection viewingDirection = null;
+    @JsonInclude(Include.NON_NULL)
+    @JsonProperty(value="appData")
+    public JsonNode appData = null;
     @JsonIgnore
     private List<BVMImageInfo> defaultImageList = null;
     @JsonIgnore
