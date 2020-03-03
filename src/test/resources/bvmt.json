@@ -15,12 +15,12 @@
 		{   
 			"id": "pgfolios",
 			"type": "folios",
-			"note": {"@value": "from the original blockprint", "@language": "en"}
+			"note": [{"@value": "from the original blockprint", "@language": "en"}]
 		},
 		{   
 			"id": "bates",
 			"type": "simple",
-			"note": {"@value": "bates numbers added on the xerox reprint", "@language": "en"}
+			"note": [{"@value": "bates numbers added on the xerox reprint", "@language": "en"}]
 		}
 	],
 	"sections": [
@@ -55,23 +55,23 @@
 					"tags": ["T0021", "T0011"]
 				},
 				{
-					"pagination": "1'b",
+					"pagination": { "pgfolios": {"value": "1a"} },
 					"tags": ["T0020"]
 				},
 				{
 					"filename": "I1KG9128003.tif",
-					"pagination": {"default": "1b", "bates": "2", "original": null, "section": "s1"},
+					"pagination": { "pgfolios": {"value": "1b", "section": "intro"}, "bates": {"value": "2"} }
 				},
 				{
 					"filename": "I1KG9128005.tif",
 					"display": false,
-					"scan-duplicate-of": "I1KG9128004.tif"
+					"of": "I1KG9128004.tif"
 				},
 				{
 					"filename": "I1KG9128004.tif",
-					"pagination": "1'a",
+					"pagination": { "pgfolios": {"value": "1'a", "section": "intro"} },
 					"rotation": 180
-				},
+				}
 			]
 		}
 	}

@@ -3,9 +3,13 @@ package io.bdrc.iiif.presentation.resmodels;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.apache.jena.rdf.model.Literal;
 
@@ -68,21 +72,24 @@ public class BVM {
     }
 
     public static enum PaginationType {
-        folios("folios"),
-        simple("simple");
+        folios("folios", Pattern.compile("^\\d+'*[ab]")),
+        simple("simple", Pattern.compile("^\\d+")),
+        romanlc("romanlc", Pattern.compile("^[ivxlcdm]+"));
 
         private String localName;
+        private Pattern testPattern;
 
-        private PaginationType(String localName) {
-            this.setLocalName(localName);
+        private PaginationType(String localName, Pattern testPattern) {
+            this.localName = localName;
+            this.testPattern = testPattern;
         }
 
         public String getLocalName() {
             return localName;
         }
 
-        public void setLocalName(String localName) {
-            this.localName = localName;
+        public Pattern getTestPattern() {
+            return testPattern;
         }
 
         public static PaginationType fromString(String tag) {
@@ -111,9 +118,6 @@ public class BVM {
         }
     }
 
-    @JsonIdentityInfo(
-            generator = ObjectIdGenerators.PropertyGenerator.class, 
-            property = "id")
     public static final class BVMPagination {
         @JsonProperty(value="id", required=true)
         public String id = null;
@@ -126,9 +130,6 @@ public class BVM {
         public BVMPagination() { }
     }
 
-    @JsonIdentityInfo(
-            generator = ObjectIdGenerators.PropertyGenerator.class, 
-            property = "id")
     public static final class BVMSection {
         @JsonProperty(value="id", required=true)
         public String id = null;
@@ -145,6 +146,11 @@ public class BVM {
         public String section = null;
       
         public BVMPaginationItem() { }
+        
+        public void validate(PaginationType type) throws BDRCAPIException {
+            if (!type.getTestPattern().matcher(this.value).matches())
+                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: invalid pagination value "+this.value);
+        }
     }
     
     public static final class BVMImageInfo {
@@ -166,36 +172,61 @@ public class BVM {
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("of")
         public String of = null;
+        @JsonInclude(Include.NON_DEFAULT)
+        @JsonProperty(value="display")
+        public Boolean display = true;
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("pagination")
         public Map<String,BVMPaginationItem> pagination = null; 
         
-        public void validate() throws BDRCAPIException {
+        public void validate(final BVM root) throws BDRCAPIException {
             boolean filenameShouldBeEmpty = false;
             boolean emptyOfOk = true;
-            for (Tag t : this.tags) {
-                if (t == Tag.T0019 || t == Tag.T0020)
-                    filenameShouldBeEmpty = true;
-                if (t == Tag.T0016 || t == Tag.T0017 || t == Tag.T0018)
-                    emptyOfOk = false;
+            if (this.tags != null) {
+                for (Tag t : this.tags) {
+                    if (t == Tag.T0019 || t == Tag.T0020)
+                        filenameShouldBeEmpty = true;
+                    if (t == Tag.T0016 || t == Tag.T0017 || t == Tag.T0018)
+                        emptyOfOk = false;
+                }
             }
             boolean filenameIsEmpty = (this.filename == null || this.filename.isEmpty());
             if ((filenameShouldBeEmpty && !filenameIsEmpty) || (!filenameShouldBeEmpty && filenameIsEmpty))
                 throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: missing filename or filename on an image tagged as missing");
             if (!emptyOfOk && this.of == null)
                 throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: missing of field");
+            
+            if (this.pagination != null) {
+                final Map<String, PaginationType> paginationMap = root.getPaginationMap();
+                for (final Entry<String,BVMPaginationItem> e : this.pagination.entrySet()) {
+                    PaginationType t = paginationMap.get(e.getKey());
+                    if (t == null)
+                        throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: invalid pagination type "+e.getKey());
+                    e.getValue().validate(t);
+                }
+            }
         }
+        
+        public BVMPaginationItem getDefaultPaginationValue(BVM root) {
+            for (final BVMPagination p : root.pagination) {
+                if (this.pagination.containsKey(p.id)) {
+                    return pagination.get(p.id);
+                }
+            }
+            return null;
+        }
+        
     }
 
     public static final class BVMView {
         @JsonProperty(value="imagelist", required=true)
         public List<BVMImageInfo> imageList = null;
         
-        public void validate() throws BDRCAPIException {
+        public void validate(final BVM root) throws BDRCAPIException {
             if (imageList == null)
                 throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: no image list in view");
             for (BVMImageInfo ii : this.imageList) {
-                ii.validate();
+                ii.validate(root);
             }
         }
     }
@@ -220,14 +251,31 @@ public class BVM {
     public List<ChangeLogItem> changes = null;
     @JsonProperty(value="view", required=true)
     public Map<String,BVMView> views = null;
+    @JsonInclude(Include.NON_NULL)
+    @JsonProperty(value="sections")
+    public List<BVMSection> sections = null;
+    @JsonProperty(value="pagination", required=true)
+    public List<BVMPagination> pagination = null;
     @JsonIgnore
-    public List<BVMImageInfo> defaultImageList = null;
+    private List<BVMImageInfo> defaultImageList = null;
+    @JsonIgnore
+    private Map<String,PaginationType> paginationMap = null;
     
     public List<BVMImageInfo> getDefaultImageList() {
         if (this.defaultImageList != null)
             return this.defaultImageList;
         this.defaultImageList = this.views.get(this.defaultView).imageList;
         return this.defaultImageList;
+    }
+    
+    public Map<String,PaginationType> getPaginationMap() {
+        if (this.paginationMap != null)
+            return this.paginationMap;
+        this.paginationMap = new HashMap<String,PaginationType>();
+        for (final BVMPagination p : this.pagination) {
+            this.paginationMap.put(p.id, p.type);
+        }
+        return this.paginationMap;
     }
     
     
@@ -245,7 +293,7 @@ public class BVM {
         if (!this.views.containsKey(this.defaultView))
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid bvmt: not view in the view list corresponding to default-view");
         for (BVMView v : this.views.values())
-            v.validate();
+            v.validate(this);
     }
     
 }
