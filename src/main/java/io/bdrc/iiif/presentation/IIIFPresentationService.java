@@ -1,16 +1,12 @@
 package io.bdrc.iiif.presentation;
 
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
-
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -37,9 +33,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -221,13 +214,13 @@ public class IIIFPresentationService {
 
     @RequestMapping(value = "/{identifier}/manifest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<StreamingResponseBody> getManifestNoVer(@PathVariable String identifier, HttpServletRequest req, HttpServletResponse resp)
-            throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+            throws BDRCAPIException {
         return getManifest(identifier, "", req, resp);
     }
 
 	@RequestMapping(value = "/{version:.+}/{identifier}/manifest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<StreamingResponseBody> getManifest(@PathVariable String identifier, @PathVariable String version, HttpServletRequest req, HttpServletResponse resp)
-			throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+			throws BDRCAPIException {
 		resp.setContentType("application/json;charset=UTF-8");
 		String cont = req.getParameter("continuous");
 		boolean continuous = false;
@@ -334,13 +327,13 @@ public class IIIFPresentationService {
 
     @RequestMapping(value = "/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<StreamingResponseBody> getCanvasNoVer(@PathVariable String identifier, @PathVariable String filename,
-            HttpServletRequest req, HttpServletResponse resp) throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+            HttpServletRequest req, HttpServletResponse resp) throws BDRCAPIException {
         return getCanvas(identifier, "", filename, req, resp);
     }
 
 	@RequestMapping(value = "/{version:.+}/{identifier}/canvas/{filename}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public ResponseEntity<StreamingResponseBody> getCanvas(@PathVariable String identifier, @PathVariable String version, @PathVariable String filename, HttpServletRequest req, HttpServletResponse resp)
-			throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
+			throws BDRCAPIException {
 		resp.setContentType("application/json;charset=UTF-8");
 		Identifier id = null;
 		try {
@@ -418,15 +411,15 @@ public class IIIFPresentationService {
 
     @RequestMapping(value = "/bvm/{resource}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> getImageInfoFile(@PathVariable String resource, HttpServletRequest request, HttpServletResponse resp)
-            throws BDRCAPIException, IOException {
+            throws BDRCAPIException {
         String json = "";
+        String res = resource.substring(resource.indexOf(":") + 1);
+        String filename = System.getProperty("iiifpres.configpath") + "gitData/buda-volume-manifests/" + getTwoLettersBucket(res)
+                + "/" + res + ".json";
         try {
-            String res = resource.substring(resource.indexOf(":") + 1);
-            String filename = System.getProperty("iiifpres.configpath") + "gitData/buda-volume-manifests/" + GlobalHelpers.getTwoLettersBucket(res)
-                    + "/" + res + ".json";
             json = GlobalHelpers.readFileContent(filename);
-        } catch (Exception e) {
-            throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, e);
+        } catch (IOException e) {
+            throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, e);
         }
         return ResponseEntity.status(HttpStatus.OK)
                 .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(json);
@@ -491,7 +484,7 @@ public class IIIFPresentationService {
         String newrev = UUID.randomUUID().toString();
         bvm.rev = newrev;
         try {
-            om.writeValue(f, bvm);
+            om.writerWithDefaultPrettyPrinter().writeValue(f, bvm);
         } catch (IOException e) {
             throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "error when writing bvm");
         }
