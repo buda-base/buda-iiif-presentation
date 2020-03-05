@@ -30,6 +30,7 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
     public final static Logger log = LoggerFactory.getLogger(SpringBootIIIFPres.class.getName());
 
     public static void main(String[] args) throws Exception {
+        log.info("SpringBootIIIFPres is initializing");
         final String configPath = System.getProperty("iiifpres.configpath");
         try {
             InputStream input = SpringBootIIIFPres.class.getClassLoader().getResourceAsStream("iiifpres.properties");
@@ -46,8 +47,11 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
                 // do nothing, continue props initialization
             }
             AuthProps.init(props);
+            log.info("SpringBootIIIFPres has loaded properties");
             if ("true".equals(AuthProps.getProperty("useAuth"))) {
-                RdfAuthModel.init();
+                log.info("SpringBootIIIFPres uses auth, updating auth data...");
+                // RdfAuthModel.init();
+                RdfAuthModel.updateAuthData(AuthProps.getProperty("fusekiUrl"));
             }
             ServiceCache.init();
 

@@ -204,7 +204,7 @@
 		          <artifactId>slf4j-simple</artifactId>
 		        </exclusion>
 		    </exclusions>
-            <version>1.7.0</version>
+            <version>1.8.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.maxmind.geoip2/geoip2 -->
         <dependency>
