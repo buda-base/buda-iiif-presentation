@@ -47,7 +47,7 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
             }
             AuthProps.init(props);
             if ("true".equals(AuthProps.getProperty("useAuth"))) {
-                RdfAuthModel.updateAuthData(null);
+                RdfAuthModel.init();
             }
             ServiceCache.init();
 
