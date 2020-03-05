@@ -437,7 +437,7 @@ public class IIIFPresentationService {
         if (!resourceQname.startsWith("bdr:I"))
             throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, "no resource " + resourceQname);
         String resourceLocalName = resourceQname.substring(4);
-        String filename = System.getProperty("user.dir") + "gitData/buda-volume-manifests/" + getTwoLettersBucket(resourceLocalName) + "/"
+        String filename = System.getProperty("user.dir") + "/gitData/buda-volume-manifests/" + getTwoLettersBucket(resourceLocalName) + "/"
                 + resourceQname + ".json";
         logger.debug("Git filename is {}", filename);
         try {
@@ -478,7 +478,7 @@ public class IIIFPresentationService {
         // TODO: check last change against current user
         if (!bvm.imageGroupQname.equals(resourceQname))
             throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvmt: for-volume doesn't match the resource url " + resourceQname);
-        String repoBase = System.getProperty("user.dir") + "gitData/buda-volume-manifests/";
+        String repoBase = System.getProperty("user.dir") + "/gitData/buda-volume-manifests/";
         Repository repo = GitHelpers.ensureGitRepo(repoBase);
         // GitHelpers.pull(repo);
         String resourceLocalName = resourceQname.substring(4);
