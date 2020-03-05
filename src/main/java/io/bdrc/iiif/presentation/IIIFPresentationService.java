@@ -28,6 +28,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -44,6 +45,7 @@ import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.auth.Access;
 import io.bdrc.auth.Access.AccessLevel;
 import io.bdrc.auth.AuthProps;
+import io.bdrc.auth.rdf.RdfAuthModel;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.AccessType;
 import io.bdrc.iiif.presentation.resmodels.BVM;
@@ -528,6 +530,14 @@ public class IIIFPresentationService {
         return ResponseEntity.status(created ? HttpStatus.CREATED : HttpStatus.OK).eTag(newrev)
                 // TODO: add location? sort of expected for HttpStatus 201
                 .body("{\"ok:\" true, \"rev\": \"" + newrev + "\"}");
+    }
+
+    @PostMapping(value = "/callbacks/github/bdrc-auth")
+    public ResponseEntity<String> updateAuthModel() {
+        logger.info("updating Auth data model() >>");
+        Thread t = new Thread(new RdfAuthModel());
+        t.start();
+        return ResponseEntity.ok("Auth Model is updating");
     }
 
     public static String getShortName(final String st) {
