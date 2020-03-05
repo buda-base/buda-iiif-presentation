@@ -443,8 +443,7 @@ public class IIIFPresentationService {
         try {
             json = GlobalHelpers.readFileContent(filename);
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, e);
+            throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, e.getMessage());
         }
         return ResponseEntity.status(HttpStatus.OK)
                 .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(json);
@@ -472,8 +471,7 @@ public class IIIFPresentationService {
         try {
             bvm = om.readValue(json, BVM.class);
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new BDRCAPIException(400, AppConstants.GENERIC_APP_ERROR_CODE, e);
+            throw new BDRCAPIException(400, AppConstants.GENERIC_APP_ERROR_CODE, e.getMessage());
         }
         bvm.validate();
         ChangeLogItem cli = bvm.getLatestChangeLogItem();
