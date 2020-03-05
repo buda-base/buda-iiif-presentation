@@ -438,7 +438,7 @@ public class IIIFPresentationService {
             throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, "no resource " + resourceQname);
         String resourceLocalName = resourceQname.substring(4);
         String filename = System.getProperty("user.dir") + "/gitData/buda-volume-manifests/" + getTwoLettersBucket(resourceLocalName) + "/"
-                + resourceQname + ".json";
+                + resourceLocalName + ".json";
         logger.debug("Git filename is {}", filename);
         try {
             json = GlobalHelpers.readFileContent(filename);
