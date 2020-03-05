@@ -442,6 +442,7 @@ public class IIIFPresentationService {
         try {
             json = GlobalHelpers.readFileContent(filename);
         } catch (IOException e) {
+            e.printStackTrace();
             throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, e);
         }
         return ResponseEntity.status(HttpStatus.OK)
@@ -470,6 +471,7 @@ public class IIIFPresentationService {
         try {
             bvm = om.readValue(json, BVM.class);
         } catch (IOException e) {
+            e.printStackTrace();
             throw new BDRCAPIException(400, AppConstants.GENERIC_APP_ERROR_CODE, e);
         }
         bvm.validate();
