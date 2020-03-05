@@ -439,6 +439,7 @@ public class IIIFPresentationService {
         String resourceLocalName = resourceQname.substring(4);
         String filename = System.getProperty("user.dir") + "gitData/buda-volume-manifests/" + getTwoLettersBucket(resourceLocalName) + "/"
                 + resourceQname + ".json";
+        logger.debug("Git filename is {}", filename);
         try {
             json = GlobalHelpers.readFileContent(filename);
         } catch (IOException e) {
