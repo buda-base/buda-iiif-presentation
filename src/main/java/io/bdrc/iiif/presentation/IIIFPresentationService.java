@@ -441,12 +441,13 @@ public class IIIFPresentationService {
         return new String(Hex.encodeHex(md.digest())).substring(0, 2);
     }
     
-    @RequestMapping(value = "/bvm/ig:{resource}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @RequestMapping(value = "/bvm/{resource}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> writeImageInfoFile(@PathVariable String resourceQname, @RequestBody String json, HttpServletRequest request,
             HttpServletResponse resp) throws BDRCAPIException {
         BVM bvm;
-        if (!resourceQname.startsWith("bdr:I"))
+        if (!resourceQname.startsWith("ig:bdr:I"))
             throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, "no resource "+resourceQname);
+        resourceQname = resourceQname.substring(3);
         try {
             bvm = om.readValue(json, BVM.class);
         } catch (IOException e) {
