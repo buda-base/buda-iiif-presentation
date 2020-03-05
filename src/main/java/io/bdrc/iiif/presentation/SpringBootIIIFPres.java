@@ -10,10 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.event.EventListener;
 
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.rdf.RdfAuthModel;
@@ -48,11 +50,7 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
             }
             AuthProps.init(props);
             log.info("SpringBootIIIFPres has loaded properties");
-            if ("true".equals(AuthProps.getProperty("useAuth"))) {
-                log.info("SpringBootIIIFPres uses auth, updating auth data...");
-                // RdfAuthModel.init();
-                RdfAuthModel.updateAuthData(AuthProps.getProperty("fusekiUrl"));
-            }
+
             ServiceCache.init();
 
         } catch (IOException e) {
@@ -62,6 +60,15 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
 
         log.info("SpringBootIIIFPres has been properly initialized");
         SpringApplication.run(SpringBootIIIFPres.class, args);
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void doSomethingAfterStartup() {
+        if ("true".equals(AuthProps.getProperty("useAuth"))) {
+            log.info("SpringBootIIIFPres uses auth, updating auth data...");
+            // RdfAuthModel.init();
+            RdfAuthModel.updateAuthData(AuthProps.getProperty("fusekiUrl"));
+        }
     }
 
 }
