@@ -63,12 +63,9 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void doSomethingAfterStartup() {
-        if ("true".equals(AuthProps.getProperty("useAuth"))) {
-            log.info("SpringBootIIIFPres uses auth, updating auth data...");
-            // RdfAuthModel.init();
-            RdfAuthModel.updateAuthData(AuthProps.getProperty("fusekiUrl"));
-        }
+    public void afterStartup() {
+        log.info("Ldspdi updates auth data...");
+        RdfAuthModel.init();
     }
 
 }
