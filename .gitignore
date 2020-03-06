@@ -59,6 +59,7 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+.gitData
 
 # Eclipse Core
 .project

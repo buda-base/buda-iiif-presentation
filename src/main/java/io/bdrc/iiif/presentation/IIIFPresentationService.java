@@ -584,9 +584,8 @@ public class IIIFPresentationService {
     @PostMapping(value = "/callbacks/github/bdrc-auth")
     public ResponseEntity<String> updateAuthModel() {
         logger.info("updating Auth data model() >>");
-        Thread t = new Thread(new RdfAuthModel());
-        t.start();
-        return ResponseEntity.ok("Auth Model is updating");
+        RdfAuthModel.readAuthModel();
+        return ResponseEntity.ok("Updated auth Model was read");
     }
 
     public static String getShortName(final String st) {
