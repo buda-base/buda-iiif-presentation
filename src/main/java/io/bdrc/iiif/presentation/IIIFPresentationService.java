@@ -8,16 +8,27 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Hex;
+import org.eclipse.jgit.api.errors.CanceledException;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidConfigurationException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -441,11 +452,15 @@ public class IIIFPresentationService {
         String resourceLocalName = resourceQname.substring(4);
         String filename = System.getProperty("user.dir") + "/gitData/buda-volume-manifests/" + getTwoLettersBucket(resourceLocalName) + "/"
                 + resourceLocalName + ".json";
+        File f = new File(filename);
+        if (!f.exists()) {
+            throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, "no resource " + resourceQname);
+        }
         logger.debug("Git filename is {}", filename);
         try {
             json = GlobalHelpers.readFileContent(filename);
         } catch (IOException e) {
-            throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, e.getMessage());
+            throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, e);
         }
         return ResponseEntity.status(HttpStatus.OK)
                 .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(json);
@@ -463,6 +478,41 @@ public class IIIFPresentationService {
         md.update(st.getBytes(Charset.forName("UTF8")));
         return new String(Hex.encodeHex(md.digest())).substring(0, 2);
     }
+    
+    public static final int pullEveryS = 600; // pull every 600 seconds
+    public static Instant lastPull = null;
+    public static synchronized void pullIfNecessary(final Repository repo) throws WrongRepositoryStateException, InvalidConfigurationException, InvalidRemoteException, CanceledException, RefNotFoundException, RefNotAdvertisedException, NoHeadException, TransportException, GitAPIException {
+        // pull if not pull has been made for 10mn
+        final Instant now = Instant.now();
+        if (lastPull == null || lastPull.isBefore(now.minusSeconds(pullEveryS))) {
+            GitHelpers.pull(repo);
+        }
+        lastPull = now;
+    }
+    
+    public static final int pushEveryS = 600; // push every 600 seconds
+    public static boolean pushScheduled = false;
+    public static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    public static synchronized void pushIfNecessary(final Repository repo) {
+        // pull if not pull has been made for 10mn
+        if (pushScheduled) return;
+        pushScheduled = true;
+        Runnable task = new Runnable() {
+            public void run() {
+                try {
+                    GitHelpers.push(repo, AuthProps.getProperty("gitRemoteUrl"), AuthProps.getProperty("gitUser"), AuthProps.getProperty("gitPass"));
+                    pushScheduled = false;
+                } catch (GitAPIException e) {
+                    logger.error("error pushing to BVM repo", e);
+                }
+            }
+        };
+        scheduler.schedule(task, pushEveryS, TimeUnit.SECONDS);
+        scheduler.shutdown();
+    }
+    
+    //"/admin/repos/bvm/pull"
+    //"/admin/repos/bvm/push"
 
     @RequestMapping(value = "/bvm/ig:{resourceQname}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> writeImageInfoFile(@PathVariable String resourceQname, @RequestBody String json, HttpServletRequest request,
@@ -479,10 +529,14 @@ public class IIIFPresentationService {
         ChangeLogItem cli = bvm.getLatestChangeLogItem();
         // TODO: check last change against current user
         if (!bvm.imageGroupQname.equals(resourceQname))
-            throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvmt: for-volume doesn't match the resource url " + resourceQname);
+            throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: for-volume doesn't match the resource url " + resourceQname);
         String repoBase = System.getProperty("user.dir") + "/gitData/buda-volume-manifests/";
         Repository repo = GitHelpers.ensureGitRepo(repoBase);
-        // GitHelpers.pull(repo);
+        try {
+            pullIfNecessary(repo);
+        } catch (GitAPIException e1) {
+            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e1);
+        }
         String resourceLocalName = resourceQname.substring(4);
         final String twoLetters = getTwoLettersBucket(resourceLocalName);
         String filename = repoBase + twoLetters + "/" + resourceLocalName + ".json";
@@ -521,12 +575,7 @@ public class IIIFPresentationService {
             throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "error when writing bvm");
         }
         GitHelpers.commitChanges(repo, cli.message.value);
-        try {
-            // TODO: push every 10mn max
-            GitHelpers.push(repo, AuthProps.getProperty("gitRemoteUrl"), AuthProps.getProperty("gitUser"), AuthProps.getProperty("gitPass"));
-        } catch (GitAPIException e) {
-            throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "error when pushing git repo");
-        }
+        pushIfNecessary(repo);
         return ResponseEntity.status(created ? HttpStatus.CREATED : HttpStatus.OK).eTag(newrev)
                 // TODO: add location? sort of expected for HttpStatus 201
                 .body("{\"ok:\" true, \"rev\": \"" + newrev + "\"}");
