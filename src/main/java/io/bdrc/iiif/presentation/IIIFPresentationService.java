@@ -390,7 +390,7 @@ public class IIIFPresentationService {
         }
         List<ImageInfo> imageInfoList;
         try {
-            imageInfoList = ImageInfoListService.Instance.getAsync(vi.instanceUri.substring(AppConstants.BDR_len), vi.imageGroup).get();
+            imageInfoList = ImageInfoListService.Instance.getAsync(vi.imageInstanceUri.substring(AppConstants.BDR_len), vi.imageGroup).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
@@ -427,7 +427,7 @@ public class IIIFPresentationService {
         }
         List<ImageInfo> imageInfoList;
         try {
-            imageInfoList = ImageInfoListService.Instance.getAsync(vi.instanceUri.substring(AppConstants.BDR_len), vi.imageGroup).get();
+            imageInfoList = ImageInfoListService.Instance.getAsync(vi.imageInstanceUri.substring(AppConstants.BDR_len), vi.imageGroup).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }

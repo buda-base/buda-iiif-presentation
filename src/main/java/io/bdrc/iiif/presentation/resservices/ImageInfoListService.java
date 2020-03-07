@@ -85,8 +85,8 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
 		return dataImageGroupId;
 	}
 
-	public final CompletableFuture<List<ImageInfo>> getAsync(final String workLocalId, final String imageGroupId) throws BDRCAPIException {
-		final String s3key = getKey(workLocalId, imageGroupId);
+	public final CompletableFuture<List<ImageInfo>> getAsync(final String imageInstanceLocalName, final String imageGroupId) throws BDRCAPIException {
+		final String s3key = getKey(imageInstanceLocalName, imageGroupId);
 		return getAsync(s3key);
 	}
 
@@ -100,7 +100,7 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
 		} catch (AmazonS3Exception e) {
 			if (e.getErrorCode().equals("NoSuchKey")) {
 			    logger.error("NoSuchKey: {}", s3key);
-				throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "sorry, BDRC did not complete the data migration for this Work");
+				throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "sorry, BDRC did not complete the data migration for this Work (no s3 key "+s3key+")");
 			} else {
 				throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
 			}
