@@ -5,6 +5,7 @@
 	"attribution": [{"@value": "data contributed by rKTs", "@language": "en"}],
 	"note": [{"@value":"not sure about the order of page 2"}],
 	"viewing-direction": "left-to-right",
+	"status": "released",
 	"changes": [
 		{
 			"time": "2020-02-03T11:35:30.00Z",

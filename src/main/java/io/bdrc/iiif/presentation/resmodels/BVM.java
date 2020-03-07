@@ -92,6 +92,32 @@ public class BVM {
             return null;
         }
     }
+
+    public static enum BVMStatus {
+        released("released"),
+        editing("editing"),
+        withdrawn("withdrawn");
+
+        private String localName;
+
+        private BVMStatus(String localName) {
+            this.localName = localName;
+        }
+        
+        @JsonValue
+        public String getLocalName() {
+            return this.localName;
+        }
+
+        public static BVMStatus fromString(String tag) {
+            for (BVMStatus at : BVMStatus.values()) {
+                if (at.localName.equals(tag)) {
+                    return at;
+                }
+            }
+            return null;
+        }
+    }
     
     public static enum PaginationType {
         folios("folios", Pattern.compile("^\\d+'*[ab]")),
@@ -285,6 +311,8 @@ public class BVM {
     @JsonInclude(Include.NON_NULL)
     @JsonProperty(value="viewing-direction")
     public ViewingDirection viewingDirection = null;
+    @JsonProperty(value="status")
+    public BVMStatus status = null;
     @JsonInclude(Include.NON_NULL)
     @JsonProperty(value="appData")
     public JsonNode appData = null;
