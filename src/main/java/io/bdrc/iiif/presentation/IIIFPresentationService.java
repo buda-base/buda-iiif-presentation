@@ -8,27 +8,15 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Hex;
-import org.eclipse.jgit.api.errors.CanceledException;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidConfigurationException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.NoHeadException;
-import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
-import org.eclipse.jgit.api.errors.RefNotFoundException;
-import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,9 +34,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
@@ -75,7 +61,6 @@ import io.bdrc.iiif.presentation.resservices.InstanceInfoService;
 import io.bdrc.iiif.presentation.resservices.InstanceOutlineService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
 import io.bdrc.libraries.GitHelpers;
-import io.bdrc.libraries.GlobalHelpers;
 import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -88,7 +73,6 @@ public class IIIFPresentationService {
     private static final Logger logger = LoggerFactory.getLogger(IIIFPresentationService.class);
     static final int ACCESS_CONTROL_MAX_AGE_IN_SECONDS = 24 * 60 * 60;
 
-    final static ObjectMapper om = new ObjectMapper().registerModule(new JavaTimeModule());
 
     @Autowired
     MeterRegistry registry;
@@ -103,6 +87,7 @@ public class IIIFPresentationService {
     public ResponseEntity<String> clearCache() throws BDRCAPIException {
         logger.info("clearing cache >>");
         BVMService.pullIfNecessary();
+        BVMService.pushWhenNecessary();
         if (ServiceCache.clearCache()) {
             return ResponseEntity.ok("\"OK\"");
         } else {
@@ -446,26 +431,18 @@ public class IIIFPresentationService {
     }
 
     @RequestMapping(value = "/bvm/ig:{resourceQname}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<String> getImageInfoFile(@PathVariable String resourceQname, HttpServletRequest request, HttpServletResponse resp)
+    public ResponseEntity<StreamingResponseBody> getImageInfoFile(@PathVariable String resourceQname, HttpServletRequest request, HttpServletResponse resp)
             throws BDRCAPIException {
-        String json = null;
         if (!resourceQname.startsWith("bdr:I"))
             throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, "no resource " + resourceQname);
-        String resourceLocalName = resourceQname.substring(4);
-        String filename = System.getProperty("user.dir") + "/gitData/buda-volume-manifests/" + getTwoLettersBucket(resourceLocalName) + "/"
-                + resourceLocalName + ".json";
-        File f = new File(filename);
-        if (!f.exists()) {
-            throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, "no resource " + resourceQname);
-        }
-        logger.debug("Git filename is {}", filename);
+        BVM bvm;
         try {
-            json = GlobalHelpers.readFileContent(filename);
-        } catch (IOException e) {
-            throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, e);
+            bvm = BVMService.Instance.getAsync(resourceQname.substring(4)).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
         return ResponseEntity.status(HttpStatus.OK)
-                .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(json);
+                .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(getStream(bvm, BVMService.om));
     }
 
     public static String getTwoLettersBucket(String st) {
@@ -480,30 +457,6 @@ public class IIIFPresentationService {
         md.update(st.getBytes(Charset.forName("UTF8")));
         return new String(Hex.encodeHex(md.digest())).substring(0, 2);
     }
-    
-    public static final int pushEveryS = 600; // push every 600 seconds
-    public static boolean pushScheduled = false;
-    public static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    public static synchronized void pushIfNecessary(final Repository repo) {
-        // pull if not pull has been made for 10mn
-        if (pushScheduled) return;
-        pushScheduled = true;
-        Runnable task = new Runnable() {
-            public void run() {
-                try {
-                    GitHelpers.push(repo, AuthProps.getProperty("gitRemoteUrl"), AuthProps.getProperty("gitUser"), AuthProps.getProperty("gitPass"));
-                    pushScheduled = false;
-                } catch (GitAPIException e) {
-                    logger.error("error pushing to BVM repo", e);
-                }
-            }
-        };
-        scheduler.schedule(task, pushEveryS, TimeUnit.SECONDS);
-        scheduler.shutdown();
-    }
-    
-    //"/admin/repos/bvm/pull"
-    //"/admin/repos/bvm/push"
 
     @RequestMapping(value = "/bvm/ig:{resourceQname}", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<String> writeImageInfoFile(@PathVariable String resourceQname, @RequestBody String json, HttpServletRequest request,
@@ -512,7 +465,7 @@ public class IIIFPresentationService {
         if (!resourceQname.startsWith("bdr:I"))
             throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, "no resource " + resourceQname);
         try {
-            bvm = om.readValue(json, BVM.class);
+            bvm = BVMService.om.readValue(json, BVM.class);
         } catch (IOException e) {
             throw new BDRCAPIException(400, AppConstants.GENERIC_APP_ERROR_CODE, e.getMessage());
         }
@@ -524,25 +477,25 @@ public class IIIFPresentationService {
         String repoBase = System.getProperty("user.dir") + "/gitData/buda-volume-manifests/";
         Repository repo = GitHelpers.ensureGitRepo(repoBase);
         BVMService.pullIfNecessary();
-        String resourceLocalName = resourceQname.substring(4);
+        final String resourceLocalName = resourceQname.substring(4);
         final String twoLetters = getTwoLettersBucket(resourceLocalName);
-        String filename = repoBase + twoLetters + "/" + resourceLocalName + ".json";
-        File dir = new File(repoBase + twoLetters + "/");
+        final String filename = repoBase + twoLetters + "/" + resourceLocalName + ".json";
+        final File dir = new File(repoBase + twoLetters + "/");
         if (!dir.exists()) {
             dir.mkdir();
         }
         // super basic multiversion concurrency control, à la CouchDB
-        File f = new File(filename);
+        final File f = new File(filename);
         boolean created = false;
         if (f.exists()) {
-            JsonNode oldBvm = null;
+            BVM oldBvm = null;
             try {
-                oldBvm = om.readTree(f);
-            } catch (IOException e) {
-                throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "impossible to read old BVM: " + resourceQname);
+                oldBvm = BVMService.Instance.getAsync(resourceQname.substring(4)).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
-            if (oldBvm != null && oldBvm.has("rev")) {
-                final String oldrev = oldBvm.get("rev").textValue();
+            if (oldBvm != null && oldBvm.rev != null) {
+                final String oldrev = oldBvm.rev;
                 if (oldrev != null && !oldrev.equals(bvm.rev)) {
                     // temporarily disable to ease tests
                     // throw new BDRCAPIException(409, AppConstants.GENERIC_APP_ERROR_CODE,
@@ -557,12 +510,13 @@ public class IIIFPresentationService {
         String newrev = UUID.randomUUID().toString();
         bvm.rev = newrev;
         try {
-            om.writerWithDefaultPrettyPrinter().writeValue(f, bvm);
+            BVMService.om.writerWithDefaultPrettyPrinter().writeValue(f, bvm);
         } catch (IOException e) {
             throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "error when writing bvm");
         }
         GitHelpers.commitChanges(repo, cli.message.value);
-        pushIfNecessary(repo);
+        BVMService.pushWhenNecessary();
+        BVMService.Instance.putInCache(bvm, resourceLocalName);
         return ResponseEntity.status(created ? HttpStatus.CREATED : HttpStatus.OK).eTag(newrev)
                 // TODO: add location? sort of expected for HttpStatus 201
                 .body("{\"ok:\" true, \"rev\": \"" + newrev + "\"}");
@@ -582,13 +536,17 @@ public class IIIFPresentationService {
         return st.substring(st.lastIndexOf("/") + 1);
     }
 
-    private StreamingResponseBody getStream(Object obj) {
+    private StreamingResponseBody getStream(Object obj, ObjectMapper om) {
         final StreamingResponseBody stream = new StreamingResponseBody() {
             @Override
             public void writeTo(final OutputStream os) throws IOException {
-                AppConstants.IIIFMAPPER.writer().writeValue(os, obj);
+                om.writer().writeValue(os, obj);
             }
         };
         return stream;
+    }
+    
+    private StreamingResponseBody getStream(Object obj) {
+        return getStream(obj, AppConstants.IIIFMAPPER);
     }
 }

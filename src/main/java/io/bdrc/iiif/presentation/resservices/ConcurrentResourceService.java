@@ -19,6 +19,7 @@ public class ConcurrentResourceService<T> {
 	static Logger logger = LoggerFactory.getLogger(ConcurrentResourceService.class);
 
 	String cachePrefix = "";
+	boolean canReturnNull = false;
 
 	Map<String, CompletableFuture<T>> futures = new ConcurrentHashMap<>();
 
@@ -28,6 +29,11 @@ public class ConcurrentResourceService<T> {
 	public ConcurrentResourceService(String cachePrefix) {
 		this.cachePrefix = cachePrefix;
 	}
+
+    public ConcurrentResourceService(String cachePrefix, boolean canReturnNull) {
+        this.cachePrefix = cachePrefix;
+        this.canReturnNull = canReturnNull;
+    }
 
 	@SuppressWarnings("unchecked")
 	Optional<T> getFromCache(final String resId) {
@@ -112,7 +118,11 @@ public class ConcurrentResourceService<T> {
     			resCached.complete(resTFromCache.get());
     		} else {
     		    logger.debug("found empty cache for {}", resId);
-    		    resCached.completeExceptionally(notFoundEx);
+    		    if (this.canReturnNull) {
+    		        resCached.complete(null);
+    		    } else {
+    		        resCached.completeExceptionally(notFoundEx);
+    		    }
     		}
             return resCached;
 		}
@@ -124,19 +134,27 @@ public class ConcurrentResourceService<T> {
 			// except the first one
 			return resFromList;
 		}
-		T resT;
+		T resT = null;
 		try {
 			resT = getFromApi(resId);
 		} catch (BDRCAPIException e) {
-			res.completeExceptionally(e);
+		    if (e.getCode() == 404 && this.canReturnNull) {
+		        res.complete(null);
+		    } else {
+		        res.completeExceptionally(e);
+		    }
 			// this means that we save each failed fetch using empty Optionals in the
-			// cache, so that we don't have too many API calls
+			// cache, so that we don't have too many API calls.
 			putInCache(resId, null);
 			futures.remove(resId);
 			return res;
 		}
+		if (this.canReturnNull) {
+		    res.complete(resT);
+		} else {
+		    res.completeExceptionally(notFoundEx);
+		}
 		putInCache(resId, resT);
-		res.complete(resT);
 		futures.remove(resId);
 		return res;
 	}
