@@ -22,6 +22,7 @@ public class AppConstants {
     public static final String CACHEPREFIX_WO = "wo:";
     public static final String CACHEPREFIX_II = "ii:";
     public static final String CACHEPREFIX_IIL = "il:";
+    public static final String CACHEPREFIX_BVM = "bvm:";
     public static final String CACHEPREFIX_VI = "vi:";
 
     // used to create the urls for canvases, manifests, etc. should be canonical

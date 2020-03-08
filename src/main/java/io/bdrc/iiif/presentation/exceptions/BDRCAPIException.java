@@ -42,6 +42,21 @@ public class BDRCAPIException extends Exception {
         }
     }
 
+    public BDRCAPIException(int status, int code, String message, Exception e) {
+        super(e.getMessage());
+        this.status = status;
+        this.code = code;
+        this.message = message;
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        this.developerMessage = sw.toString();
+        this.link = null;
+        if (status == 500) {
+            logger.error("error status {}, code {}", status, code, e);
+        }
+    }
+    
     public BDRCAPIException(int status, int code, Exception e) {
         super(e.getMessage());
         this.status = status;

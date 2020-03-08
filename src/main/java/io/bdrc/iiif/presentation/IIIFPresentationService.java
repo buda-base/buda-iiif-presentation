@@ -67,6 +67,7 @@ import io.bdrc.iiif.presentation.resmodels.ImageInstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.InstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.InstanceOutline;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
+import io.bdrc.iiif.presentation.resservices.BVMService;
 import io.bdrc.iiif.presentation.resservices.ImageGroupInfoService;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.iiif.presentation.resservices.ImageInstanceInfoService;
@@ -98,13 +99,14 @@ public class IIIFPresentationService {
         return ResponseEntity.ok("User-agent: *\nDisallow: /");
     }
 
-    @RequestMapping(value = "/clearcache", method = RequestMethod.POST, produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> clearCache() {
+    @RequestMapping(value = "/clearcache", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<String> clearCache() throws BDRCAPIException {
         logger.info("clearing cache >>");
+        BVMService.pullIfNecessary();
         if (ServiceCache.clearCache()) {
-            return ResponseEntity.ok("OK");
+            return ResponseEntity.ok("\"OK\"");
         } else {
-            return ResponseEntity.ok("ERROR");
+            return ResponseEntity.ok("\"ERROR\"");
         }
     }
 
@@ -479,17 +481,6 @@ public class IIIFPresentationService {
         return new String(Hex.encodeHex(md.digest())).substring(0, 2);
     }
     
-    public static final int pullEveryS = 600; // pull every 600 seconds
-    public static Instant lastPull = null;
-    public static synchronized void pullIfNecessary(final Repository repo) throws WrongRepositoryStateException, InvalidConfigurationException, InvalidRemoteException, CanceledException, RefNotFoundException, RefNotAdvertisedException, NoHeadException, TransportException, GitAPIException {
-        // pull if not pull has been made for 10mn
-        final Instant now = Instant.now();
-        if (lastPull == null || lastPull.isBefore(now.minusSeconds(pullEveryS))) {
-            GitHelpers.pull(repo);
-        }
-        lastPull = now;
-    }
-    
     public static final int pushEveryS = 600; // push every 600 seconds
     public static boolean pushScheduled = false;
     public static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -532,11 +523,7 @@ public class IIIFPresentationService {
             throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: for-volume doesn't match the resource url " + resourceQname);
         String repoBase = System.getProperty("user.dir") + "/gitData/buda-volume-manifests/";
         Repository repo = GitHelpers.ensureGitRepo(repoBase);
-        try {
-            pullIfNecessary(repo);
-        } catch (GitAPIException e1) {
-            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e1);
-        }
+        BVMService.pullIfNecessary();
         String resourceLocalName = resourceQname.substring(4);
         final String twoLetters = getTwoLettersBucket(resourceLocalName);
         String filename = repoBase + twoLetters + "/" + resourceLocalName + ".json";

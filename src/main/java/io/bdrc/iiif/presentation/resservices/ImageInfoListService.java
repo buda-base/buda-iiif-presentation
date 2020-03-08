@@ -53,7 +53,7 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
 		}
 	}
 
-	private static String getFirstMd5Nums(final String workLocalId) {
+	public static String getFirstMd5Nums(final String workLocalId) {
 		final byte[] bytesOfMessage;
 		bytesOfMessage = workLocalId.getBytes(utf8);
 		final byte[] hashBytes = md.digest(bytesOfMessage);
