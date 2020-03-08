@@ -32,7 +32,8 @@ public class ConcurrentResourceService<T> {
 	@SuppressWarnings("unchecked")
 	Optional<T> getFromCache(final String resId) {
 	    logger.debug("getFromCache: {}{}", cachePrefix, resId);
-		return (Optional<T>) ServiceCache.getObjectFromCache(cachePrefix + resId);
+	    Object res = ServiceCache.getObjectFromCache(cachePrefix + resId);
+		return (Optional<T>) res;
 	}
 
 	void putInCache(final String resId, final T res) {
@@ -58,10 +59,15 @@ public class ConcurrentResourceService<T> {
 	public T getSync(String resId) throws BDRCAPIException {
 		resId = normalizeId(resId);
 		Optional<T> resTFromCache = getFromCache(resId);
-		if (!resTFromCache.isEmpty()) {
-			logger.debug("found cache for {}", resId);
-			return resTFromCache.get();
-		}
+	      if (resTFromCache != null) {
+            if (!resTFromCache.isEmpty()) {
+                logger.debug("found non-empty cache for {}", resId);
+                return resTFromCache.get();
+            } else {
+                logger.debug("found empty cache for {}", resId);
+                return null;
+            }
+        }
 		T resT = getFromApi(resId);
 		putInCache(resId, resT);
 		return resT;
