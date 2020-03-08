@@ -67,7 +67,8 @@
 				{
 					"filename": "I1KG9128005.tif",
 					"display": false,
-					"of": "I1KG9128004.tif"
+					"duplicate-of": "I1KG9128004.tif",
+					"tags": ["T0018"]
 				},
 				{
 					"filename": "I1KG9128004.tif",

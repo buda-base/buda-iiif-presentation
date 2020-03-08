@@ -494,15 +494,16 @@ public class IIIFPresentationService {
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
-            if (oldBvm != null && oldBvm.rev != null) {
-                final String oldrev = oldBvm.rev;
-                if (oldrev != null && !oldrev.equals(bvm.rev)) {
+            if (oldBvm != null) {
+                if (oldBvm.rev != null && !oldBvm.rev.equals(bvm.rev)) {
                     // temporarily disable to ease tests
                     // throw new BDRCAPIException(409, AppConstants.GENERIC_APP_ERROR_CODE,
                     // "document update conflict, please update to the latest version.");
+                } else if (oldBvm.rev == null) {
+                    throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "old bvm doesn't have a rev");
                 }
             } else {
-                throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "old bvm doens't have a rev: " + resourceQname);
+                throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "cannot read old bvm");
             }
         } else {
             created = true;

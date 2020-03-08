@@ -6,6 +6,7 @@ import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_IIL;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 import org.apache.commons.jcs.access.CacheAccess;
@@ -50,7 +51,7 @@ public class PathTest {
 		final String cacheKey = CACHEPREFIX_IIL+ImageInfoListService.getKey("W22084", "I0890");
         final List<ImageInfo> ii = PresentationTest.getTestImageList("W22084-0890.json");
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
-        cache.put(cacheKey, ii);
+        cache.put(cacheKey, Optional.of(ii));
         final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
         vi.instanceUri = BDR+"MW22084";
@@ -59,7 +60,7 @@ public class PathTest {
         vi.access = AccessType.OPEN;
         vi.restrictedInChina = false;
         vi.statusUri = "http://purl.bdrc.io/admindata/StatusReleased";
-        cache.put("vi:bdr:I0890", vi);
+        cache.put("vi:bdr:I0890", Optional.of(vi));
         InputStream input = AuthCheck.class.getClassLoader().getResourceAsStream("iiifpres.properties");
         Properties props = new Properties();
         props.load(input);

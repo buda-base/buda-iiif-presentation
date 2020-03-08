@@ -79,7 +79,6 @@ public class BVMService extends ConcurrentResourceService<BVM> {
 	    final String firstTwo = ImageInfoListService.getFirstMd5Nums(imageGroupLocalName);
         String filename = System.getProperty("user.dir") + "/gitData/buda-volume-manifests/" + firstTwo + "/"
                 + imageGroupLocalName + ".json";
-        pullIfNecessary();
         File f = new File(filename);
         if (!f.exists()) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "no BVM file for " + imageGroupLocalName);
