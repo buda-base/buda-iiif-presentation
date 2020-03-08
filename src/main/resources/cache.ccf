@@ -4,6 +4,8 @@ jcs.iiifpres=
 jcs.iiifpres.cacheattributes=org.apache.commons.jcs.engine.CompositeCacheAttributes
 jcs.iiifpres.cacheattributes.MaxObjects=2000
 jcs.iiifpres.cacheattributes.MemoryCacheName=org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache
+jcs.iiifpres.elementattributes.IsEternal=false
+jcs.iiifpres.elementattributes.MaxLife=600
 
 jcs.geoloc=
 jcs.geoloc.cacheattributes=org.apache.commons.jcs.engine.CompositeCacheAttributes

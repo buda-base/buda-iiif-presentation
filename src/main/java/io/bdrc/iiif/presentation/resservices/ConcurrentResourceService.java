@@ -2,8 +2,10 @@ package io.bdrc.iiif.presentation.resservices;
 
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
 import static io.bdrc.iiif.presentation.AppConstants.BDR_len;
+import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,14 +30,19 @@ public class ConcurrentResourceService<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	T getFromCache(final String resId) {
+	Optional<T> getFromCache(final String resId) {
 	    logger.debug("getFromCache: {}{}", cachePrefix, resId);
-		return (T) ServiceCache.getObjectFromCache(cachePrefix + resId);
+		return (Optional<T>) ServiceCache.getObjectFromCache(cachePrefix + resId);
 	}
 
 	void putInCache(final String resId, final T res) {
 		logger.debug("putInCache: {}{}", cachePrefix, resId);
-		ServiceCache.put(res, cachePrefix + resId);
+		Optional<T> wrapper;
+		if (res != null)
+		    wrapper = Optional.of(res);
+		else
+		    wrapper = Optional.empty();
+		ServiceCache.put(wrapper, cachePrefix + resId);
 	}
 
 	public T getFromApi(final String resId) throws BDRCAPIException {
@@ -50,16 +57,18 @@ public class ConcurrentResourceService<T> {
 
 	public T getSync(String resId) throws BDRCAPIException {
 		resId = normalizeId(resId);
-		T resT = getFromCache(resId);
-		if (resT != null) {
+		Optional<T> resTFromCache = getFromCache(resId);
+		if (!resTFromCache.isEmpty()) {
 			logger.debug("found cache for {}", resId);
-			return resT;
+			return resTFromCache.get();
 		}
-		resT = getFromApi(resId);
-		ServiceCache.put(resT, resId);
+		T resT = getFromApi(resId);
+		putInCache(resId, resT);
 		return resT;
 	}
 
+	public static final BDRCAPIException notFoundEx = new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "resource not found");
+	
 	/*
 	 * Function returning a CompletableFuture and thus allowing many different calls
 	 * to iiif-presentation to try to access a non-cached WorkInfo at the same time
@@ -89,12 +98,17 @@ public class ConcurrentResourceService<T> {
 	 */
 	public CompletableFuture<T> getAsync(String resId) {
 		resId = normalizeId(resId);
-		T resT = getFromCache(resId);
-		if (resT != null) {
-			logger.debug("found cache for {}", resId);
-			CompletableFuture<T> resCached = new CompletableFuture<>();
-			resCached.complete(resT);
-			return resCached;
+		Optional<T> resTFromCache = getFromCache(resId);
+		if (resTFromCache != null) {
+		    CompletableFuture<T> resCached = new CompletableFuture<>();
+		    if (!resTFromCache.isEmpty()) {
+    			logger.debug("found non-empty cache for {}", resId);
+    			resCached.complete(resTFromCache.get());
+    		} else {
+    		    logger.debug("found empty cache for {}", resId);
+    		    resCached.completeExceptionally(notFoundEx);
+    		}
+            return resCached;
 		}
 		// unintuitive way to perform the (necessary) atomic operation in the list
 		CompletableFuture<T> res = new CompletableFuture<>();
@@ -104,13 +118,14 @@ public class ConcurrentResourceService<T> {
 			// except the first one
 			return resFromList;
 		}
+		T resT;
 		try {
 			resT = getFromApi(resId);
 		} catch (BDRCAPIException e) {
 			res.completeExceptionally(e);
-			// this means that each failed fetch will not be saved and the next
-			// API call will trigger a new one... this could be optimized by doing
-			// that every, say 10mn, so that we don't do too many external calls
+			// this means that we save each failed fetch using empty Optionals in the
+			// cache, so that we don't have too many API calls
+			putInCache(resId, null);
 			futures.remove(resId);
 			return res;
 		}

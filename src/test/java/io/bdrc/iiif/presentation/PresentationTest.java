@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.jsonldjava.shaded.com.google.common.base.Optional;
 
 import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
@@ -167,7 +168,7 @@ public class PresentationTest {
         final List<ImageInfo> ii = getTestImageList("W22084-0890.json");
         
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
-        cache.put(cacheKey, ii);
+        cache.put(cacheKey, Optional.of(ii));
         final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
         vi.instanceUri = BDR+"MW22084";
@@ -191,7 +192,7 @@ public class PresentationTest {
         final String cacheKey = CACHEPREFIX_IIL+ImageInfoListService.getKey("W22084", "I0890");
         final List<ImageInfo> ii = getTestImageList("W22084-0890.json");
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
-        cache.put(cacheKey, ii);
+        cache.put(cacheKey, Optional.of(ii));
         final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
         vi.instanceUri = BDR+"MW22084";
