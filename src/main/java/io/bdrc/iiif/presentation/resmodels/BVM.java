@@ -219,8 +219,11 @@ public class BVM {
         @JsonProperty("rotation")
         public Integer rotation = null;
         @JsonInclude(Include.NON_NULL)
-        @JsonProperty("of")
-        public String of = null;
+        @JsonProperty("duplicate-of")
+        public String duplicateOf = null;
+        @JsonInclude(Include.NON_NULL)
+        @JsonProperty("detail-of")
+        public String detailOf = null;
         @JsonInclude(Include.NON_DEFAULT)
         @JsonProperty(value="display")
         public Boolean display = true;
@@ -230,21 +233,19 @@ public class BVM {
         
         public void validate(final BVM root) throws BDRCAPIException {
             boolean filenameShouldBeEmpty = false;
-            boolean emptyOfOk = true;
             if (this.tags != null) {
                 for (Tag t : this.tags) {
                     if (t == Tag.T0019 || t == Tag.T0020)
                         filenameShouldBeEmpty = true;
-                    if (t == Tag.T0016 || t == Tag.T0017 || t == Tag.T0018)
-                        emptyOfOk = false;
+                    //if (t == Tag.T0016 && this.detailOf == null)
+                    //    throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: missing detail-of field");
+                    if ((t == Tag.T0017 || t == Tag.T0018) && this.duplicateOf == null)
+                        throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: missing duplicate-of field");
                 }
             }
             boolean filenameIsEmpty = (this.filename == null || this.filename.isEmpty());
             if ((filenameShouldBeEmpty && !filenameIsEmpty) || (!filenameShouldBeEmpty && filenameIsEmpty))
                 throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: missing filename or filename on an image tagged as missing");
-            if (!emptyOfOk && this.of == null)
-                throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: missing of field");
-            
             if (this.pagination != null) {
                 final Map<String, PaginationType> paginationMap = root.getPaginationMap();
                 for (final Entry<String,BVMPaginationItem> e : this.pagination.entrySet()) {
