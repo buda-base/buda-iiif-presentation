@@ -71,7 +71,7 @@ public class BVMService extends ConcurrentResourceService<BVM> {
     }
 	
 	BVMService() {
-		super(CACHEPREFIX_BVM);
+		super(CACHEPREFIX_BVM, true);
 	}
 
 	@Override

@@ -48,7 +48,7 @@ import io.bdrc.iiif.presentation.resmodels.AccessType;
 import io.bdrc.iiif.presentation.resmodels.BVM;
 import io.bdrc.iiif.presentation.resmodels.BVM.ChangeLogItem;
 import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
-import io.bdrc.iiif.presentation.resmodels.ImageInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInfoList;
 import io.bdrc.iiif.presentation.resmodels.ImageInstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.InstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.InstanceOutline;
@@ -115,7 +115,7 @@ public class IIIFPresentationService {
         case AppConstants.CACHEPREFIX_II:
             return ResponseEntity.ok().body((ImageInstanceInfo) res);
         case AppConstants.CACHEPREFIX_IIL:
-            return ResponseEntity.ok().body((List<ImageInfo>) res);
+            return ResponseEntity.ok().body(((ImageInfoList) res).list);
         case AppConstants.CACHEPREFIX_VI:
             return ResponseEntity.ok().body((ImageGroupInfo) res);
         default:
@@ -375,13 +375,13 @@ public class IIIFPresentationService {
             return ResponseEntity.status(HttpStatus.resolve(404)).cacheControl(CacheControl.noCache())
                     .body(getStream("\"Cannot serve canvas for external manifests\""));
         }
-        List<ImageInfo> imageInfoList;
+        ImageInfoList imageInfoList;
         try {
             imageInfoList = ImageInfoListService.Instance.getAsync(vi.imageInstanceUri.substring(AppConstants.BDR_len), vi.imageGroup).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
-        final Integer imgSeqNum = ManifestService.getFileNameSeqNum(imageInfoList, filename);
+        final Integer imgSeqNum = imageInfoList.getSeqNumFromFilename(filename);
         if (imgSeqNum == null)
             throw new BDRCAPIException(500, AppConstants.GENERIC_LDS_ERROR, "Cannot find filename in the S3 image list");
         if (al == AccessLevel.FAIR_USE) {
@@ -390,7 +390,7 @@ public class IIIFPresentationService {
                         .body(getStream("\"Insufficient rights (" + vi.access + ")\""));
             }
         }
-        final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgSeqNum, id.getImageGroupId(), imageInfoList);
+        final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgSeqNum, id.getImageGroupId(), imageInfoList.list);
         if (vi.access == AccessType.OPEN) {
             return ResponseEntity.status(HttpStatus.OK)
                     .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic())
@@ -412,7 +412,7 @@ public class IIIFPresentationService {
         } catch (InterruptedException | ExecutionException e1) {
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
         }
-        List<ImageInfo> imageInfoList;
+        ImageInfoList imageInfoList;
         try {
             imageInfoList = ImageInfoListService.Instance.getAsync(vi.imageInstanceUri.substring(AppConstants.BDR_len), vi.imageGroup).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -420,7 +420,7 @@ public class IIIFPresentationService {
         }
         return ResponseEntity.status(HttpStatus.OK)
                 .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic())
-                .body(imageInfoList);
+                .body(imageInfoList.list);
     }
 
     public static String getLocalName(final String st) {

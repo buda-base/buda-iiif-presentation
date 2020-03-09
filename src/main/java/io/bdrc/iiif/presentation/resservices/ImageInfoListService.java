@@ -27,9 +27,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdrc.auth.AuthProps;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.resmodels.ImageInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInfoList.ImageInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInfoList;
 
-public class ImageInfoListService extends ConcurrentResourceService<List<ImageInfo>> {
+public class ImageInfoListService extends ConcurrentResourceService<ImageInfoList> {
 
 	final static ObjectMapper mapper = new ObjectMapper();
 	final static String bucketName = "archive.tbrc.org";
@@ -85,13 +86,13 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
 		return dataImageGroupId;
 	}
 
-	public final CompletableFuture<List<ImageInfo>> getAsync(final String imageInstanceLocalName, final String imageGroupId) throws BDRCAPIException {
+	public final CompletableFuture<ImageInfoList> getAsync(final String imageInstanceLocalName, final String imageGroupId) throws BDRCAPIException {
 		final String s3key = getKey(imageInstanceLocalName, imageGroupId);
 		return getAsync(s3key);
 	}
 
 	@Override
-	final public List<ImageInfo> getFromApi(final String s3key) throws BDRCAPIException {
+	final public ImageInfoList getFromApi(final String s3key) throws BDRCAPIException {
 		final AmazonS3 s3Client = getClient();
 		logger.info("fetching s3 key {}", s3key);
 		final S3Object object;
@@ -110,8 +111,7 @@ public class ImageInfoListService extends ConcurrentResourceService<List<ImageIn
 			final GZIPInputStream gis = new GZIPInputStream(objectData);
 			final List<ImageInfo> imageList = om.readValue(gis, new TypeReference<List<ImageInfo>>() {});
 			objectData.close();
-			imageList.removeIf(imageInfo -> imageInfo.filename.endsWith("json"));
-			return imageList;
+			return new ImageInfoList(imageList);
 		} catch (IOException e) {
 			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
 		}

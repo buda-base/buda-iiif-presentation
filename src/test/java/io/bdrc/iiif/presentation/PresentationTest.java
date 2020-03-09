@@ -31,7 +31,7 @@ import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
-import io.bdrc.iiif.presentation.resmodels.ImageInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInfoList;
 import io.bdrc.iiif.presentation.resmodels.ImageInstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
 import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
@@ -86,10 +86,9 @@ public class PresentationTest {
 //        om.writeValue(System.out, itemInfo);
     }
 
-    public static List<ImageInfo> getTestImageList(String filename) throws JsonParseException, JsonMappingException, IOException {
+    public static ImageInfoList getTestImageList(String filename) throws JsonParseException, JsonMappingException, IOException {
         final File f = new File(TESTDIR + filename);
-        final List<ImageInfo> imageList = om.readValue(f, new TypeReference<List<ImageInfo>>() {});
-        imageList.removeIf(imageInfo -> imageInfo.filename.endsWith("json"));
+        final ImageInfoList imageList = new ImageInfoList(om.readValue(f, new TypeReference<List<ImageInfoList.ImageInfo>>() {}));
         return imageList;
     }
 
@@ -165,7 +164,7 @@ public class PresentationTest {
         //om.writeValue(fout, wo);
         final Identifier id = new Identifier("wvo:bdr:MW22084::bdr:I0890", Identifier.MANIFEST_ID);
         final String cacheKey = CACHEPREFIX_IIL+ImageInfoListService.getKey("W22084", "I0890");
-        final List<ImageInfo> ii = getTestImageList("W22084-0890.json");
+        final ImageInfoList ii = getTestImageList("W22084-0890.json");
         
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
         cache.put(cacheKey, Optional.of(ii));
@@ -190,7 +189,7 @@ public class PresentationTest {
         //om.writeValue(fout, wi);
         final Identifier id = new Identifier("wv:bdr:MW22084_01_01::bdr:I0890", Identifier.MANIFEST_ID);
         final String cacheKey = CACHEPREFIX_IIL+ImageInfoListService.getKey("W22084", "I0890");
-        final Optional<List<ImageInfo>> ii = Optional.of(getTestImageList("W22084-0890.json"));
+        final Optional<ImageInfoList> ii = Optional.of(getTestImageList("W22084-0890.json"));
         CacheAccess<String, Object> cache = ServiceCache.CACHE;
         System.out.println("put class "+ii.getClass());
         cache.put(cacheKey, ii);

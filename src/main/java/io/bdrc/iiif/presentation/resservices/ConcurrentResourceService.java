@@ -149,7 +149,7 @@ public class ConcurrentResourceService<T> {
 			futures.remove(resId);
 			return res;
 		}
-		if (this.canReturnNull) {
+		if (resT != null || this.canReturnNull) {
 		    res.complete(resT);
 		} else {
 		    res.completeExceptionally(notFoundEx);

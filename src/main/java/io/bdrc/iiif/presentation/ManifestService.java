@@ -30,7 +30,8 @@ import de.digitalcollections.iiif.model.sharedcanvas.Range;
 import de.digitalcollections.iiif.model.sharedcanvas.Sequence;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.BDRCPresentationImageService;
-import io.bdrc.iiif.presentation.resmodels.ImageInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInfoList.ImageInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInfoList;
 import io.bdrc.iiif.presentation.resmodels.LangString;
 import io.bdrc.iiif.presentation.resmodels.Location;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
@@ -221,7 +222,7 @@ public class ManifestService {
         logger.info("building manifest for ID {}", id.getId());
         logger.debug("rootPart: {}", rootPart);
         final String imageInstanceLocalName = vi.imageInstanceUri.substring(BDR_len);
-        List<ImageInfo> imageInfoList;
+        ImageInfoList imageInfoList;
         try {
             imageInfoList = ImageInfoListService.Instance.getAsync(imageInstanceLocalName, vi.imageGroup).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -258,7 +259,7 @@ public class ManifestService {
             ePage = id.getEPageNum() == null ? totalPages : id.getEPageNum().intValue();
         }
         logger.debug("computed: {}-{}", bPage, ePage);
-        final Sequence mainSeq = getSequenceFrom(id, imageInfoList, vi, volumeId, bPage, ePage, fairUse);
+        final Sequence mainSeq = getSequenceFrom(id, imageInfoList.list, vi, volumeId, bPage, ePage, fairUse);
         mainSeq.setViewingDirection(ViewingDirection.TOP_TO_BOTTOM);
         if (continuous) {
             mainSeq.setViewingHints(VIEWING_HINTS);
@@ -267,7 +268,7 @@ public class ManifestService {
         final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
         manifest.setRenderings(oc);
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE) {
-            addRangesToManifest(manifest, id, vi, volumeId, fairUse, imageInfoList, rootPart);
+            addRangesToManifest(manifest, id, vi, volumeId, fairUse, imageInfoList.list, rootPart);
         }
         manifest.addSequence(mainSeq);
         return manifest;
@@ -396,9 +397,9 @@ public class ManifestService {
         return canvas;
     }
 
-    public static Integer getFileNameSeqNum(final List<ImageInfo> imageInfoList, final String filename) {
+    public static Integer getFileNameSeqNum(final ImageInfoList imageInfoList, final String filename) {
         int res = 1; // seqNum starts at 1
-        for (final ImageInfo i : imageInfoList) {
+        for (final ImageInfo i : imageInfoList.list) {
             if (i.filename.equals(filename))
                 return res;
             res += 1;
