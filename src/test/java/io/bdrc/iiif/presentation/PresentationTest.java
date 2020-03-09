@@ -1,16 +1,16 @@
 package io.bdrc.iiif.presentation;
 
+import static io.bdrc.iiif.presentation.AppConstants.BDR;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_IIL;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix_coll;
-import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_IIL;
-import static io.bdrc.iiif.presentation.AppConstants.BDR;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
-import org.apache.commons.jcs.access.CacheAccess;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFLanguages;
@@ -25,20 +25,18 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Optional;
 
 import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
+import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
 import io.bdrc.iiif.presentation.resmodels.ImageInfoList;
 import io.bdrc.iiif.presentation.resmodels.ImageInstanceInfo;
-import io.bdrc.iiif.presentation.resmodels.PartInfo;
-import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
 import io.bdrc.iiif.presentation.resmodels.InstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.InstanceOutline;
+import io.bdrc.iiif.presentation.resmodels.PartInfo;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
-import io.bdrc.iiif.presentation.resservices.InstanceInfoService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
 import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
@@ -50,15 +48,16 @@ public class PresentationTest {
 
     @BeforeClass
     public static void before() {
-        ServiceCache.init();
+
     }
 
-    //@Test
-    //public void getApi() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
-    //    InstanceInfo ii = InstanceInfoService.Instance.getFromApi("bdr:MW22084");
-    //    System.out.println(ii);
-    //}
-    
+    // @Test
+    // public void getApi() throws BDRCAPIException, JsonGenerationException,
+    // JsonMappingException, IOException, IdentifierException {
+    // InstanceInfo ii = InstanceInfoService.Instance.getFromApi("bdr:MW22084");
+    // System.out.println(ii);
+    // }
+
     @Test
     public void accessHeaderTest() {
         assertTrue("123".equals(IIIFPresAuthFilter.getToken("Bearer 123")));
@@ -88,7 +87,8 @@ public class PresentationTest {
 
     public static ImageInfoList getTestImageList(String filename) throws JsonParseException, JsonMappingException, IOException {
         final File f = new File(TESTDIR + filename);
-        final ImageInfoList imageList = new ImageInfoList(om.readValue(f, new TypeReference<List<ImageInfoList.ImageInfo>>() {}));
+        final ImageInfoList imageList = new ImageInfoList(om.readValue(f, new TypeReference<List<ImageInfoList.ImageInfo>>() {
+        }));
         return imageList;
     }
 
@@ -123,22 +123,26 @@ public class PresentationTest {
         final InstanceInfo wi = new InstanceInfo(m, "bdr:MWSL001");
         // om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:MWSL001", Identifier.COLLECTION_ID);
-        //final Collection collection = CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id), id, wi, false);
-        //final File fout = new File("/tmp/virtualWorkpart.json");
-        //IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
+        // final Collection collection =
+        // CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id),
+        // id, wi, false);
+        // final File fout = new File("/tmp/virtualWorkpart.json");
+        // IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
     }
-    
+
     @Test
     public void virtualWorkLinktoPart() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualworklinktopart.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final InstanceInfo wi = new InstanceInfo(m, "bdr:MW1ERI0009001_01_02_02");
-        //om.writeValue(System.out, wi);
+        // om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:MW1ERI0009001_01_02_02", Identifier.COLLECTION_ID);
-        //final Collection collection = CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id), id, wi, false);
-        //final File fout = new File("/tmp/virtualWorkLinkToPart.json");
-        //IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
+        // final Collection collection =
+        // CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id),
+        // id, wi, false);
+        // final File fout = new File("/tmp/virtualWorkLinkToPart.json");
+        // IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
     }
 
     @Test
@@ -147,35 +151,35 @@ public class PresentationTest {
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workGraphNoItem-virtualworklocation.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final InstanceInfo wi = new InstanceInfo(m, "bdr:MW1ERI0009001_01_01_01");
-        //om.writeValue(System.out, wi);
+        // om.writeValue(System.out, wi);
         final Identifier id = new Identifier("wio:bdr:MW1ERI0009001_01_01_01", Identifier.COLLECTION_ID);
-        //final Collection collection = CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id), id, wi, false);
-        //final File fout = new File("/tmp/virtualWorkLocation.json");
-        //IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
+        // final Collection collection =
+        // CollectionService.getCollectionForOutline(CollectionService.getCommonCollection(id),
+        // id, wi, false);
+        // final File fout = new File("/tmp/virtualWorkLocation.json");
+        // IIIFApiObjectMapperProvider.writer.writeValue(fout, collection);
     }
-    
+
     @Test
     public void workOutlineBasics() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
         Model m = ModelFactory.createDefaultModel();
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workOutline.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final InstanceOutline wo = new InstanceOutline(m, "bdr:MW22084");
-        //final File fout = new File("/tmp/workOutline.json");
-        //om.writeValue(fout, wo);
+        // final File fout = new File("/tmp/workOutline.json");
+        // om.writeValue(fout, wo);
         final Identifier id = new Identifier("wvo:bdr:MW22084::bdr:I0890", Identifier.MANIFEST_ID);
-        final String cacheKey = CACHEPREFIX_IIL+ImageInfoListService.getKey("W22084", "I0890");
+        final String cacheKey = CACHEPREFIX_IIL + ImageInfoListService.getKey("W22084", "I0890");
         final ImageInfoList ii = getTestImageList("W22084-0890.json");
-        
-        CacheAccess<String, Object> cache = ServiceCache.CACHE;
-        cache.put(cacheKey, Optional.of(ii));
+        ServiceCache.put(Optional.of(ii), cacheKey);
         final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
-        vi.instanceUri = BDR+"MW22084";
-        vi.imageInstanceUri = BDR+"W22084";
+        vi.instanceUri = BDR + "MW22084";
+        vi.imageInstanceUri = BDR + "W22084";
         vi.volumeNumber = 1;
         Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:I0890", false, wo.getPartForInstanceId("bdr:MW22084"));
-        //final File fout2 = new File("/tmp/workOutline-manifest.json");
-        //IIIFApiObjectMapperProvider.writer.writeValue(fout2, man);
+        // final File fout2 = new File("/tmp/workOutline-manifest.json");
+        // IIIFApiObjectMapperProvider.writer.writeValue(fout2, man);
     }
 
     @Test
@@ -184,25 +188,24 @@ public class PresentationTest {
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workOutline.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final InstanceInfo wi = new InstanceInfo(m, "bdr:MW22084_01_01");
-        //System.out.println(wi.toString());
-        //final File fout = new File("/tmp/wv.json");
-        //om.writeValue(fout, wi);
+        // System.out.println(wi.toString());
+        // final File fout = new File("/tmp/wv.json");
+        // om.writeValue(fout, wi);
         final Identifier id = new Identifier("wv:bdr:MW22084_01_01::bdr:I0890", Identifier.MANIFEST_ID);
-        final String cacheKey = CACHEPREFIX_IIL+ImageInfoListService.getKey("W22084", "I0890");
+        final String cacheKey = CACHEPREFIX_IIL + ImageInfoListService.getKey("W22084", "I0890");
         final Optional<ImageInfoList> ii = Optional.of(getTestImageList("W22084-0890.json"));
-        CacheAccess<String, Object> cache = ServiceCache.CACHE;
-        System.out.println("put class "+ii.getClass());
-        cache.put(cacheKey, ii);
+        System.out.println("put class " + ii.getClass());
+        ServiceCache.put(ii, cacheKey);
         final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
-        vi.instanceUri = BDR+"MW22084";
-        vi.imageInstanceUri = BDR+"W22084";
+        vi.instanceUri = BDR + "MW22084";
+        vi.imageInstanceUri = BDR + "W22084";
         vi.volumeNumber = 1;
         Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:I0890", false, wi);
-        //final File fout2 = new File("/tmp/wv-manifest.json");
-        //AppConstants.IIIFMAPPER.writer().writeValue(fout2, man);
+        // final File fout2 = new File("/tmp/wv-manifest.json");
+        // AppConstants.IIIFMAPPER.writer().writeValue(fout2, man);
     }
-    
+
     @Test
     public void wioTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
         Model m = ModelFactory.createDefaultModel();

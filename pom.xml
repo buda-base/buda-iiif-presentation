@@ -143,12 +143,7 @@
          <dependency> 
           <groupId>javax.servlet</groupId>
           <artifactId>javax.servlet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-jcs-core</artifactId>
-            <version>2.2.1</version>
-        </dependency>
+        </dependency>        
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
@@ -222,6 +217,11 @@
 	        <artifactId>java-jwt</artifactId>
 	        <version>3.10.0</version>
 	    </dependency>
+        <!-- https://mvnrepository.com/artifact/org.ehcache/ehcache -->
+        <dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>ehcache</artifactId>        
+        </dependency>
     </dependencies>
     <properties>
         <jersey.version>2.29</jersey.version>

@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.util.Optional;
 import java.util.Properties;
 
-import org.apache.commons.jcs.access.CacheAccess;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,8 +25,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import io.bdrc.auth.AuthProps;
 import io.bdrc.iiif.presentation.resmodels.AccessType;
-import io.bdrc.iiif.presentation.resmodels.ImageInfoList;
 import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInfoList;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
 
@@ -36,49 +35,47 @@ import io.bdrc.iiif.presentation.resservices.ServiceCache;
 @ActiveProfiles("local")
 public class PathTest {
 
-	public final static Logger log = LoggerFactory.getLogger(PathTest.class.getName());
+    public final static Logger log = LoggerFactory.getLogger(PathTest.class.getName());
 
-	@Autowired
-	Environment environment;
-	
-	@Autowired
+    @Autowired
+    Environment environment;
+
+    @Autowired
     private TestRestTemplate restTemplate;
 
-	@BeforeClass
-	public static void init() throws IOException {
-		ServiceCache.init();
-		final String cacheKey = CACHEPREFIX_IIL+ImageInfoListService.getKey("W22084", "I0890");
+    @BeforeClass
+    public static void init() throws IOException {
+        final String cacheKey = CACHEPREFIX_IIL + ImageInfoListService.getKey("W22084", "I0890");
         final ImageInfoList ii = PresentationTest.getTestImageList("W22084-0890.json");
-        CacheAccess<String, Object> cache = ServiceCache.CACHE;
-        cache.put(cacheKey, Optional.of(ii));
+        ServiceCache.put(Optional.of(ii), cacheKey);
         final ImageGroupInfo vi = new ImageGroupInfo();
         vi.imageGroup = "I0890";
-        vi.instanceUri = BDR+"MW22084";
-        vi.imageInstanceUri = BDR+"W22084";
+        vi.instanceUri = BDR + "MW22084";
+        vi.imageInstanceUri = BDR + "W22084";
         vi.volumeNumber = 1;
         vi.access = AccessType.OPEN;
         vi.restrictedInChina = false;
         vi.statusUri = "http://purl.bdrc.io/admindata/StatusReleased";
-        cache.put("vi:bdr:I0890", Optional.of(vi));
+        ServiceCache.put(Optional.of(vi), "vi:bdr:I0890");
         InputStream input = AuthCheck.class.getClassLoader().getResourceAsStream("iiifpres.properties");
         Properties props = new Properties();
         props.load(input);
         AuthProps.init(props);
-	}
+    }
 
-	@Test
-	public void testPathWithVersion() throws ClientProtocolException, IOException {
-		ResponseEntity<String> res = this.restTemplate.getForEntity("http://localhost:" + environment.getProperty("local.server.port") + "/2.1.1/v:bdr:I0890/manifest",
-                String.class);
-		//System.out.println(res.getBody());
-		assert(res.getStatusCode().equals(HttpStatus.OK));
-	}
+    @Test
+    public void testPathWithVersion() throws ClientProtocolException, IOException {
+        ResponseEntity<String> res = this.restTemplate
+                .getForEntity("http://localhost:" + environment.getProperty("local.server.port") + "/2.1.1/v:bdr:I0890/manifest", String.class);
+        // System.out.println(res.getBody());
+        assert (res.getStatusCode().equals(HttpStatus.OK));
+    }
 
-	@Test
-	public void testPathNoVersion() throws ClientProtocolException, IOException {
-		ResponseEntity<String> res = this.restTemplate.getForEntity("http://localhost:" + environment.getProperty("local.server.port") + "/v:bdr:I0890/manifest",
-            String.class);
-		//System.out.println(res.getBody());
-		assert(res.getStatusCode().equals(HttpStatus.OK));
-	}
+    @Test
+    public void testPathNoVersion() throws ClientProtocolException, IOException {
+        ResponseEntity<String> res = this.restTemplate
+                .getForEntity("http://localhost:" + environment.getProperty("local.server.port") + "/v:bdr:I0890/manifest", String.class);
+        // System.out.println(res.getBody());
+        assert (res.getStatusCode().equals(HttpStatus.OK));
+    }
 }

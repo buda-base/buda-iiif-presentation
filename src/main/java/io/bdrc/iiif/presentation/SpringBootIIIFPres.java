@@ -19,7 +19,6 @@ import org.springframework.context.event.EventListener;
 
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.rdf.RdfAuthModel;
-import io.bdrc.iiif.presentation.resservices.ServiceCache;
 
 @SpringBootApplication
 @Configuration
@@ -50,8 +49,6 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
             }
             AuthProps.init(props);
             log.info("SpringBootIIIFPres has loaded properties");
-
-            ServiceCache.init();
 
         } catch (IOException e) {
             // TODO Auto-generated catch block
