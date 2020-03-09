@@ -66,7 +66,7 @@ public class ConcurrentResourceService<T> {
 		resId = normalizeId(resId);
 		Optional<T> resTFromCache = getFromCache(resId);
 	      if (resTFromCache != null) {
-            if (!resTFromCache.isEmpty()) {
+            if (resTFromCache.isPresent()) {
                 logger.debug("found non-empty cache for {}", resId);
                 return resTFromCache.get();
             } else {
@@ -113,7 +113,7 @@ public class ConcurrentResourceService<T> {
 		Optional<T> resTFromCache = getFromCache(resId);
 		if (resTFromCache != null) {
 		    CompletableFuture<T> resCached = new CompletableFuture<>();
-		    if (!resTFromCache.isEmpty()) {
+		    if (resTFromCache.isPresent()) {
     			logger.debug("found non-empty cache for {}", resId);
     			resCached.complete(resTFromCache.get());
     		} else {
