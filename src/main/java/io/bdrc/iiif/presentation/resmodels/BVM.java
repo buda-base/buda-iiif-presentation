@@ -3,11 +3,14 @@ package io.bdrc.iiif.presentation.resmodels;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -156,6 +159,7 @@ public class BVM {
         public String userQname = null;
         @JsonProperty(value="message", required=true)
         public LangString message = null;
+        @JsonFormat(timezone = "UTC")
         @JsonProperty(value="time", required=true)
         public Instant time = null;
       
@@ -229,7 +233,9 @@ public class BVM {
         public Boolean display = true;
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("pagination")
-        public Map<String,BVMPaginationItem> pagination = null; 
+        public Map<String,BVMPaginationItem> pagination = null;
+        
+        public BVMImageInfo() {}
         
         public void validate(final BVM root) throws BDRCAPIException {
             boolean filenameShouldBeEmpty = false;
@@ -257,6 +263,7 @@ public class BVM {
             }
         }
         
+        @JsonIgnore
         public BVMPaginationItem getDefaultPaginationValue(BVM root) {
             for (final BVMPagination p : root.pagination) {
                 if (this.pagination.containsKey(p.id)) {
@@ -335,6 +342,7 @@ public class BVM {
         }
     }
     
+    @JsonIgnore
     public BVMImageInfo getDefaultBVMImageInfoForFilename(final String filename) {
         if (this.fnMap == null) {
             generateFilenameMapDV();
@@ -342,6 +350,7 @@ public class BVM {
         return this.fnMap.get(filename);
     }
     
+    @JsonIgnore
     public List<BVMImageInfo> getDefaultImageList() {
         if (this.defaultImageList != null)
             return this.defaultImageList;
@@ -349,6 +358,7 @@ public class BVM {
         return this.defaultImageList;
     }
     
+    @JsonIgnore
     public Map<String,PaginationType> getPaginationMap() {
         if (this.paginationMap != null)
             return this.paginationMap;
@@ -359,6 +369,7 @@ public class BVM {
         return this.paginationMap;
     }
     
+    @JsonIgnore
     public ChangeLogItem getLatestChangeLogItem() {
         if (this.changes == null)
             return null;

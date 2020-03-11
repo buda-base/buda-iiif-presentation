@@ -40,6 +40,7 @@ public class BVMService extends ConcurrentResourceService<BVM> {
 	    printer.indentObjectsWith(indenter);
 	    printer.indentArraysWith(indenter);
 	    om.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+	    om.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 	}
 
     public static final int pushEveryS = 600; // push every 600 seconds
