@@ -441,6 +441,7 @@ public class IIIFPresentationService {
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
         return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(getStream(bvm, BVMService.om));
     }
 
@@ -519,6 +520,7 @@ public class IIIFPresentationService {
         BVMService.Instance.putInCache(bvm, resourceLocalName);
         return ResponseEntity.status(created ? HttpStatus.CREATED : HttpStatus.OK).eTag(newrev)
                 // TODO: add location? sort of expected for HttpStatus 201
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .body("{\"ok:\" true, \"rev\": \"" + newrev + "\"}");
     }
 
