@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.util.Optional;
 
 import io.bdrc.auth.AuthProps;
 import io.bdrc.iiif.presentation.AppConstants;
@@ -105,7 +106,7 @@ public class BVMService extends ConcurrentResourceService<BVM> {
 	
 	public final void putInCache(final BVM bvm, final String imageGroupLocalName) {
 	    //TODO: interrupt scheduled gets?
-	    ServiceCache.put(bvm, this.cachePrefix + imageGroupLocalName);
+	    ServiceCache.put(Optional.of(bvm), this.cachePrefix + imageGroupLocalName);
 	}
 
 }
