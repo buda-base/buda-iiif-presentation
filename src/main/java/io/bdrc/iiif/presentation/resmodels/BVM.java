@@ -22,6 +22,18 @@ import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
 public class BVM {
     
+    public static final class TrueFilter {
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (obj == null || !(obj instanceof Boolean)) {
+                return false;
+            }
+            final Boolean v = (Boolean) obj;
+            return Boolean.TRUE.equals(v);
+        }
+    }
+    
     public static enum Tag {
         T0001("T0001"),
         T0002("T0002"),
@@ -228,9 +240,9 @@ public class BVM {
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("detail-of")
         public String detailOf = null;
-        @JsonInclude(Include.NON_DEFAULT)
+        @JsonInclude(value = Include.CUSTOM, valueFilter = TrueFilter.class)
         @JsonProperty(value="display")
-        public Boolean display = true;
+        public Boolean display = Boolean.TRUE;
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("pagination")
         public Map<String,BVMPaginationItem> pagination = null;
