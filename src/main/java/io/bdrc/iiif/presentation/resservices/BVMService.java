@@ -93,6 +93,7 @@ public class BVMService extends ConcurrentResourceService<BVM> {
                 + imageGroupLocalName + ".json";
         File f = new File(filename);
         if (!f.exists()) {
+            logger.debug("bvm file doesn't exist: {}", filename);
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "no BVM file for " + imageGroupLocalName);
         }
         logger.debug("Git filename is {}", filename);
