@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.bdrc.auth.AuthProps;
@@ -37,6 +38,7 @@ public class BVMService extends ConcurrentResourceService<BVM> {
 	static {
 	    printer.indentObjectsWith(indenter);
 	    printer.indentArraysWith(indenter);
+	    om.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
 	}
 
     public static final int pushEveryS = 600; // push every 600 seconds
