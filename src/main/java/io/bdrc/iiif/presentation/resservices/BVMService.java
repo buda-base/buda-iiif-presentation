@@ -15,6 +15,8 @@ import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.util.DefaultIndenter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -29,6 +31,13 @@ public class BVMService extends ConcurrentResourceService<BVM> {
 	private static final Logger logger = LoggerFactory.getLogger(BVMService.class);
 	public static final BVMService Instance = new BVMService();
 	public final static ObjectMapper om = new ObjectMapper().registerModule(new JavaTimeModule());
+	public final static DefaultPrettyPrinter.Indenter indenter = new DefaultIndenter("  ", DefaultIndenter.SYS_LF);
+	public final static DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
+	
+	static {
+	    printer.indentObjectsWith(indenter);
+	    printer.indentArraysWith(indenter);
+	}
 
     public static final int pushEveryS = 600; // push every 600 seconds
     public static boolean pushScheduled = false;

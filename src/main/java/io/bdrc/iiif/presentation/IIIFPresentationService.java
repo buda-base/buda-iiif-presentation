@@ -73,7 +73,6 @@ public class IIIFPresentationService {
     private static final Logger logger = LoggerFactory.getLogger(IIIFPresentationService.class);
     static final int ACCESS_CONTROL_MAX_AGE_IN_SECONDS = 24 * 60 * 60;
 
-
     @Autowired
     MeterRegistry registry;
 
@@ -511,7 +510,7 @@ public class IIIFPresentationService {
         String newrev = UUID.randomUUID().toString();
         bvm.rev = newrev;
         try {
-            BVMService.om.writerWithDefaultPrettyPrinter().writeValue(f, bvm);
+            BVMService.om.writer(BVMService.printer).writeValue(f, bvm);
         } catch (IOException e) {
             throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "error when writing bvm");
         }
