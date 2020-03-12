@@ -24,9 +24,9 @@ public class ServiceCache {
                 ResourcePoolsBuilder.newResourcePoolsBuilder().heap(500, EntryUnit.ENTRIES)));
     }
 
-    public static void put(Object res, String key) {
+    public static void put(Object res, final String key) {
         try {
-            log.info("PUT IN CACHE ");
+            log.debug("put object in cache for key: {}", key);
             CACHE.put(key, res);
             CacheMetrics.put();
             res = null;
@@ -35,11 +35,14 @@ public class ServiceCache {
         }
     }
 
-    public static Object getObjectFromCache(String key) {
-        Object obj = CACHE.get(key);
+    public static Object getObjectFromCache(final String key) {
+        final Object obj = CACHE.get(key);
         if (obj != null) {
+            log.debug("got object in cache for key: {}", key);
             CacheMetrics.found();
         } else {
+            
+            log.debug("can't get object in cache for key: {}", key);
             CacheMetrics.notFound();
         }
         return obj;
