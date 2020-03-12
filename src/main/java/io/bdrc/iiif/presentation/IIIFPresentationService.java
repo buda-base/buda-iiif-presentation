@@ -440,6 +440,9 @@ public class IIIFPresentationService {
         } catch (InterruptedException | ExecutionException e) {
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
+        if (bvm == null) {
+            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "resource not available");
+        }
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(getStream(bvm, BVMService.om));
@@ -503,7 +506,7 @@ public class IIIFPresentationService {
                     throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "old bvm doesn't have a rev");
                 }
             } else {
-                throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE, "cannot read old bvm");
+                created = true;
             }
         } else {
             created = true;
