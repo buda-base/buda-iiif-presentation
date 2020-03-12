@@ -54,7 +54,8 @@
 					"filename": "I1KG9128002.tif",
 					"pagination": { "pgfolios": {"value": "1a", "section": "intro"} },
 					"indication": { "@value": "kha", "@language": "bo-x-ewts" },
-					"tags": ["T0021", "T0011"]
+					"tags": ["T0021", "T0011"],
+					"checked": false
 				},
 				{
 					"pagination": { "pgfolios": {"value": "1a"} },
@@ -66,7 +67,7 @@
 				},
 				{
 					"filename": "I1KG9128005.tif",
-					"display": false,
+					"hidden": true,
 					"duplicate-of": "I1KG9128004.tif",
 					"tags": ["T0018"]
 				},

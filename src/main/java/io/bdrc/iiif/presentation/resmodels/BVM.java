@@ -240,9 +240,9 @@ public class BVM {
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("detail-of")
         public String detailOf = null;
-        @JsonInclude(value = Include.CUSTOM, valueFilter = TrueFilter.class)
-        @JsonProperty(value="display")
-        public Boolean display = Boolean.TRUE;
+        @JsonInclude(value = Include.NON_DEFAULT)
+        @JsonProperty(value="hidden")
+        public Boolean hidden = Boolean.FALSE;
         @JsonInclude(value = Include.CUSTOM, valueFilter = TrueFilter.class)
         @JsonProperty(value="checked")
         public Boolean checked = Boolean.TRUE;
