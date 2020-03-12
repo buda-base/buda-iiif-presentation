@@ -19,6 +19,7 @@ import org.springframework.context.event.EventListener;
 
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.rdf.RdfAuthModel;
+import io.bdrc.iiif.presentation.resservices.ServiceCache;
 
 @SpringBootApplication
 @Configuration
@@ -47,6 +48,7 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
             } catch (Exception ex) {
                 // do nothing, continue props initialization
             }
+
             AuthProps.init(props);
             log.info("SpringBootIIIFPres has loaded properties");
 
@@ -61,8 +63,10 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
 
     @EventListener(ApplicationReadyEvent.class)
     public void afterStartup() {
+        ServiceCache.init();
         log.info("Ldspdi updates auth data...");
         RdfAuthModel.init();
+
     }
 
 }

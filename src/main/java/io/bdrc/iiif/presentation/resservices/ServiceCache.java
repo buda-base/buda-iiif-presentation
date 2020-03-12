@@ -17,11 +17,12 @@ public class ServiceCache {
     public static Cache<String, Object> CACHE;
     public final static Logger log = LoggerFactory.getLogger(ServiceCache.class.getName());
 
-    static {
+    public static void init() {
         CacheManager cacheManager = CacheManagerBuilder.newCacheManagerBuilder().build();
         cacheManager.init();
         CACHE = cacheManager.createCache("iiifpres", CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, Object.class,
                 ResourcePoolsBuilder.newResourcePoolsBuilder().heap(500, EntryUnit.ENTRIES)));
+        log.debug("Cache was initialized {}", CACHE);
     }
 
     public static void put(Object res, final String key) {
@@ -41,7 +42,7 @@ public class ServiceCache {
             log.debug("got object in cache for key: {}", key);
             CacheMetrics.found();
         } else {
-            
+
             log.debug("can't get object in cache for key: {}", key);
             CacheMetrics.notFound();
         }
