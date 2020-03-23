@@ -389,7 +389,7 @@ public class IIIFPresentationService {
                         .body(getStream("\"Insufficient rights (" + vi.access + ")\""));
             }
         }
-        final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgSeqNum, id.getImageGroupId(), imageInfoList.list);
+        final Canvas res = ManifestService.getCanvasForIdentifier(id, vi, imgSeqNum, id.getImageGroupId(), imageInfoList);
         if (vi.access == AccessType.OPEN) {
             return ResponseEntity.status(HttpStatus.OK)
                     .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic())

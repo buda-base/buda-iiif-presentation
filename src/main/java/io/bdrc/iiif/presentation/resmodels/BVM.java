@@ -353,25 +353,36 @@ public class BVM {
     @JsonIgnore
     private Map<String,PaginationType> paginationMap = null;
     @JsonIgnore
-    private Map<String,BVMImageInfo> fnMap = null;
+    private Map<String,Integer> fnMap = null;
     
     // in the default view
     private void generateFilenameMapDV() {
         this.fnMap = new HashMap<>();
         List<BVMImageInfo> iil = getDefaultImageList();
+        int idx = 0;
         for (final BVMImageInfo ii : iil) {
             if (ii.filename != null) {
-                this.fnMap.put(ii.filename, ii);
+                this.fnMap.put(ii.filename, idx);
             }
+            idx += 1;
         }
     }
-    
+
     @JsonIgnore
-    public BVMImageInfo getDefaultBVMImageInfoForFilename(final String filename) {
-        if (this.fnMap == null) {
+    public Integer getDefaultBVMIndexForFilename(final String filename, final boolean buildListIfMissing) {
+        if (this.fnMap == null && buildListIfMissing) {
             generateFilenameMapDV();
         }
-        return this.fnMap.get(filename);
+        if (this.fnMap == null) {
+            List<BVMImageInfo> iil = getDefaultImageList();
+            for (int i = 0 ; i < iil.size() ; i++) {
+                if (filename.equals(iil.get(i).filename))
+                    return i;
+            }
+            return null;
+        } else {
+            return this.fnMap.get(filename);
+        }
     }
     
     @JsonIgnore

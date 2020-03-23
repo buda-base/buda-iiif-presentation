@@ -47,7 +47,7 @@ public class ImageInfoList {
     }
     
     public List<ImageInfo> list = null;
-    public Map<String,ImageInfo> map = null;
+    public Map<String,Integer> map = null;
     
     public ImageInfoList(List<ImageInfo> list) {
         list.removeIf(imageInfo -> imageInfo.filename.endsWith("json"));
@@ -56,18 +56,34 @@ public class ImageInfoList {
     
     private void generateMap() {
         this.map = new HashMap<>();
+        int idx = 0;
         for (final ImageInfo ii: this.list) {
-            this.map.put(ii.filename, ii);
+            this.map.put(ii.filename, idx);
+            idx += 1;
         }
     }
     
     public ImageInfo getFromFilename(final String fn) {
         if (this.map == null)
             generateMap();
-        return this.map.get(fn);
+        Integer idx = this.map.get(fn);
+        if (idx == null) return null;
+        return this.list.get(idx);
     }
  
+    public Integer getIdxFromFilename(final String fn) {
+        if (this.map == null)
+            generateMap();
+        return this.map.get(fn);
+    }
+    
+    // seq num starts at 1
     public Integer getSeqNumFromFilename(final String fn) {
+        if (this.map != null) {
+            Integer res = this.map.get(fn);
+            if (res == null) return null;
+            return res+1;
+        }
         // we don't build the map for this one
         int res = 1; // seqNum starts at 1
         for (final ImageInfo i : this.list) {
