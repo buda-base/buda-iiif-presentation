@@ -16,6 +16,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import de.digitalcollections.iiif.model.enums.ViewingDirection;
+
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
@@ -82,15 +85,21 @@ public class BVM {
         }
     }
 
-    public static enum ViewingDirection {
-        LTR("left-to-right"),
-        RTL("right-to-left"),
-        TTB("top-to-bottom");
+    public static enum BVMViewingDirection {
+        LTR("left-to-right", ViewingDirection.LEFT_TO_RIGHT),
+        RTL("right-to-left", ViewingDirection.RIGHT_TO_LEFT),
+        TTB("top-to-bottom", ViewingDirection.TOP_TO_BOTTOM);
 
         private String localName;
+        private ViewingDirection iiifViewingDirection;
 
-        private ViewingDirection(String localName) {
+        private BVMViewingDirection(String localName, ViewingDirection iiifViewingDirection) {
             this.localName = localName;
+            this.iiifViewingDirection = iiifViewingDirection;
+        }
+        
+        public ViewingDirection getIIIFViewingDirection() {
+            return this.iiifViewingDirection;
         }
         
         @JsonValue
@@ -98,8 +107,8 @@ public class BVM {
             return this.localName;
         }
 
-        public static ViewingDirection fromString(String tag) {
-            for (ViewingDirection at : ViewingDirection.values()) {
+        public static BVMViewingDirection fromString(String tag) {
+            for (BVMViewingDirection at : BVMViewingDirection.values()) {
                 if (at.localName.equals(tag)) {
                     return at;
                 }
@@ -333,7 +342,7 @@ public class BVM {
     public List<BVMPagination> pagination = null;
     @JsonInclude(Include.NON_NULL)
     @JsonProperty(value="viewing-direction")
-    public ViewingDirection viewingDirection = null;
+    public BVMViewingDirection viewingDirection = null;
     @JsonProperty(value="status")
     public BVMStatus status = null;
     @JsonInclude(Include.NON_NULL)

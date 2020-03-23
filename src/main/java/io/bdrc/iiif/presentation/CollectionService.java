@@ -82,7 +82,7 @@ public class CollectionService {
                 sb.append("?continuous=true");
             }
             final Manifest m = new Manifest(sb.toString());
-            m.setLabel(ManifestService.getLabel(i, wi.labels, needsVolumeIndication));
+            m.setLabel(ManifestService.getPVforLS(wi.labels, needsVolumeIndication ? i : null));
             c.addManifest(m);
         }
     }
@@ -102,7 +102,7 @@ public class CollectionService {
                 sb.append("?continuous=true");
             }
             final Manifest m = new Manifest(sb.toString());
-            m.setLabel(ManifestService.getLabel(i, wi.labels, needsVolumeIndication));
+            m.setLabel(ManifestService.getPVforLS(wi.labels, needsVolumeIndication ? i : null));
             c.addManifest(m);
         }
     }
@@ -181,7 +181,7 @@ public class CollectionService {
                     }
                 }
                 final Manifest manifest = new Manifest(manifestUrl);
-                manifest.setLabel(ManifestService.getLabel(vi.volumeNumber, iInf.labels, needsVolumeIndication));
+                manifest.setLabel(ManifestService.getPVforLS(iInf.labels, needsVolumeIndication ? vi.volumeNumber : null));
                 collection.addManifest(manifest);
             }
         }

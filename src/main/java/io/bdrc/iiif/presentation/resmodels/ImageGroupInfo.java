@@ -7,15 +7,18 @@ import static io.bdrc.iiif.presentation.AppConstants.TMPPREFIX;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QuerySolution;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.SKOS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +53,8 @@ public class ImageGroupInfo {
     public URI iiifManifestUri = null;
     @JsonProperty("partInfo")
     public List<PartInfo> partInfo = null;
+    @JsonProperty("labels")
+    public List<LangString> labels = null;
 
     private static final Logger logger = LoggerFactory.getLogger(ImageGroupInfoService.class);
 
@@ -63,6 +68,13 @@ public class ImageGroupInfo {
         this.imageInstanceUri = sol.getResource("iinstanceId").getURI();
         if (sol.contains("?ric")) {
             this.restrictedInChina = sol.get("?ric").asLiteral().getBoolean();
+        }
+        if (sol.contains("?prefLabel")) {
+            if (this.labels == null) {
+                this.labels = new ArrayList<>();
+            }
+            Literal l = sol.get("?prefLabel").asLiteral();
+            this.labels.add(new LangString(l)); 
         }
         if (sol.contains("?volumeNumber")) {
             this.volumeNumber = sol.get("?volumeNumber").asLiteral().getInt();
@@ -120,6 +132,15 @@ public class ImageGroupInfo {
         final Statement volumeNumberS = volume.getProperty(m.getProperty(BDO, "volumeNumber"));
         if (volumeNumberS != null) {
             this.volumeNumber = volumeNumberS.getInt();
+        }
+        
+        // TODO: use statement iterator
+        final Statement prefLabelS = volume.getProperty(SKOS.prefLabel);
+        if (prefLabelS != null) {
+            if (this.labels == null) {
+                this.labels = new ArrayList<>();
+            }
+            this.labels.add(new LangString(prefLabelS.getLiteral())); 
         }
 
         final Statement volumePagesTbrcIntroS = volume.getProperty(m.getProperty(BDO, "volumePagesTbrcIntro"));

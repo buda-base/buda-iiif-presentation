@@ -237,7 +237,7 @@ public class PresentationTest {
                     manifestUrl = IIIFPresPrefix + manifestId + "/manifest";
                 }
                 final Manifest manifest = new Manifest(manifestUrl);
-                manifest.setLabel(ManifestService.getLabel(vi.volumeNumber, wi.labels, needsVolumeIndication));
+                manifest.setLabel(ManifestService.getPVforLS(wi.labels, needsVolumeIndication ? vi.volumeNumber : null));
                 collection.addManifest(manifest);
             }
         }
