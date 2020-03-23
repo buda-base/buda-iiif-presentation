@@ -1,0 +1,89 @@
+{
+	"for-volume": "bdr:I0890",
+	"spec-version": "0.1.0",
+	"rev": "860f508e-608e-484d-9fc3-62392fab0b12",
+	"attribution": [{"@value": "data contributed by rKTs", "@language": "en"}],
+	"note": [{"@value":"not sure about the order of page 2"}],
+	"viewing-direction": "top-to-bottom",
+	"status": "released",
+    "volume-label": [
+        {"@value": "some label", "@language": "en"}
+    ],
+	"changes": [
+		{
+			"time": "2020-02-03T11:35:30.00Z",
+			"user": "bdr:U0002",
+			"message": {"@value": "initial version", "@language": "en"}
+		}
+	],
+	"pagination": [
+		{   
+			"id": "pgfolios",
+			"type": "folios",
+			"note": [{"@value": "from the original blockprint", "@language": "en"}]
+		}
+	],
+	"sections": [],
+	"default-view": "view1",
+	"view": {
+		"view1": {
+			"imagelist": [
+				{
+					"filename": "08900001.tif",
+					"tags": ["T0005"]
+				},
+				{
+					"filename": "08900002.tif",
+					"tags": ["T0005"],
+					"hidden": true
+				},
+				{
+					"filename": "08900003.tif",
+					"tags": ["T0001"]
+				},
+				{
+					"filename": "08900004.tif",
+					"pagination": { "pgfolios": {"value": "1a"} },
+					"tags": ["T0021"]
+				},
+				{
+					"pagination": { "pgfolios": {"value": "1b"} },
+					"tags": ["T0020"]
+				},
+				{
+					"filename": "08900005.tif",
+					"pagination": { "pgfolios": {"value": "2a"} }
+				},
+				{
+					"filename": "08900009.tif",
+					"pagination": { "pgfolios": {"value": "2b"} }
+				},
+				{
+					"filename": "08900010.tif",
+					"pagination": { "pgfolios": {"value": "2'a"} }
+				},
+				{
+					"filename": "0890006.tif",
+					"pagination": { "pgfolios": {"value": "2'b"} }
+				},
+				{
+					"filename": "0890008.tif",
+					"pagination": { "pgfolios": {"value": "2'b"} },
+					"tags": ["T0018"],
+					"duplicate-of": "0890006.tif"
+				},
+				{
+					"filename": "0890007.tif",
+					"pagination": { "pgfolios": {"value": "3a"} }
+				}
+			]
+		}
+	},
+	"appData": {
+        "default-string-lang": "en",
+        "show-checked-images": true,
+        "show-hidden-images": true,
+        "margin-indication-odd": "{volname}-{sectionname}-{pagenum:bo}",
+        "margin-indication-even": ""
+    }
+}

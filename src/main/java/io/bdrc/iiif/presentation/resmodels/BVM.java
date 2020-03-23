@@ -289,6 +289,7 @@ public class BVM {
         
         @JsonIgnore
         public BVMPaginationItem getDefaultPaginationValue(BVM root) {
+            if (this.pagination == null) return null;
             for (final BVMPagination p : root.pagination) {
                 if (this.pagination.containsKey(p.id)) {
                     return pagination.get(p.id);
