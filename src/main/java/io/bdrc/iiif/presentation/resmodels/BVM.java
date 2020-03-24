@@ -253,8 +253,8 @@ public class BVM {
         @JsonProperty(value="hidden")
         public Boolean hidden = Boolean.FALSE;
         @JsonInclude(value = Include.CUSTOM, valueFilter = TrueFilter.class)
-        @JsonProperty(value="checked")
-        public Boolean checked = Boolean.TRUE;
+        @JsonProperty(value="reviewed")
+        public Boolean reviewed = Boolean.TRUE;
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("pagination")
         public Map<String,BVMPaginationItem> pagination = null;
