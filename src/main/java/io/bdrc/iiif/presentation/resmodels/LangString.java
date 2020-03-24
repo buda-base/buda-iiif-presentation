@@ -16,7 +16,7 @@ public class LangString {
     public LangString(Literal l) {
         this.value = l.getString();
         this.language = l.getLanguage();
-    }
-
+    } 
+    
     public LangString() {}
 }
