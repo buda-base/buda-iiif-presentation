@@ -188,7 +188,7 @@ public class BVM {
         public ChangeLogItem() { }
         
         public void validate() throws BDRCAPIException {
-            if (this.userQname == null || this.message == null || this.time == null)
+            if (this.message == null || this.time == null)
                 throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: invalid change, missing field");
         }
     }
