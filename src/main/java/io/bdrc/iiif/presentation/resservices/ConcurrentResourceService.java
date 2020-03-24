@@ -74,6 +74,7 @@ public class ConcurrentResourceService<T> {
                 return null;
             }
         }
+        logger.debug("didn't find any entry in cache for {}", resId);
         T resT = getFromApi(resId);
         putInCache(resId, resT);
         return resT;
@@ -126,6 +127,7 @@ public class ConcurrentResourceService<T> {
             }
             return resCached;
         }
+        logger.debug("didn't find any entry in cache for {}", resId);
         // unintuitive way to perform the (necessary) atomic operation in the list
         CompletableFuture<T> res = new CompletableFuture<>();
         CompletableFuture<T> resFromList = futures.putIfAbsent(resId, res);

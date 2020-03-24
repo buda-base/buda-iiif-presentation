@@ -153,17 +153,30 @@ public class ManifestService {
         return canvas;
     }
 
-    public static Sequence getSequenceFromBvm(final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi, final String volumeId, final int ilBeginSeqNum, final int ilEndSeqNum, final boolean fairUse, final BVM bvm) throws BDRCAPIException {
+    public static Sequence getSequenceFromBvm(final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi, final String volumeId, final Integer ilBeginSeqNum, final Integer ilEndSeqNum, final boolean fairUse, final BVM bvm) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence(IIIFPresPrefix + id.getId() + "/sequence/mainbvm");
         // all indices start at 1
         Canvas firstCanvas = null;
-        // we're always in the not fairUse case with BVM, in order to simplify all that
-        final String beginFileName = imageInfoList.get(ilBeginSeqNum-1).filename;
-        final String endFileName = imageInfoList.get(ilEndSeqNum-1).filename;
-        final Integer bvmBeginIndex = bvm.getDefaultBVMIndexForFilename(beginFileName, true);
-        final Integer bvmEndIndex = bvm.getDefaultBVMIndexForFilename(endFileName, true);
-        if (bvmBeginIndex == null || bvmEndIndex == null) {
-            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filenames from image list not in bvm: "+beginFileName+" or "+endFileName);
+        // we're always in the not fairUse case with BVM
+        // This handling of the null begin/end seqnum makes it better for cases where we just want
+        // all the images
+        final Integer bvmBeginIndex;
+        if (ilBeginSeqNum != null) {
+            final String beginFileName = imageInfoList.get(ilBeginSeqNum-1).filename;
+            bvmBeginIndex = bvm.getDefaultBVMIndexForFilename(beginFileName, true);
+            if (bvmBeginIndex == null)
+                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from image list not in bvm: "+beginFileName);
+        } else {
+            bvmBeginIndex = 0;
+        }
+        final Integer bvmEndIndex;
+        if (ilEndSeqNum != null) {
+            final String endFileName = imageInfoList.get(ilEndSeqNum-1).filename;
+            bvmEndIndex = bvm.getDefaultBVMIndexForFilename(endFileName, true);
+            if (bvmEndIndex == null)
+                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from image list not in bvm: "+endFileName);
+        } else {
+            bvmEndIndex = bvm.getDefaultImageList().size()-1;
         }
         final List<BVMImageInfo> bvmIil = bvm.getDefaultImageList();
         for (int bvmImgIdx = bvmBeginIndex; bvmImgIdx <= bvmEndIndex; bvmImgIdx++) {
@@ -195,11 +208,13 @@ public class ManifestService {
         return mainSeq;
     }
     
-    public static Sequence getSequenceFrom(final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi, final String volumeId, final int beginIndex, final int endIndex, final boolean fairUse, final BVM bvm) throws BDRCAPIException {
+    public static Sequence getSequenceFrom(final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi, final String volumeId, Integer beginIndex, Integer endIndex, final boolean fairUse, final BVM bvm) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence(IIIFPresPrefix + id.getId() + "/sequence/main");
         if (bvm != null && !fairUse) {
             return getSequenceFromBvm(id, imageInfoList, vi, volumeId, beginIndex, endIndex, fairUse, bvm);
         }
+        if (beginIndex == null) beginIndex = 1+vi.pagesIntroTbrc;
+        if (endIndex == null) endIndex = imageInfoList.size();
         // all indices start at 1
         mainSeq.setViewingDirection(getViewingDirection(imageInfoList, bvm));
         Canvas firstCanvas = null;
@@ -300,7 +315,7 @@ public class ManifestService {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
         }
         // TODO: have a a way to test BVMs? maybe a query url?
-        if (bvm.status != BVMStatus.released) {
+        if (bvm != null && bvm.status != BVMStatus.released) {
             bvm = null;
         }
         final Manifest manifest = new Manifest(IIIFPresPrefix + id.getId() + "/manifest");
@@ -310,7 +325,7 @@ public class ManifestService {
         manifest.addLogo(IIIF_IMAGE_PREFIX + "static::logo.png/full/max/0/default.png");
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID || id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
             // if label is for the whole volume: first bvm, if none then image group info, if not the volume number:
-            if (bvm.label != null && !bvm.label.isEmpty()) {
+            if (bvm != null && bvm.label != null && !bvm.label.isEmpty()) {
                 manifest.setLabel(getPVforLS(bvm.label, vi.volumeNumber));
             } else if (vi != null && vi.labels != null && !vi.labels.isEmpty()) {
                 manifest.setLabel(getPVforLS(vi.labels, vi.volumeNumber));
@@ -327,8 +342,8 @@ public class ManifestService {
         // TODO: when there's a BVM, perhaps we should only rely on it to display/not display images,
         // including scan request pages...
         int nbPagesIntro = vi.pagesIntroTbrc;
-        int bPage;
-        int ePage;
+        Integer bPage;
+        Integer ePage;
         final int totalPages = imageInfoList.size();
         if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE) {
             bPage = 1 + nbPagesIntro;
@@ -348,8 +363,8 @@ public class ManifestService {
                     ePage = location.epagenum;
             }
         } else {
-            bPage = id.getBPageNum() == null ? 1 + nbPagesIntro : id.getBPageNum().intValue();
-            ePage = id.getEPageNum() == null ? totalPages : id.getEPageNum().intValue();
+            bPage = id.getBPageNum();
+            ePage = id.getEPageNum();
         }
         logger.debug("computed: {}-{}", bPage, ePage);
         final Sequence mainSeq = getSequenceFrom(id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
@@ -366,8 +381,9 @@ public class ManifestService {
         return manifest;
     }
 
-    public static List<OtherContent> getRenderings(final String volumeId, final int bPage, final int ePage) {
-        final String fullId = volumeId + "::" + bPage + "-" + ePage;
+    public static List<OtherContent> getRenderings(final String volumeId, Integer bPage, Integer ePage) {
+        if (bPage == null) bPage = 1;
+        final String fullId = volumeId + "::" + bPage + "-" + (ePage != null ? ePage : "");
         final OtherContent oct = new OtherContent(PDF_URL_PREFIX + "v:" + fullId, "application/pdf");
         oct.setLabel(new PropertyValue("Download as PDF"));
         final OtherContent oct1 = new OtherContent(ZIP_URL_PREFIX + "v:" + fullId, "application/zip");

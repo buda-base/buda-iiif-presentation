@@ -1,6 +1,7 @@
 package io.bdrc.iiif.presentation;
 
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_BVM;
 import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_IIL;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix_coll;
@@ -48,7 +49,7 @@ public class PresentationTest {
 
     @BeforeClass
     public static void before() {
-
+        ServiceCache.init();
     }
 
     // @Test
@@ -177,6 +178,7 @@ public class PresentationTest {
         vi.instanceUri = BDR + "MW22084";
         vi.imageInstanceUri = BDR + "W22084";
         vi.volumeNumber = 1;
+        ServiceCache.put(Optional.empty(), CACHEPREFIX_BVM + "I0890");
         Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:I0890", false, wo.getPartForInstanceId("bdr:MW22084"));
         // final File fout2 = new File("/tmp/workOutline-manifest.json");
         // IIIFApiObjectMapperProvider.writer.writeValue(fout2, man);
@@ -201,6 +203,8 @@ public class PresentationTest {
         vi.instanceUri = BDR + "MW22084";
         vi.imageInstanceUri = BDR + "W22084";
         vi.volumeNumber = 1;
+        // empty bvm so that it's not fetched
+        ServiceCache.put(Optional.empty(), CACHEPREFIX_BVM + "I0890");
         Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:I0890", false, wi);
         // final File fout2 = new File("/tmp/wv-manifest.json");
         // AppConstants.IIIFMAPPER.writer().writeValue(fout2, man);

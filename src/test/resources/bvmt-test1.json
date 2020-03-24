@@ -63,17 +63,17 @@
 					"pagination": { "pgfolios": {"value": "2'a"} }
 				},
 				{
-					"filename": "0890006.tif",
+					"filename": "08900006.tif",
 					"pagination": { "pgfolios": {"value": "2'b"} }
 				},
 				{
-					"filename": "0890008.tif",
+					"filename": "08900008.tif",
 					"pagination": { "pgfolios": {"value": "2'b"} },
 					"tags": ["T0018"],
-					"duplicate-of": "0890006.tif"
+					"duplicate-of": "08900006.tif"
 				},
 				{
-					"filename": "0890007.tif",
+					"filename": "08900007.tif",
 					"pagination": { "pgfolios": {"value": "3a"} }
 				}
 			]

@@ -42,7 +42,6 @@ public class ServiceCache {
             log.debug("got object in cache for key: {}", key);
             CacheMetrics.found();
         } else {
-
             log.debug("can't get object in cache for key: {}", key);
             CacheMetrics.notFound();
         }
