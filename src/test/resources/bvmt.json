@@ -52,10 +52,11 @@
 				},
 				{
 					"filename": "I1KG9128002.tif",
+					"id": "to be ignored with no error, at least for now",
 					"pagination": { "pgfolios": {"value": "1a", "section": "intro"} },
 					"indication": { "@value": "kha", "@language": "bo-x-ewts" },
 					"tags": ["T0021", "T0011"],
-					"checked": false
+					"reviewed": false
 				},
 				{
 					"pagination": { "pgfolios": {"value": "1a"} },

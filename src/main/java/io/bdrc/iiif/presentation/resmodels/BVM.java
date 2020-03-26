@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -187,7 +188,7 @@ public class BVM {
         public ChangeLogItem() { }
         
         public void validate() throws BDRCAPIException {
-            if (this.userQname == null || this.message == null || this.time == null)
+            if (this.message == null || this.time == null)
                 throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: invalid change, missing field");
         }
     }
@@ -227,6 +228,7 @@ public class BVM {
         }
     }
     
+    @JsonIgnoreProperties({"id"})
     public static final class BVMImageInfo {
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("tags")
@@ -355,6 +357,7 @@ public class BVM {
     private Map<String,PaginationType> paginationMap = null;
     @JsonIgnore
     private Map<String,Integer> fnMap = null;
+    
     
     // in the default view
     private void generateFilenameMapDV() {
