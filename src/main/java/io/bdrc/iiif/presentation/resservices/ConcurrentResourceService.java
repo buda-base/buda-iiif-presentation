@@ -143,6 +143,7 @@ public class ConcurrentResourceService<T> {
             if (e.getCode() == 404 && this.canReturnNull) {
                 res.complete(null);
             } else {
+                logger.error("getFromApi exception, code "+e.getCode(), e);
                 res.completeExceptionally(e);
             }
             // this means that we save each failed fetch using empty Optionals in the
