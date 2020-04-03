@@ -140,10 +140,10 @@ public class ConcurrentResourceService<T> {
         try {
             resT = getFromApi(resId);
         } catch (BDRCAPIException e) {
-            if (e.getCode() == 404 && this.canReturnNull) {
+            if (e.getStatus() == 404 && this.canReturnNull) {
                 res.complete(null);
             } else {
-                logger.error("getFromApi exception, code "+e.getCode(), e);
+                logger.error("getFromApi exception, status "+e.getStatus(), e);
                 res.completeExceptionally(e);
             }
             // this means that we save each failed fetch using empty Optionals in the

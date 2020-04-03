@@ -76,6 +76,10 @@ public class BDRCAPIException extends Exception {
         this.status = status;
     }
 
+    public int getStatus() {
+        return this.status;
+    }
+    
     public void setCode(int code) {
         this.code = code;
     }
