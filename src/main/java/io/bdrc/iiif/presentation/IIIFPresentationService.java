@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -251,6 +250,7 @@ public class IIIFPresentationService {
         InstanceOutline wo = null;
         // quite specific: we want to compute wo here only if we don't have the volume
         // id
+        logger.debug("for {} got ID {}", identifier, id);
         if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE && id.getInstanceId() != null && id.getImageGroupId() == null) {
             try {
                 wo = InstanceOutlineService.Instance.getAsync(id.getInstanceId()).get();
@@ -259,6 +259,7 @@ public class IIIFPresentationService {
                 throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
         }
+        logger.debug("for {} got InstanceOutline {}", identifier, wo);
         String volumeId = id.getImageGroupId();
         if (volumeId == null) {
             if (iInf != null)
@@ -275,6 +276,7 @@ public class IIIFPresentationService {
         } catch (InterruptedException | ExecutionException e) {
             throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
+        logger.debug("for {} got ImageGroupInfo {}", identifier, vi);
         if (vi.restrictedInChina && GeoLocation.isFromChina(req)) {
             return ResponseEntity.status(HttpStatus.resolve(403)).cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
         }
@@ -430,8 +432,8 @@ public class IIIFPresentationService {
     }
 
     @RequestMapping(value = "/bvm/ig:{resourceQname}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<StreamingResponseBody> getImageInfoFile(@PathVariable String resourceQname, HttpServletRequest request, HttpServletResponse resp)
-            throws BDRCAPIException {
+    public ResponseEntity<StreamingResponseBody> getImageInfoFile(@PathVariable String resourceQname, HttpServletRequest request,
+            HttpServletResponse resp) throws BDRCAPIException {
         if (!resourceQname.startsWith("bdr:I"))
             throw new BDRCAPIException(404, AppConstants.GENERIC_APP_ERROR_CODE, "no resource " + resourceQname);
         BVM bvm;
@@ -443,9 +445,9 @@ public class IIIFPresentationService {
         if (bvm == null) {
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, "resource not available");
         }
-        return ResponseEntity.status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic()).body(getStream(bvm, BVMService.om));
+        return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON_UTF8)
+                .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic())
+                .body(getStream(bvm, BVMService.om));
     }
 
     public static String getTwoLettersBucket(String st) {
@@ -523,8 +525,7 @@ public class IIIFPresentationService {
         BVMService.Instance.putInCache(bvm, resourceLocalName);
         return ResponseEntity.status(created ? HttpStatus.CREATED : HttpStatus.OK).eTag(newrev)
                 // TODO: add location? sort of expected for HttpStatus 201
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .body("{\"ok:\" true, \"rev\": \"" + newrev + "\"}");
+                .contentType(MediaType.APPLICATION_JSON_UTF8).body("{\"ok:\" true, \"rev\": \"" + newrev + "\"}");
     }
 
     @PostMapping(value = "/callbacks/github/bdrc-auth")
@@ -550,7 +551,7 @@ public class IIIFPresentationService {
         };
         return stream;
     }
-    
+
     private StreamingResponseBody getStream(Object obj) {
         return getStream(obj, AppConstants.IIIFMAPPER);
     }

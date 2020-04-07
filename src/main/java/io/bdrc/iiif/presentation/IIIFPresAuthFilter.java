@@ -101,6 +101,7 @@ public class IIIFPresAuthFilter implements Filter {
             chain.doFilter(request, response);
         } catch (Exception e) {
             log.error("Auth filter did not go through properly ", e);
+            ((HttpServletResponse) response).setStatus(417);
             throw e;
         }
     }
