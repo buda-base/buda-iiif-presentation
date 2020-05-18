@@ -41,6 +41,7 @@ import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import io.bdrc.auth.Access;
 import io.bdrc.auth.Access.AccessLevel;
 import io.bdrc.auth.AuthProps;
+import io.bdrc.auth.model.User;
 import io.bdrc.auth.rdf.RdfAuthModel;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.AccessType;
@@ -281,8 +282,11 @@ public class IIIFPresentationService {
             return ResponseEntity.status(HttpStatus.resolve(403)).cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
         }
         Access acc = (Access) req.getAttribute("access");
+        boolean isAdmin = false;
         if (acc == null)
             acc = new Access();
+        User usr = acc.getUser();
+        isAdmin = usr.isAdmin();
         final String accessShortName = getLocalName(vi.access.getUri());
         final String statusShortName = getLocalName(vi.statusUri);
         final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.imageInstanceUri);
@@ -325,7 +329,8 @@ public class IIIFPresentationService {
         }
         // TODO: case where a part is asked with an outline, we need to make sure that
         // we get the part asked by the user
-        final Manifest resmanifest = ManifestService.getManifestForIdentifier(id, vi, continuous, volumeId, al == AccessLevel.FAIR_USE, rootPart);
+        final Manifest resmanifest = ManifestService.getManifestForIdentifier(isAdmin, id, vi, continuous, volumeId, al == AccessLevel.FAIR_USE,
+                rootPart);
         if (vi.access == AccessType.OPEN) {
             return ResponseEntity.status(HttpStatus.OK)
                     .cacheControl(CacheControl.maxAge(Long.parseLong(AuthProps.getProperty("max-age")), TimeUnit.SECONDS).cachePublic())

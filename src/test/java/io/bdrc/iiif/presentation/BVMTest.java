@@ -1,9 +1,8 @@
 package io.bdrc.iiif.presentation;
 
-import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_IIL;
 import static io.bdrc.iiif.presentation.AppConstants.BDR;
 import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_BVM;
-import static org.junit.Assert.assertTrue;
+import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_IIL;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,8 +19,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +31,6 @@ import io.bdrc.iiif.presentation.resmodels.BVM;
 import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
 import io.bdrc.iiif.presentation.resmodels.ImageInfoList;
 import io.bdrc.iiif.presentation.resmodels.InstanceInfo;
-import io.bdrc.iiif.presentation.resmodels.BVM.ChangeLogItem;
 import io.bdrc.iiif.presentation.resservices.BVMService;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
@@ -42,9 +40,9 @@ import io.bdrc.libraries.IdentifierException;
 public class BVMTest {
 
     final static String TESTDIR = "src/test/resources/";
-    
+
     public final static ObjectMapper testom = new ObjectMapper();
-    
+
     public static final class TrueFilter {
 
         @Override
@@ -56,42 +54,44 @@ public class BVMTest {
             return Boolean.TRUE.equals(v);
         }
     }
-    
+
     public static final class TestBooleanDefaultTrue {
         @JsonInclude(value = Include.CUSTOM, valueFilter = TrueFilter.class)
-        @JsonProperty(value="display")
+        @JsonProperty(value = "display")
         public Boolean display = Boolean.TRUE;
         public String s = "test";
-        
-        public TestBooleanDefaultTrue() {}
+
+        public TestBooleanDefaultTrue() {
+        }
     }
 
     public static final class TestBooleanDefaultFalse {
         @JsonInclude(Include.NON_DEFAULT)
-        @JsonProperty(value="display")
+        @JsonProperty(value = "display")
         public Boolean display = Boolean.FALSE;
         public String s = "test";
-        
-        public TestBooleanDefaultFalse() {}
+
+        public TestBooleanDefaultFalse() {
+        }
     }
-    
+
     @Test
     public void readComplexBVMTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException {
         InputStream is = BVMTest.class.getClassLoader().getResourceAsStream("bvmt.json");
         BVM bvm = BVMService.om.readValue(is, BVM.class);
         bvm.validate();
-        //ChangeLogItem cli = bvm.getLatestChangeLogItem();
+        // ChangeLogItem cli = bvm.getLatestChangeLogItem();
         BVMService.om.writer(BVMService.printer).writeValue(System.out, bvm);
-        //testom.writeValue(System.out, new TestBooleanDefaultTrue());
-        //testom.writeValue(System.err, new TestBooleanDefaultTrue());
-        //testom.writeValue(System.out, new TestBooleanDefaultFalse());
+        // testom.writeValue(System.out, new TestBooleanDefaultTrue());
+        // testom.writeValue(System.err, new TestBooleanDefaultTrue());
+        // testom.writeValue(System.out, new TestBooleanDefaultFalse());
     }
-    
+
     @BeforeClass
     public static void init() {
         ServiceCache.init();
     }
-    
+
     @Test
     public void volumeManifestTest() throws BDRCAPIException, JsonGenerationException, JsonMappingException, IOException, IdentifierException {
         InputStream is = BVMTest.class.getClassLoader().getResourceAsStream("bvmt-test1.json");
@@ -112,7 +112,7 @@ public class BVMTest {
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workOutline.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final InstanceInfo wi = new InstanceInfo(m, "bdr:MW22084");
-        Manifest man = ManifestService.getManifestForIdentifier(id, vi, false, "bdr:I0890", false, wi);
+        Manifest man = ManifestService.getManifestForIdentifier(false, id, vi, false, "bdr:I0890", false, wi);
         final File fout2 = new File("/tmp/bvm-v-manifest.json");
         AppConstants.IIIFMAPPER.writer().writeValue(fout2, man);
     }

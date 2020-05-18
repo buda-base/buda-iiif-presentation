@@ -32,16 +32,16 @@ import de.digitalcollections.iiif.model.sharedcanvas.Sequence;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.BDRCPresentationImageService;
 import io.bdrc.iiif.presentation.resmodels.BVM;
-import io.bdrc.iiif.presentation.resmodels.ImageInfoList.ImageInfo;
-import io.bdrc.iiif.presentation.resmodels.ImageInfoList;
-import io.bdrc.iiif.presentation.resmodels.LangString;
-import io.bdrc.iiif.presentation.resmodels.Location;
-import io.bdrc.iiif.presentation.resmodels.PartInfo;
 import io.bdrc.iiif.presentation.resmodels.BVM.BVMImageInfo;
 import io.bdrc.iiif.presentation.resmodels.BVM.BVMPaginationItem;
 import io.bdrc.iiif.presentation.resmodels.BVM.BVMStatus;
 import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
+import io.bdrc.iiif.presentation.resmodels.ImageInfoList;
+import io.bdrc.iiif.presentation.resmodels.ImageInfoList.ImageInfo;
 import io.bdrc.iiif.presentation.resmodels.InstanceOutline;
+import io.bdrc.iiif.presentation.resmodels.LangString;
+import io.bdrc.iiif.presentation.resmodels.Location;
+import io.bdrc.iiif.presentation.resmodels.PartInfo;
 import io.bdrc.iiif.presentation.resservices.BVMService;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.libraries.Identifier;
@@ -117,7 +117,8 @@ public class ManifestService {
         }
     }
 
-    public static Canvas addOneCanvas(final int imgSeqNum, final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi, final String volumeId, final Sequence mainSeq, final BVMImageInfo bvmIi, final BVM bvm) {
+    public static Canvas addOneCanvas(final int imgSeqNum, final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi,
+            final String volumeId, final Sequence mainSeq, final BVMImageInfo bvmIi, final BVM bvm) {
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum - 1);
         final Integer size = imageInfo.size;
         if (size != null && size > 1500000)
@@ -126,7 +127,7 @@ public class ManifestService {
         mainSeq.addCanvas(canvas);
         return canvas;
     }
-    
+
     public static Canvas addCopyrightCanvas(final Sequence mainSeq, final String volumeId) {
         final String canvasUri = IIIFPresPrefix + "v:" + volumeId + "/canvas/" + AppConstants.COPYRIGHT_PAGE_CANVAS_ID;
         final Canvas canvas = new Canvas(canvasUri);
@@ -153,30 +154,32 @@ public class ManifestService {
         return canvas;
     }
 
-    public static Sequence getSequenceFromBvm(final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi, final String volumeId, final Integer ilBeginSeqNum, final Integer ilEndSeqNum, final boolean fairUse, final BVM bvm) throws BDRCAPIException {
+    public static Sequence getSequenceFromBvm(final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi, final String volumeId,
+            final Integer ilBeginSeqNum, final Integer ilEndSeqNum, final boolean fairUse, final BVM bvm) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence(IIIFPresPrefix + id.getId() + "/sequence/mainbvm");
         // all indices start at 1
         Canvas firstCanvas = null;
         // we're always in the not fairUse case with BVM
-        // This handling of the null begin/end seqnum makes it better for cases where we just want
+        // This handling of the null begin/end seqnum makes it better for cases where we
+        // just want
         // all the images
         final Integer bvmBeginIndex;
         if (ilBeginSeqNum != null) {
-            final String beginFileName = imageInfoList.get(ilBeginSeqNum-1).filename;
+            final String beginFileName = imageInfoList.get(ilBeginSeqNum - 1).filename;
             bvmBeginIndex = bvm.getDefaultBVMIndexForFilename(beginFileName, true);
             if (bvmBeginIndex == null)
-                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from image list not in bvm: "+beginFileName);
+                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from image list not in bvm: " + beginFileName);
         } else {
             bvmBeginIndex = 0;
         }
         final Integer bvmEndIndex;
         if (ilEndSeqNum != null) {
-            final String endFileName = imageInfoList.get(ilEndSeqNum-1).filename;
+            final String endFileName = imageInfoList.get(ilEndSeqNum - 1).filename;
             bvmEndIndex = bvm.getDefaultBVMIndexForFilename(endFileName, true);
             if (bvmEndIndex == null)
-                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from image list not in bvm: "+endFileName);
+                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from image list not in bvm: " + endFileName);
         } else {
-            bvmEndIndex = bvm.getDefaultImageList().size()-1;
+            bvmEndIndex = bvm.getDefaultImageList().size() - 1;
         }
         final List<BVMImageInfo> bvmIil = bvm.getDefaultImageList();
         for (int bvmImgIdx = bvmBeginIndex; bvmImgIdx <= bvmEndIndex; bvmImgIdx++) {
@@ -197,9 +200,9 @@ public class ManifestService {
             } else {
                 final Integer iiLidx = imageInfoList.getIdxFromFilename(bvmIi.filename);
                 if (iiLidx == null) {
-                    throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from bvm not in imagelist: "+bvmIi.filename);
+                    throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from bvm not in imagelist: " + bvmIi.filename);
                 }
-                final Canvas thisCanvas = addOneCanvas(iiLidx+1, id, imageInfoList, vi, volumeId, mainSeq, bvmIi, bvm);
+                final Canvas thisCanvas = addOneCanvas(iiLidx + 1, id, imageInfoList, vi, volumeId, mainSeq, bvmIi, bvm);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
@@ -207,19 +210,22 @@ public class ManifestService {
         mainSeq.setStartCanvas(firstCanvas.getIdentifier());
         return mainSeq;
     }
-    
-    public static Sequence getSequenceFrom(final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi, final String volumeId, Integer beginIndex, Integer endIndex, final boolean fairUse, final BVM bvm) throws BDRCAPIException {
+
+    public static Sequence getSequenceFrom(boolean isAdmin, final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi,
+            final String volumeId, Integer beginIndex, Integer endIndex, final boolean fairUse, final BVM bvm) throws BDRCAPIException {
         final Sequence mainSeq = new Sequence(IIIFPresPrefix + id.getId() + "/sequence/main");
         if (bvm != null && !fairUse) {
             return getSequenceFromBvm(id, imageInfoList, vi, volumeId, beginIndex, endIndex, fairUse, bvm);
         }
-        if (beginIndex == null) beginIndex = 1+vi.pagesIntroTbrc;
-        if (endIndex == null) endIndex = imageInfoList.size();
+        if (beginIndex == null)
+            beginIndex = 1 + vi.pagesIntroTbrc;
+        if (endIndex == null)
+            endIndex = imageInfoList.size();
         // all indices start at 1
         mainSeq.setViewingDirection(getViewingDirection(imageInfoList, bvm));
         Canvas firstCanvas = null;
         final int totalPages = imageInfoList.size();
-        if (!fairUse) {
+        if (!fairUse || isAdmin) {
             for (int imgSeqNum = beginIndex; imgSeqNum <= endIndex; imgSeqNum++) {
                 final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, null);
                 if (firstCanvas == null)
@@ -230,14 +236,17 @@ public class ManifestService {
             final int lastUnaccessiblePage = totalPages - AppConstants.FAIRUSE_PAGES_E;
             // first part: min(firstUnaccessiblePage+1,beginIndex) to
             // min(endIndex,firstUnaccessiblePage+1)
-            for (int imgSeqNum = Math.min(firstUnaccessiblePage, beginIndex); imgSeqNum <= Math.min(endIndex, firstUnaccessiblePage - 1); imgSeqNum++) {
+            for (int imgSeqNum = Math.min(firstUnaccessiblePage, beginIndex); imgSeqNum <= Math.min(endIndex,
+                    firstUnaccessiblePage - 1); imgSeqNum++) {
                 final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, null);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
             // then copyright page, if either beginIndex or endIndex is
             // > FAIRUSE_PAGES_S+tbrcintro and < vi.totalPages-FAIRUSE_PAGES_E
-            if ((beginIndex >= firstUnaccessiblePage && beginIndex <= lastUnaccessiblePage) || (endIndex >= firstUnaccessiblePage && endIndex <= lastUnaccessiblePage) || (beginIndex < firstUnaccessiblePage && endIndex > lastUnaccessiblePage)) {
+            if ((beginIndex >= firstUnaccessiblePage && beginIndex <= lastUnaccessiblePage)
+                    || (endIndex >= firstUnaccessiblePage && endIndex <= lastUnaccessiblePage)
+                    || (beginIndex < firstUnaccessiblePage && endIndex > lastUnaccessiblePage)) {
                 final Canvas thisCanvas = addCopyrightCanvas(mainSeq, volumeId);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
@@ -253,17 +262,17 @@ public class ManifestService {
         mainSeq.setStartCanvas(firstCanvas.getIdentifier());
         return mainSeq;
     }
-    
+
     public static String getVolNumLabelSuffix(final String language, final Integer volnum) {
-        switch(language) {
+        switch (language) {
         case "bo-x-ewts":
             return "_pod/_" + Integer.toString(volnum);
         case "bo":
             return " པོད། " + StringUtils.replaceChars(Integer.toString(volnum), "0123456789", "༠༡༢༣༤༥༦༧༨༩");
         case "en":
-            return " (vol. " + Integer.toString(volnum)+")";
+            return " (vol. " + Integer.toString(volnum) + ")";
         default:
-            return " (" + Integer.toString(volnum)+")";
+            return " (" + Integer.toString(volnum) + ")";
         }
     }
 
@@ -273,27 +282,30 @@ public class ManifestService {
         res.addValue(ManifestService.getLocaleFor("bo-x-ewts"), "pod/_" + volnum);
         return res;
     }
-    
+
     public static PropertyValue getPVforLS(final List<LangString> lslist, final Integer volnum) {
         final PropertyValue res = new PropertyValue();
         for (final LangString ls : lslist) {
-            final String valueSuffix; 
+            final String valueSuffix;
             if (volnum != null) {
                 valueSuffix = getVolNumLabelSuffix(ls.language, volnum);
             } else {
                 valueSuffix = "";
             }
             if (ls.language != null) {
-                res.addValue(ManifestService.getLocaleFor(ls.language), ls.value+valueSuffix);
+                res.addValue(ManifestService.getLocaleFor(ls.language), ls.value + valueSuffix);
             } else {
-                res.addValue(ls.value+valueSuffix);
+                res.addValue(ls.value + valueSuffix);
             }
         }
         return res;
     }
-    
-    public static Manifest getManifestForIdentifier(final Identifier id, final ImageGroupInfo vi, boolean continuous, final String volumeId, final boolean fairUse, final PartInfo rootPart) throws BDRCAPIException {
-        if (id.getType() != Identifier.MANIFEST_ID || (id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE)) {
+
+    public static Manifest getManifestForIdentifier(boolean isAdmin, final Identifier id, final ImageGroupInfo vi, boolean continuous,
+            final String volumeId, final boolean fairUse, final PartInfo rootPart) throws BDRCAPIException {
+        if (id.getType() != Identifier.MANIFEST_ID || (id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID
+                && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE
+                && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE)) {
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
         if (!vi.imageInstanceUri.startsWith(BDR)) {
@@ -324,22 +336,24 @@ public class ManifestService {
             manifest.addLicense(vi.license.getIIIFUri());
         manifest.addLogo(IIIF_IMAGE_PREFIX + "static::logo.png/full/max/0/default.png");
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID || id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
-            // if label is for the whole volume: first bvm, if none then image group info, if not the volume number:
+            // if label is for the whole volume: first bvm, if none then image group info,
+            // if not the volume number:
             if (bvm != null && bvm.label != null && !bvm.label.isEmpty()) {
                 manifest.setLabel(getPVforLS(bvm.label, vi.volumeNumber));
             } else if (vi != null && vi.labels != null && !vi.labels.isEmpty()) {
                 manifest.setLabel(getPVforLS(vi.labels, vi.volumeNumber));
             } else {
-                manifest.setLabel(getVolNumPV(vi.volumeNumber));    
+                manifest.setLabel(getVolNumPV(vi.volumeNumber));
             }
         } else {
             if (rootPart != null && rootPart.labels != null && !rootPart.labels.isEmpty()) {
-                manifest.setLabel(getPVforLS(rootPart.labels, vi.volumeNumber)); 
+                manifest.setLabel(getPVforLS(rootPart.labels, vi.volumeNumber));
             } else {
                 manifest.setLabel(getVolNumPV(vi.volumeNumber));
-            } 
+            }
         }
-        // TODO: when there's a BVM, perhaps we should only rely on it to display/not display images,
+        // TODO: when there's a BVM, perhaps we should only rely on it to display/not
+        // display images,
         // including scan request pages...
         int nbPagesIntro = vi.pagesIntroTbrc;
         Integer bPage;
@@ -358,8 +372,9 @@ public class ManifestService {
                     bPage = location.bpagenum;
                 if (location.evolnum < vi.volumeNumber)
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked ends before this volume");
-                // if evolnum > vi.volumeNumber, we already have bPage correctly set to totalPages
-                if (vi.volumeNumber.equals(location.evolnum)  && location.epagenum != -1)
+                // if evolnum > vi.volumeNumber, we already have bPage correctly set to
+                // totalPages
+                if (vi.volumeNumber.equals(location.evolnum) && location.epagenum != -1)
                     ePage = location.epagenum;
             }
         } else {
@@ -367,7 +382,7 @@ public class ManifestService {
             ePage = id.getEPageNum();
         }
         logger.debug("computed: {}-{}", bPage, ePage);
-        final Sequence mainSeq = getSequenceFrom(id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
+        final Sequence mainSeq = getSequenceFrom(isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
         if (continuous) {
             mainSeq.setViewingHints(VIEWING_HINTS);
         }
@@ -375,14 +390,15 @@ public class ManifestService {
         final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
         manifest.setRenderings(oc);
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE) {
-            addRangesToManifest(manifest, id, vi, volumeId, fairUse, imageInfoList, rootPart, bvm);
+            addRangesToManifest(isAdmin, manifest, id, vi, volumeId, fairUse, imageInfoList, rootPart, bvm);
         }
         manifest.addSequence(mainSeq);
         return manifest;
     }
 
     public static List<OtherContent> getRenderings(final String volumeId, Integer bPage, Integer ePage) {
-        if (bPage == null) bPage = 1;
+        if (bPage == null)
+            bPage = 1;
         final String fullId = volumeId + "::" + bPage + "-" + (ePage != null ? ePage : "");
         final OtherContent oct = new OtherContent(PDF_URL_PREFIX + "v:" + fullId, "application/pdf");
         oct.setLabel(new PropertyValue("Download as PDF"));
@@ -394,7 +410,8 @@ public class ManifestService {
         return ct;
     }
 
-    public static void addRangesToManifest(final Manifest m, final Identifier id, final ImageGroupInfo vi, final String volumeId, final boolean fairUse, final ImageInfoList imageInfoList, final PartInfo rootPi, final BVM bvm) throws BDRCAPIException {
+    public static void addRangesToManifest(boolean isAdmin, final Manifest m, final Identifier id, final ImageGroupInfo vi, final String volumeId,
+            final boolean fairUse, final ImageInfoList imageInfoList, final PartInfo rootPi, final BVM bvm) throws BDRCAPIException {
         if (rootPi == null)
             return;
         final PartInfo volumeRoot = InstanceOutline.getRootPiForVolumeR(rootPi, vi.volumeNumber);
@@ -403,12 +420,14 @@ public class ManifestService {
         final Range r = new Range(IIIFPresPrefix + "v:" + id.getImageGroupId() + "/range/top", "Table of Contents");
         r.setViewingHints("top");
         for (final PartInfo part : volumeRoot.parts) {
-            addSubRangeToRange(m, r, id, part, vi, volumeId, imageInfoList, fairUse, bvm);
+            addSubRangeToRange(isAdmin, m, r, id, part, vi, volumeId, imageInfoList, fairUse, bvm);
         }
         m.addRange(r);
     }
 
-    public static void addSubRangeToRange(final Manifest m, final Range r, final Identifier id, final PartInfo part, final ImageGroupInfo vi, final String volumeId, final ImageInfoList imageInfoList, final boolean fairUse, BVM bvm) throws BDRCAPIException {
+    public static void addSubRangeToRange(boolean isAdmin, final Manifest m, final Range r, final Identifier id, final PartInfo part,
+            final ImageGroupInfo vi, final String volumeId, final ImageInfoList imageInfoList, final boolean fairUse, BVM bvm)
+            throws BDRCAPIException {
         // do not add ranges where there is no location nor subparts
         if (part.location == null && part.parts == null)
             return;
@@ -429,7 +448,7 @@ public class ManifestService {
             int ePage = imageInfoList.size();
             if (loc.evolnum != null && loc.evolnum.equals(vi.volumeNumber) && loc.epagenum != null)
                 ePage = Math.min(loc.epagenum, ePage);
-            if (!fairUse) {
+            if (!fairUse || isAdmin) {
                 if (bvm == null) {
                     for (int seqNum = bPage; seqNum <= ePage; seqNum++) {
                         // imgSeqNum starts at 1
@@ -437,12 +456,13 @@ public class ManifestService {
                         subRange.addCanvas(canvasUri);
                     }
                 } else {
-                    final String beginFileName = imageInfoList.get(bPage-1).filename;
-                    final String endFileName = imageInfoList.get(ePage-1).filename;
+                    final String beginFileName = imageInfoList.get(bPage - 1).filename;
+                    final String endFileName = imageInfoList.get(ePage - 1).filename;
                     final Integer bvmBeginIndex = bvm.getDefaultBVMIndexForFilename(beginFileName, true);
                     final Integer bvmEndIndex = bvm.getDefaultBVMIndexForFilename(endFileName, true);
                     if (bvmBeginIndex == null || bvmEndIndex == null) {
-                        throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filenames from image list not in bvm: "+beginFileName+" or "+endFileName);
+                        throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE,
+                                "filenames from image list not in bvm: " + beginFileName + " or " + endFileName);
                     }
                     final List<BVMImageInfo> bvmIil = bvm.getDefaultImageList();
                     for (int bvmImgIdx = bvmBeginIndex; bvmImgIdx <= bvmEndIndex; bvmImgIdx++) {
@@ -454,7 +474,7 @@ public class ManifestService {
                         } else {
                             final Integer iiLidx = imageInfoList.getIdxFromFilename(bvmIi.filename);
                             if (iiLidx == null) {
-                                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from bvm not in imagelist: "+bvmIi.filename);
+                                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from bvm not in imagelist: " + bvmIi.filename);
                             }
                             final String canvasUri = getCanvasUri(bvmIi.filename, volumeId, iiLidx);
                             subRange.addCanvas(canvasUri);
@@ -472,7 +492,9 @@ public class ManifestService {
                 }
                 // then copyright page, if either beginIndex or endIndex is
                 // > FAIRUSE_PAGES_S+tbrcintro and < vi.totalPages-FAIRUSE_PAGES_E
-                if ((bPage >= firstUnaccessiblePage && bPage <= lastUnaccessiblePage) || (ePage >= firstUnaccessiblePage && ePage <= lastUnaccessiblePage) || (bPage < firstUnaccessiblePage && ePage > lastUnaccessiblePage)) {
+                if ((bPage >= firstUnaccessiblePage && bPage <= lastUnaccessiblePage)
+                        || (ePage >= firstUnaccessiblePage && ePage <= lastUnaccessiblePage)
+                        || (bPage < firstUnaccessiblePage && ePage > lastUnaccessiblePage)) {
                     subRange.addCanvas(IIIFPresPrefix + "v:" + volumeId + "/canvas" + "/" + AppConstants.COPYRIGHT_PAGE_CANVAS_ID);
                 }
                 // last part: max(beginIndex,lastUnaccessiblePage) to
@@ -485,7 +507,7 @@ public class ManifestService {
         }
         if (part.parts != null) {
             for (final PartInfo subpart : part.parts) {
-                addSubRangeToRange(m, subRange, id, subpart, vi, volumeId, imageInfoList, fairUse, bvm);
+                addSubRangeToRange(isAdmin, m, subRange, id, subpart, vi, volumeId, imageInfoList, fairUse, bvm);
             }
         }
         m.addRange(subRange);
@@ -512,14 +534,15 @@ public class ManifestService {
         }
         final PropertyValue res = new PropertyValue();
         if (missing) {
-            res.addValue(ManifestService.getLocaleFor("en"), paginationItem.value+" (missing)");
+            res.addValue(ManifestService.getLocaleFor("en"), paginationItem.value + " (missing)");
         } else {
-            res.addValue(paginationItem.value);            
+            res.addValue(paginationItem.value);
         }
         return res;
     }
-    
-    public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final ImageInfoList imageInfoList, final String volumeId, final ImageGroupInfo vi, final BVMImageInfo bvmIi, final BVM bvm) {
+
+    public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final ImageInfoList imageInfoList, final String volumeId,
+            final ImageGroupInfo vi, final BVMImageInfo bvmIi, final BVM bvm) {
         // imgSeqNum starts at 1
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum - 1);
         final String canvasUri = getCanvasUri(imageInfo.filename, volumeId, imgSeqNum);
@@ -556,8 +579,10 @@ public class ManifestService {
         return canvas;
     }
 
-    public static Canvas getCanvasForIdentifier(final Identifier id, final ImageGroupInfo vi, final int imgSeqNum, final String volumeId, final ImageInfoList imageInfoList) throws BDRCAPIException {
-        // TODO: get the BVM if available, so that we can pass it as an argument to buildCanvas()
+    public static Canvas getCanvasForIdentifier(final Identifier id, final ImageGroupInfo vi, final int imgSeqNum, final String volumeId,
+            final ImageInfoList imageInfoList) throws BDRCAPIException {
+        // TODO: get the BVM if available, so that we can pass it as an argument to
+        // buildCanvas()
         if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID)
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of canvas");
         if (!vi.instanceUri.startsWith(BDR))
@@ -565,7 +590,8 @@ public class ManifestService {
         logger.info("building canvas for ID {}, imgSeqNum {}", id.getId(), imgSeqNum);
         final int imageTotal = imageInfoList.size();
         if (imgSeqNum < 1 || imgSeqNum > imageTotal)
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you asked a canvas for an image number that is inferior to 1 or greater than the total number of images");
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE,
+                    "you asked a canvas for an image number that is inferior to 1 or greater than the total number of images");
         return buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi, null, null);
     }
 }
