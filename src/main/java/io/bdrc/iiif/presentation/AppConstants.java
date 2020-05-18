@@ -27,7 +27,7 @@ public class AppConstants {
 
     // used to create the urls for canvases, manifests, etc. should be canonical
     // at least for canvases (so that the annotation can target the uri)
-    public static final String IIIFPresPrefix = "https://iiifpres-dev.bdrc.io/";
+    public static final String IIIFPresPrefix = AuthProps.getProperty("iiifprefix");
     public static final String IIIFPresPrefix_coll = IIIFPresPrefix + "collection/";
 
     public static final String LDS_QUERYPREFIX = AuthProps.getProperty("dataserver");
