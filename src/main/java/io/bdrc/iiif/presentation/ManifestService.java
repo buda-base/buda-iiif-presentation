@@ -259,7 +259,8 @@ public class ManifestService {
                     firstCanvas = thisCanvas;
             }
         }
-        mainSeq.setStartCanvas(firstCanvas.getIdentifier());
+        if (firstCanvas != null)
+            mainSeq.setStartCanvas(firstCanvas.getIdentifier());
         return mainSeq;
     }
 
