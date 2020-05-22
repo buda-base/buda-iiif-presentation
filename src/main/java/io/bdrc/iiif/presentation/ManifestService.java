@@ -221,6 +221,10 @@ public class ManifestService {
             beginIndex = 1 + vi.pagesIntroTbrc;
         if (endIndex == null)
             endIndex = imageInfoList.size();
+        if (endIndex <= beginIndex) {
+            // this is the case where the manifest would be empty, we return a 404 instead
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "manifest would be empty");
+        }
         // all indices start at 1
         mainSeq.setViewingDirection(getViewingDirection(imageInfoList, bvm));
         Canvas firstCanvas = null;
