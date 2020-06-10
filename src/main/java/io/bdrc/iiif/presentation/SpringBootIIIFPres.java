@@ -48,7 +48,6 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
             } catch (Exception ex) {
                 // do nothing, continue props initialization
             }
-
             AuthProps.init(props);
             log.info("SpringBootIIIFPres has loaded properties");
 
@@ -59,6 +58,16 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
 
         log.info("SpringBootIIIFPres has been properly initialized");
         SpringApplication.run(SpringBootIIIFPres.class, args);
+    }
+
+    public static boolean isInChina() {
+        String val = AuthProps.getProperty("serverLocation");
+        if (val != null) {
+            if (val.equals("china")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @EventListener(ApplicationReadyEvent.class)
