@@ -1,6 +1,5 @@
 package io.bdrc.iiif.presentation.resservices;
 
-import org.apache.commons.jcs.access.exception.CacheException;
 import org.ehcache.Cache;
 import org.ehcache.CacheManager;
 import org.ehcache.config.builders.CacheConfigurationBuilder;
@@ -31,7 +30,7 @@ public class ServiceCache {
             CACHE.put(key, res);
             CacheMetrics.put();
             res = null;
-        } catch (CacheException e) {
+        } catch (Exception e) {
             log.error("Problem putting Results -->" + res + " in the iiifpres cache, for key -->" + key + " Exception:" + e.getMessage());
         }
     }
