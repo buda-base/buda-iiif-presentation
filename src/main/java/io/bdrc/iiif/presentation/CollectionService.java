@@ -23,7 +23,6 @@ import io.bdrc.iiif.presentation.resmodels.InstanceInfo;
 import io.bdrc.iiif.presentation.resmodels.ImageInstanceInfo.VolumeInfoSmall;
 import io.bdrc.iiif.presentation.resservices.ImageInstanceInfoService;
 import io.bdrc.iiif.presentation.resservices.InstanceInfoService;
-import io.bdrc.libraries.Identifier;
 
 public class CollectionService {
 

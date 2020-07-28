@@ -61,7 +61,6 @@ import io.bdrc.iiif.presentation.resservices.InstanceInfoService;
 import io.bdrc.iiif.presentation.resservices.InstanceOutlineService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
 import io.bdrc.libraries.GitHelpers;
-import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;

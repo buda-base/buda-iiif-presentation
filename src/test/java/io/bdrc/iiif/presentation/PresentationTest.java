@@ -39,7 +39,6 @@ import io.bdrc.iiif.presentation.resmodels.InstanceOutline;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
-import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
 
 public class PresentationTest {

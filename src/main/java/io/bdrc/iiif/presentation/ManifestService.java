@@ -44,7 +44,6 @@ import io.bdrc.iiif.presentation.resmodels.Location;
 import io.bdrc.iiif.presentation.resmodels.PartInfo;
 import io.bdrc.iiif.presentation.resservices.BVMService;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
-import io.bdrc.libraries.Identifier;
 
 public class ManifestService {
 

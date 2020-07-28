@@ -34,7 +34,6 @@ import io.bdrc.iiif.presentation.resmodels.InstanceInfo;
 import io.bdrc.iiif.presentation.resservices.BVMService;
 import io.bdrc.iiif.presentation.resservices.ImageInfoListService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
-import io.bdrc.libraries.Identifier;
 import io.bdrc.libraries.IdentifierException;
 
 public class BVMTest {
