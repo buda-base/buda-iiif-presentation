@@ -372,8 +372,11 @@ public class ManifestService {
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked starts after this volume");
                 // if bvolnum < vi.volumeNumber, we already have bPage correctly set to:
                 // 1+nbPagesIntro
-                if (location.bvolnum.equals(vi.volumeNumber))
+                if (location.bvolnum.equals(vi.volumeNumber)  && location.bpagenum != null) {
                     bPage = location.bpagenum;
+                    if (bPage <= nbPagesIntro)
+                        bPage = nbPagesIntro + 1;
+                }
                 if (location.evolnum < vi.volumeNumber)
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked ends before this volume");
                 // if evolnum > vi.volumeNumber, we already have bPage correctly set to

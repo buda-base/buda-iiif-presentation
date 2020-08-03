@@ -15,7 +15,7 @@ public class Location {
     public Integer bvolnum = null;
     @JsonProperty("evolnum")
     public Integer evolnum = null;
-    @JsonProperty("bpagenum")
+    @JsonProperty("bpagenum") // stays null if no begin page indicated
     public Integer bpagenum = null;
     @JsonProperty("epagenum") // by convention, epagenum is -1 for the last page
     public Integer epagenum = null;
@@ -26,7 +26,7 @@ public class Location {
     public Location(final Model m, final Resource location) {
         final Property locationVolumeP = m.getProperty(BDO, "contentLocationVolume");
         if (!location.hasProperty(locationVolumeP))
-            this.bvolnum = 1; // probable reasonable default...
+            this.bvolnum = 1; // probable a reasonable default...
         else 
             this.bvolnum = location.getProperty(locationVolumeP).getInt();
         final Property locationEndVolumeP = m.getProperty(BDO, "contentLocationEndVolume");
@@ -42,8 +42,6 @@ public class Location {
         final Property locationPageP = m.getProperty(BDO, "contentLocationPage");
         if (location.hasProperty(locationPageP))
             this.bpagenum = location.getProperty(locationPageP).getInt();
-        else
-            this.bpagenum = 1;
         final Property locationEndPageP = m.getProperty(BDO, "contentLocationEndPage");
         if (location.hasProperty(locationEndPageP))
             this.epagenum = location.getProperty(locationEndPageP).getInt();
