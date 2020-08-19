@@ -220,9 +220,9 @@ public class ManifestService {
             beginIndex = 1 + vi.pagesIntroTbrc;
         if (endIndex == null)
             endIndex = imageInfoList.size();
-        if (endIndex <= beginIndex) {
+        if (endIndex < beginIndex) {
             // this is the case where the manifest would be empty, we return a 404 instead
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "manifest would be empty");
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "manifest is empty (first page is after last page)");
         }
         // all indices start at 1
         mainSeq.setViewingDirection(getViewingDirection(imageInfoList, bvm));
@@ -264,6 +264,8 @@ public class ManifestService {
         }
         if (firstCanvas != null)
             mainSeq.setStartCanvas(firstCanvas.getIdentifier());
+        else
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "manifest is empty (images are too big to be displayed)");
         return mainSeq;
     }
 
