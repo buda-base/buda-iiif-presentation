@@ -73,9 +73,10 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
     @EventListener(ApplicationReadyEvent.class)
     public void afterStartup() {
         ServiceCache.init();
-        log.info("Ldspdi updates auth data...");
-        RdfAuthModel.init();
-
+        if ("true".equals(AuthProps.getProperty("useAuth"))) {
+            log.info("Ldspdi updates auth data...");
+            RdfAuthModel.init();
+        }
     }
 
 }
