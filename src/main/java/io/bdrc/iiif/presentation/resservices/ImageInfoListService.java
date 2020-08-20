@@ -1,8 +1,10 @@
 package io.bdrc.iiif.presentation.resservices;
 
 import static io.bdrc.iiif.presentation.AppConstants.CACHEPREFIX_IIL;
-import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -26,6 +28,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.bdrc.auth.AuthProps;
+import io.bdrc.iiif.presentation.AppConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.ImageInfoList.ImageInfo;
 import io.bdrc.iiif.presentation.resmodels.ImageInfoList;
@@ -93,28 +96,51 @@ public class ImageInfoListService extends ConcurrentResourceService<ImageInfoLis
 
 	@Override
 	final public ImageInfoList getFromApi(final String s3key) throws BDRCAPIException {
-		final AmazonS3 s3Client = getClient();
-		logger.info("fetching s3 key {}", s3key);
-		final S3Object object;
-		try {
-			object = s3Client.getObject(new GetObjectRequest(bucketName, s3key));
-		} catch (AmazonS3Exception e) {
-			if (e.getErrorCode().equals("NoSuchKey")) {
-			    logger.error("NoSuchKey: {}", s3key);
-				throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "sorry, BDRC did not complete the data migration for this Work (no s3 key "+s3key+")");
-			} else {
-				throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
-			}
-		}
-		final InputStream objectData = object.getObjectContent();
-		try {
-			final GZIPInputStream gis = new GZIPInputStream(objectData);
-			final List<ImageInfo> imageList = om.readValue(gis, new TypeReference<List<ImageInfo>>() {});
-			objectData.close();
-			return new ImageInfoList(imageList);
-		} catch (IOException e) {
-			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
-		}
+        String source = AuthProps.getProperty("imageSourceType");
+        switch (source) {
+        case AppConstants.S3_SOURCE:
+            final AmazonS3 s3Client = getClient();
+            logger.info("fetching s3 key {}", s3key);
+            final S3Object object;
+            try {
+                object = s3Client.getObject(new GetObjectRequest(bucketName, s3key));
+            } catch (AmazonS3Exception e) {
+                if (e.getErrorCode().equals("NoSuchKey")) {
+                    logger.error("NoSuchKey: {}", s3key);
+                    throw new BDRCAPIException(404, 5000, "sorry, BDRC did not complete the data migration for this work");
+                } else {
+                    throw new BDRCAPIException(500, 5000, e);
+                }
+            }
+            final InputStream objectData = object.getObjectContent();
+            try {
+                final GZIPInputStream gis = new GZIPInputStream(objectData);
+                final List<ImageInfo> imageList = om.readValue(gis, new TypeReference<List<ImageInfo>>() {
+                });
+                objectData.close();
+                imageList.removeIf(imageInfo -> imageInfo.filename.endsWith("json"));
+                return new ImageInfoList(imageList);
+            } catch (IOException e) {
+                throw new BDRCAPIException(500, 5000, e);
+            }
+        case AppConstants.DISK_SOURCE:
+            try {
+                String rootDir = AuthProps.getProperty("imageSourceDiskRootDir");
+                FileInputStream in = new FileInputStream(new File(rootDir + s3key));
+                final GZIPInputStream gis = new GZIPInputStream(in);
+                final List<ImageInfo> imageList = om.readValue(gis, new TypeReference<List<ImageInfo>>() {
+                });
+                gis.close();
+                imageList.removeIf(imageInfo -> imageInfo.filename.endsWith("json"));
+                return new ImageInfoList(imageList);
+            } catch (FileNotFoundException e) {
+                throw new BDRCAPIException(404, 5000, "no file list on hard drive");
+            } catch (IOException e) {
+                throw new BDRCAPIException(404, 5000, e);
+            }
+        default:
+            throw new BDRCAPIException(500, 5000, "invalid imageSourceType property: "+source);
+        }
 	}
 
 }

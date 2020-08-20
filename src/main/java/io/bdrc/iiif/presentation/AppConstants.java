@@ -14,6 +14,9 @@ public class AppConstants {
     public static final String BDO = "http://purl.bdrc.io/ontology/core/";
     public static final String ADM = "http://purl.bdrc.io/ontology/admin/";
     public static final String TMPPREFIX = "http://purl.bdrc.io/ontology/tmp/";
+    
+    public static final String DISK_SOURCE = "disk";
+    public static final String S3_SOURCE = "s3";
 
     public static final String CACHENAME = "iiifpres";
 
