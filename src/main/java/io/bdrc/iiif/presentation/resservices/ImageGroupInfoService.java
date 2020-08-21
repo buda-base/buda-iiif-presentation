@@ -56,7 +56,7 @@ public class ImageGroupInfoService extends ConcurrentResourceService<ImageGroupI
 				throw new BDRCAPIException(500, CANNOT_FIND_VOLUME_ERROR_CODE, "cannot find volume " + volumeId + " in the database");
 			}
 			final QuerySolution sol = res.next();
-			resVolumeInfo = new ImageGroupInfo(sol);
+			resVolumeInfo = new ImageGroupInfo(sol, volumeId);
 			if (res.hasNext()) {
 				throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "more than one volume found in the database for " + volumeId + ", this shouldn't happen");
 			}

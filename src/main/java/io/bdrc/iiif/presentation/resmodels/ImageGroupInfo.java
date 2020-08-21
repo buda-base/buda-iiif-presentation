@@ -59,8 +59,13 @@ public class ImageGroupInfo {
     private static final Logger logger = LoggerFactory.getLogger(ImageGroupInfoService.class);
 
     // result of volumeInfo query
-    public ImageGroupInfo(final QuerySolution sol) {
+    public ImageGroupInfo(final QuerySolution sol, final String volumeId) {
         logger.debug("creating VolumeInfo for solution {}", sol.toString());
+        if (volumeId.startsWith("bdr:")) {
+            this.imageGroup = volumeId.substring(4);
+        } else {
+            this.imageGroup = volumeId;
+        }
         this.access = AccessType.fromString(sol.getResource("access").getURI());
         this.statusUri = sol.getResource("status").getURI();
         this.license = LicenseType.fromString(sol.getResource("license").getURI());
@@ -81,9 +86,6 @@ public class ImageGroupInfo {
         }
         if (sol.contains("?pagesIntroTbrc")) {
             this.pagesIntroTbrc = sol.get("?pagesIntroTbrc").asLiteral().getInt();
-        }
-        if (sol.contains("?imageGroup")) {
-            this.imageGroup = sol.getLiteral("?imageGroup").getString();
         }
         if (sol.contains("?iiifManifest")) {
             final String manifestURIString = sol.getResource("?iiifManifest").getURI();
@@ -115,10 +117,7 @@ public class ImageGroupInfo {
         }
         this.imageInstanceUri = imageInstance.getURI();
 
-        final Statement imageGroupS = volume.getProperty(m.getProperty(TMPPREFIX, "legacyImageGroupRID"));
-        if (imageGroupS != null) {
-            this.imageGroup = imageGroupS.getString();
-        }
+        this.imageGroup = volume.getLocalName();
 
         final Statement iiifManifestS = volume.getProperty(m.getProperty(BDO, "hasIIIFManifest"));
         if (iiifManifestS != null) {
