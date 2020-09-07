@@ -126,7 +126,9 @@ public class ImageInfoListService extends ConcurrentResourceService<ImageInfoLis
         case AppConstants.DISK_SOURCE:
             try {
                 String rootDir = AuthProps.getProperty("imageSourceDiskRootDir");
-                FileInputStream in = new FileInputStream(new File(rootDir + s3key));
+                final String fpath = rootDir + s3key.substring(6);
+                logger.info("try to read {}", fpath);
+                FileInputStream in = new FileInputStream(new File(fpath));
                 final GZIPInputStream gis = new GZIPInputStream(in);
                 final List<ImageInfo> imageList = om.readValue(gis, new TypeReference<List<ImageInfo>>() {
                 });
