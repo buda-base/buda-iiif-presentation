@@ -155,8 +155,8 @@ public class IIIFPresentationService {
             try {
                 iiInf = ImageInstanceInfoService.Instance.getAsync(id.getImageInstanceId()).get();
             } catch (InterruptedException | ExecutionException e1) {
-                Metrics.counter("exit.status", "result", "500").increment();
-                throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
+                Metrics.counter("exit.status", "result", "404").increment();
+                throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e1);
             }
             access = iiInf.access;
             statusUri = iiInf.statusUri;
@@ -168,8 +168,8 @@ public class IIIFPresentationService {
             try {
                 winf = InstanceInfoService.Instance.getAsync(id.getInstanceId()).get();
             } catch (InterruptedException | ExecutionException e) {
-                Metrics.counter("exit.status", "result", "500").increment();
-                throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+                Metrics.counter("exit.status", "result", "404").increment();
+                throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
             }
             access = winf.rootAccess;
             statusUri = winf.rootStatusUri;
@@ -181,8 +181,8 @@ public class IIIFPresentationService {
             try {
                 winf1 = InstanceInfoService.Instance.getAsync(id.getInstanceId()).get();
             } catch (InterruptedException | ExecutionException e2) {
-                Metrics.counter("exit.status", "result", "500").increment();
-                throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e2);
+                Metrics.counter("exit.status", "result", "404").increment();
+                throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e2);
             }
             access = winf1.rootAccess;
             statusUri = winf1.rootStatusUri;

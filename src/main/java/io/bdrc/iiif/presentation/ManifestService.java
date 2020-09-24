@@ -325,7 +325,7 @@ public class ManifestService {
         try {
             imageInfoList = ImageInfoListService.Instance.getAsync(imageInstanceLocalName, vi.imageGroup).get();
         } catch (InterruptedException | ExecutionException e) {
-            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, e);
         }
         try {
             bvm = BVMService.Instance.getAsync(vi.imageGroup).get();
