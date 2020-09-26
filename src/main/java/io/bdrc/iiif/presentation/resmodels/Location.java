@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class Location {
+public class Location implements Comparable<Location> {
     @JsonProperty("bvolnum")
     public Integer bvolnum = null;
     @JsonProperty("evolnum")
@@ -59,5 +59,15 @@ public class Location {
         } catch (JsonProcessingException e) {
             return "toString objectmapper exception, this shouldn't happen";
         }
+    }
+
+    @Override
+    public int compareTo(Location compared) {
+        int voldiff = this.bvolnum - compared.bvolnum;
+        if (voldiff != 0) return voldiff;
+        if (this.bpagenum != null && compared.bpagenum != null) {
+            return this.bpagenum - compared.bpagenum;
+        }
+        return 0;
     }
 }

@@ -69,6 +69,8 @@ public class ImageInstanceInfo {
     
     @JsonProperty("instanceUri")
     public String instanceUri;
+    @JsonProperty("rootIinstanceUri")
+    public String rootIinstanceUri = null;
     @JsonProperty("access")
     public AccessType access;
     @JsonProperty("restrictedInChina")
@@ -79,6 +81,8 @@ public class ImageInstanceInfo {
     public LicenseType license;
     @JsonProperty("volumes")
     public List<VolumeInfoSmall> volumes;
+    @JsonProperty("locations")
+    public List<Location> locations = null;
     
     public ImageInstanceInfo() {}
     
@@ -100,7 +104,11 @@ public class ImageInstanceInfo {
         final Resource iinstance = m.getResource(iinstanceId);
         this.instanceUri = iinstance.getPropertyResourceValue(m.getProperty(BDO, "instanceReproductionOf")).getURI();
         Resource rootImageInstance = iinstance.getPropertyResourceValue(m.getProperty(BDO, "inRootInstance"));
-        rootImageInstance = rootImageInstance != null ? rootImageInstance : iinstance;
+        if (rootImageInstance != null) {
+            this.rootIinstanceUri = rootImageInstance.getURI();
+        } else {
+            rootImageInstance = iinstance;
+        }
         final Resource iinstanceAdmin =  getAdminForResource(m, rootImageInstance);
         if (iinstanceAdmin == null) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no admin data for item");
@@ -149,6 +157,17 @@ public class ImageInstanceInfo {
         }
         Collections.sort(volumes);
         this.volumes = volumes;
+        final StmtIterator clItr = iinstance.listProperties(m.getProperty(BDO, "contentLocation"));
+        while (clItr.hasNext()) {
+            final Statement s = volumesItr.next();
+            final Resource cl = s.getObject().asResource();
+            if (this.locations == null)
+                this.locations = new ArrayList<>();
+            this.locations.add(new Location(m, cl));
+        }
+        if (this.locations != null) {
+            Collections.sort(this.locations);
+        }
     }
     
     public VolumeInfoSmall getVolumeNumber(int volumeNumber) {
