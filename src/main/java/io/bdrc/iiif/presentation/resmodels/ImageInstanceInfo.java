@@ -135,7 +135,7 @@ public class ImageInstanceInfo {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no access or license");
         this.access = AccessType.fromString(iinstanceAccess.getURI());
         this.license = LicenseType.fromString(license.getURI());
-        final StmtIterator volumesItr = iinstance.listProperties(m.getProperty(BDO, "instanceHasVolume"));
+        final StmtIterator volumesItr = rootImageInstance.listProperties(m.getProperty(BDO, "instanceHasVolume"));
         if (!volumesItr.hasNext())
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "no volume in item");
         final List<VolumeInfoSmall> volumes = new ArrayList<>();
