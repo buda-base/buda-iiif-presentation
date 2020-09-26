@@ -99,7 +99,9 @@ public class ImageInstanceInfo {
             iinstanceId = BDR+iinstanceId.substring(4);
         final Resource iinstance = m.getResource(iinstanceId);
         this.instanceUri = iinstance.getPropertyResourceValue(m.getProperty(BDO, "instanceReproductionOf")).getURI();
-        final Resource iinstanceAdmin =  getAdminForResource(m, iinstance);
+        Resource rootImageInstance = iinstance.getPropertyResourceValue(m.getProperty(BDO, "inRootInstance"));
+        rootImageInstance = rootImageInstance != null ? rootImageInstance : iinstance;
+        final Resource iinstanceAdmin =  getAdminForResource(m, rootImageInstance);
         if (iinstanceAdmin == null) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no admin data for item");
         }
