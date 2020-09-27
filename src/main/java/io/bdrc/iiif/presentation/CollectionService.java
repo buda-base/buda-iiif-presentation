@@ -36,11 +36,13 @@ public class CollectionService {
     }
 
     public static Collection getCollectionForIdentifier(final Identifier id, boolean continuous) throws BDRCAPIException {
-        final InstanceInfo wi;
-        try {
-            wi = InstanceInfoService.Instance.getAsync(id.getInstanceId()).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+        InstanceInfo wi = null;
+        if (id.getInstanceId() != null) {
+            try {
+                wi = InstanceInfoService.Instance.getAsync(id.getInstanceId()).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
+            }
         }
         switch (id.getSubType()) {
         case Identifier.COLLECTION_ID_ITEM:
