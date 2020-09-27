@@ -59,42 +59,62 @@ public class CollectionService {
 
     // not used anymore but quite convenient
     public static void addManifestsForLocation(final Collection c, final InstanceInfo wi, final ImageInstanceInfo ii, final boolean continuous) {
-        if (!wi.hasLocation)
+        if (wi.locations == null)
             return;
-        final Location loc = wi.location;
-        final boolean needsVolumeIndication = loc.evolnum - loc.bvolnum > 2;
-        for (int i = loc.bvolnum; i <= loc.evolnum; i++) {
-            VolumeInfoSmall vi = ii.getVolumeNumber(i);
-            if (vi == null)
-                continue;
-            final int volumebPage = (i == loc.bvolnum.intValue()) ? loc.bpagenum : 0;
-            final int volumeePage = (i == loc.evolnum.intValue()) ? loc.epagenum : -1;
-            final StringBuilder sb = new StringBuilder();
-            sb.append(IIIFPresPrefix + "vo:" + vi.getPrefixedUri());
-            if (volumebPage != 0 || volumeePage != -1) {
-                sb.append("::");
-                if (volumebPage != 0)
-                    sb.append(volumebPage);
-                sb.append("-");
-                if (volumeePage != -1)
-                    sb.append(volumeePage);
+        boolean needsVolumeIndication = false;
+        Integer lastVolume = null;
+        for (final Location loc : wi.locations) {
+            if (loc.evolnum - loc.bvolnum > 2) {
+                needsVolumeIndication = true;
+                break;
             }
-            sb.append("/manifest");
-            if (continuous) {
-                sb.append("?continuous=true");
+            if (lastVolume != null && lastVolume != loc.bvolnum) {
+                needsVolumeIndication = true;
+                break;
             }
-            final Manifest m = new Manifest(sb.toString());
-            m.setLabel(ManifestService.getPVforLS(wi.labels, needsVolumeIndication ? i : null));
-            c.addManifest(m);
+            lastVolume = loc.bvolnum;
+        }
+        for (final Location loc: wi.locations) {
+            for (int i = loc.bvolnum; i <= loc.evolnum; i++) {
+                VolumeInfoSmall vi = ii.getVolumeNumber(i);
+                if (vi == null)
+                    continue;
+                final int volumebPage = (i == loc.bvolnum.intValue()) ? loc.bpagenum : 0;
+                final int volumeePage = (i == loc.evolnum.intValue()) ? loc.epagenum : -1;
+                final StringBuilder sb = new StringBuilder();
+                sb.append(IIIFPresPrefix + "vo:" + vi.getPrefixedUri());
+                if (volumebPage != 0 || volumeePage != -1) {
+                    sb.append("::");
+                    if (volumebPage != 0)
+                        sb.append(volumebPage);
+                    sb.append("-");
+                    if (volumeePage != -1)
+                        sb.append(volumeePage);
+                }
+                sb.append("/manifest");
+                if (continuous) {
+                    sb.append("?continuous=true");
+                }
+                final Manifest m = new Manifest(sb.toString());
+                m.setLabel(ManifestService.getPVforLS(wi.labels, needsVolumeIndication ? i : null));
+                c.addManifest(m);
+            }
         }
     }
     
     public static void addManifestsForWorkInVolumes(final Collection c, final InstanceInfo wi, final ImageInstanceInfo ii, final boolean continuous, final String workId) {
         if (!wi.hasLocation)
             return;
-        final Location loc = wi.location;
-        final boolean needsVolumeIndication = loc.evolnum - loc.bvolnum > 2;
-        for (int i = loc.bvolnum; i <= loc.evolnum; i++) {
+        List<Integer> vols = new ArrayList<>();
+        for (final Location loc : wi.locations) {
+            for (int i = loc.bvolnum; i <= loc.evolnum; i++) {
+                if (!vols.contains(i)) {
+                    vols.add(i);
+                }
+            }
+        }
+        final boolean needsVolumeIndication = vols.size() > 1;
+        for (final Integer i : vols) {
             VolumeInfoSmall vi = ii.getVolumeNumber(i);
             if (vi == null)
                 continue;

@@ -59,14 +59,24 @@ public class InstanceInfo extends PartInfo {
 
     public InstanceInfo() {}
 
-    public void readLocation(final Model m, final Resource location) {
-        this.location = new Location(m, location);
-        final Property locationInstanceP = m.getProperty(BDO, "contentLocationInstance");
-        if (location.hasProperty(locationInstanceP))
-            this.rootInstanceQname = "bdr:"+location.getProperty(locationInstanceP).getResource().getLocalName();
-        this.hasLocation = true;
+    private void readLocations(final Model m, Resource r) {
+        final StmtIterator clItr = r.listProperties(m.getProperty(BDO, "contentLocation"));
+        while (clItr.hasNext()) {
+            final Statement s = clItr.next();
+            final Resource cl = s.getObject().asResource();
+            final Property locationInstanceP = m.getProperty(BDO, "contentLocationInstance");
+            if (cl.hasProperty(locationInstanceP))
+                this.rootInstanceQname = "bdr:"+cl.getProperty(locationInstanceP).getResource().getLocalName();
+            if (this.locations == null)
+                this.locations = new ArrayList<>();
+            this.locations.add(new Location(m, cl));
+            this.hasLocation = true;
+        }
+        if (this.locations != null && this.locations.size() > 1) {
+            Collections.sort(this.locations);
+        }
     }
-
+    
     public InstanceInfo(final Model m, String instanceId) throws BDRCAPIException {
         // the model is supposed to come from the IIIFPres_workInfo_noItem graph query
         if (instanceId.startsWith("bdr:"))
@@ -91,17 +101,11 @@ public class InstanceInfo extends PartInfo {
         if (item != null) {
             this.imageInstanceQname = "bdr:"+item.getLocalName();
         }
-        final Resource location = instance.getPropertyResourceValue(m.getProperty(BDO, "contentLocation"));
-        if (location == null) {
-            this.hasLocation = false;
-        } else {
-            readLocation(m, location);
-        }
+        readLocations(m, instance);
         final Resource firstImageGroup = instance.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstImageGroup"));
         if (firstImageGroup != null) {
             this.firstImageGroupQname = "bdr:"+firstImageGroup.getLocalName();
         }
-        
         final Resource root_access = instance.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootAccess"));
         if (root_access != null) {
             this.rootAccess = AccessType.fromString(root_access.getURI());
@@ -150,10 +154,8 @@ public class InstanceInfo extends PartInfo {
             if (this.labels == null) {
                 this.labels = getLabels(m, linkTo);
             }
-            if (!this.hasLocation) {
-                final Resource linkToLocation = linkTo.getPropertyResourceValue(m.getProperty(BDO, "contentLocation"));
-                if (linkToLocation != null)
-                    readLocation(m, linkToLocation);
+            if (this.locations == null) {
+                readLocations(m, linkTo);
             }
             this.isRoot = (linkTo.getPropertyResourceValue(m.getProperty(BDO, "partOf")) == null);
         }
@@ -211,9 +213,7 @@ public class InstanceInfo extends PartInfo {
                         partInfo.linkToTypeLname = linkToType.getLocalName();
                     }
                 }
-                final Resource location = part.getPropertyResourceValue(m.getProperty(BDO, "contentLocation"));
-                if (location != null)
-                    partInfo.location = new Location(m, location);
+                partInfo.locations = ImageInstanceInfo.getLocations(m, part);
                 partInfo.labels = getLabels(m, part);
                 partInfo.parts = getParts(m, part, shortIdPartMap);
                 if (partInfo.labels == null && linkTo != null) {
@@ -222,7 +222,7 @@ public class InstanceInfo extends PartInfo {
                 if (partInfo.parts == null && linkTo != null) {
                     partInfo.parts = getParts(m, linkTo, shortIdPartMap);
                 }
-                if (location != null || partInfo.labels != null || partInfo.parts != null || partInfo.linkToQname != null)
+                if (partInfo.locations != null || partInfo.labels != null || partInfo.parts != null || partInfo.linkToQname != null)
                     parts.add(partInfo);
             }
             Collections.sort(parts);

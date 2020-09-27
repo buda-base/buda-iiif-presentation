@@ -41,9 +41,7 @@ public class InstanceOutline {
         if (firstVolume != null) {
             this.firstImageGroupQname = "bdr:"+firstVolume.getLocalName();
         }
-        Resource location = instance.getPropertyResourceValue(m.getProperty(BDO, "contentLocation"));
-        if (location != null)
-            rootPi.location = new Location(m, location);
+        rootPi.locations = ImageInstanceInfo.getLocations(m, instance);
         final Resource linkTo = instance.getPropertyResourceValue(m.getProperty(BDO, "virtualLinkTo"));
         if (linkTo != null) {
             rootPi.linkToQname = "bdr:"+linkTo.getLocalName();
@@ -57,10 +55,8 @@ public class InstanceOutline {
             if (rootPi.labels == null) {
                 rootPi.labels = InstanceInfo.getLabels(m, linkTo);
             }
-            if (rootPi.location == null) {
-                location = linkTo.getPropertyResourceValue(m.getProperty(BDO, "contentLocation"));
-                if (location != null)
-                    rootPi.location = new Location(m, location);
+            if (rootPi.locations == null) {
+                rootPi.locations = ImageInstanceInfo.getLocations(m, linkTo);
             }
         }
     }
@@ -75,10 +71,18 @@ public class InstanceOutline {
     // function finding the first node of the tree having two or more
     // children in the specified volume
     public static PartInfo getRootPiForVolumeR(PartInfo pi, int volNum) {
-        final Location loc = pi.location;
-        if (loc != null && (loc.bvolnum > volNum || loc.evolnum < volNum)) {
-            // if the part is not in the volume, no need to go any further
-            return null;
+        if (pi.locations != null) {
+            // if there are locations but none in the volume, no need to go further
+            boolean hasLocInVolume = false;
+            for (final Location loc : pi.locations) {
+                if (loc.bvolnum <= volNum && loc.evolnum >= volNum) {
+                    hasLocInVolume = true;
+                    break;
+                }
+            }
+            if (!hasLocInVolume) {
+                return null;
+            }
         }
         if (pi.parts == null)
             return null;
@@ -105,9 +109,13 @@ public class InstanceOutline {
     }
     
     public static boolean isInVolumeR(int volNum, final PartInfo pi) {
-        final Location loc = pi.location;
-        if (loc != null) {
-            return loc.bvolnum <= volNum && loc.evolnum >= volNum;
+        if (pi.locations != null) {
+            for (final Location loc : pi.locations) {
+                if (loc.bvolnum <= volNum && loc.evolnum >= volNum) {
+                    return true;
+                }
+            }
+            return false;
         }
         if (pi.parts == null)
             return false;

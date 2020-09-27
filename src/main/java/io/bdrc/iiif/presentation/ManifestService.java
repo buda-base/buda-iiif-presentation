@@ -210,9 +210,8 @@ public class ManifestService {
         return mainSeq;
     }
 
-    public static Sequence getSequenceFrom(boolean isAdmin, final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi,
+    public static Sequence getSequenceFrom(final Sequence mainSeq, boolean isAdmin, final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi,
             final String volumeId, Integer beginIndex, Integer endIndex, final boolean fairUse, final BVM bvm) throws BDRCAPIException {
-        final Sequence mainSeq = new Sequence(IIIFPresPrefix + id.getId() + "/sequence/main");
         if (bvm != null && !fairUse) {
             return getSequenceFromBvm(id, imageInfoList, vi, volumeId, beginIndex, endIndex, fairUse, bvm);
         }
@@ -365,39 +364,55 @@ public class ManifestService {
         Integer bPage;
         Integer ePage;
         final int totalPages = imageInfoList.size();
+        final Sequence mainSeq = new Sequence(IIIFPresPrefix + id.getId() + "/sequence/main");
         if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE) {
             bPage = 1 + nbPagesIntro;
             ePage = totalPages;
-            Location location = (rootPart == null) ? null : rootPart.location;
-            if (location != null) {
-                if (location.bvolnum > vi.volumeNumber)
-                    throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked starts after this volume");
-                // if bvolnum < vi.volumeNumber, we already have bPage correctly set to:
-                // 1+nbPagesIntro
-                if (location.bvolnum.equals(vi.volumeNumber)  && location.bpagenum != null) {
-                    bPage = location.bpagenum;
-                    if (bPage <= nbPagesIntro)
-                        bPage = nbPagesIntro + 1;
+            if (rootPart == null || rootPart.locations == null) {
+                // this is slightly odd: we should maybe throw an exception in that case
+                logger.warn("work has no location");
+                bPage = id.getBPageNum();
+                ePage = id.getEPageNum();
+                getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
+                final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
+                manifest.setRenderings(oc);
+            } else {
+                boolean volumeFound = false;
+                for (final Location location : rootPart.locations) {
+                    if (location.bvolnum > vi.volumeNumber)
+                        break;
+                    // if bvolnum < vi.volumeNumber, we already have bPage correctly set to:
+                    // 1+nbPagesIntro
+                    if (location.bvolnum.equals(vi.volumeNumber)  && location.bpagenum != null) {
+                        bPage = location.bpagenum;
+                        if (bPage <= nbPagesIntro)
+                            bPage = nbPagesIntro + 1;
+                    }
+                    if (location.evolnum < vi.volumeNumber)
+                        break;
+                    // if evolnum > vi.volumeNumber, we already have bPage correctly set to
+                    // totalPages
+                    if (vi.volumeNumber.equals(location.evolnum) && location.epagenum != -1)
+                        ePage = location.epagenum;
+                    volumeFound = true;
+                    logger.info("computed: {}-{}", bPage, ePage);
+                    getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
+                    final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
+                    manifest.setRenderings(oc);
                 }
-                if (location.evolnum < vi.volumeNumber)
+                if (!volumeFound)
                     throw new BDRCAPIException(404, NO_ACCESS_ERROR_CODE, "the work you asked ends before this volume");
-                // if evolnum > vi.volumeNumber, we already have bPage correctly set to
-                // totalPages
-                if (vi.volumeNumber.equals(location.evolnum) && location.epagenum != -1)
-                    ePage = location.epagenum;
             }
         } else {
             bPage = id.getBPageNum();
             ePage = id.getEPageNum();
+            logger.debug("computed: {}-{}", bPage, ePage);
+            getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
+            final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
+            manifest.setRenderings(oc);
         }
-        logger.debug("computed: {}-{}", bPage, ePage);
-        final Sequence mainSeq = getSequenceFrom(isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
-        if (continuous) {
+        if (continuous)
             mainSeq.setViewingHints(VIEWING_HINTS);
-        }
-        // PDF / zip download
-        final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
-        manifest.setRenderings(oc);
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE) {
             addRangesToManifest(isAdmin, manifest, id, vi, volumeId, fairUse, imageInfoList, rootPart, bvm);
         }
@@ -438,14 +453,15 @@ public class ManifestService {
             final ImageGroupInfo vi, final String volumeId, final ImageInfoList imageInfoList, final boolean fairUse, BVM bvm)
             throws BDRCAPIException {
         // do not add ranges where there is no location nor subparts
-        if (part.location == null && part.parts == null)
+        if (part.locations == null && part.parts == null)
             return;
         final String rangeUri = IIIFPresPrefix + "v:" + volumeId + "/range/w:" + part.partQname;
         final Range subRange = new Range(rangeUri);
         final PropertyValue labels = getPropForLabels(part.labels);
         subRange.setLabel(labels);
-        if (part.location != null) {
-            final Location loc = part.location;
+        if (part.locations != null) {
+            // TODO: for multiple locations, not implemented yet (I'm not sure how it would work anyways)
+            final Location loc = part.locations.get(0);
             if (loc.bvolnum > vi.volumeNumber || loc.evolnum < vi.volumeNumber)
                 return;
             int bPage = 1;

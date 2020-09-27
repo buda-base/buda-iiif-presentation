@@ -97,6 +97,22 @@ public class ImageInstanceInfo {
         return null;
     }
     
+    public static List<Location> getLocations(final Model m, Resource r) {
+        List<Location> res = null;
+        final StmtIterator clItr = r.listProperties(m.getProperty(BDO, "contentLocation"));
+        while (clItr.hasNext()) {
+            final Statement s = clItr.next();
+            final Resource cl = s.getObject().asResource();
+            if (res == null)
+                res = new ArrayList<>();
+            res.add(new Location(m, cl));
+        }
+        if (res != null && res.size() > 1) {
+            Collections.sort(res);
+        }
+        return res;
+    }
+    
     public ImageInstanceInfo(final Model m, String iinstanceId) throws BDRCAPIException {
         // the model is supposed to come from the IIIFPres_itemGraph graph query
         if (iinstanceId.startsWith("bdr:"))
@@ -157,17 +173,7 @@ public class ImageInstanceInfo {
         }
         Collections.sort(volumes);
         this.volumes = volumes;
-        final StmtIterator clItr = iinstance.listProperties(m.getProperty(BDO, "contentLocation"));
-        while (clItr.hasNext()) {
-            final Statement s = clItr.next();
-            final Resource cl = s.getObject().asResource();
-            if (this.locations == null)
-                this.locations = new ArrayList<>();
-            this.locations.add(new Location(m, cl));
-        }
-        if (this.locations != null) {
-            Collections.sort(this.locations);
-        }
+        this.locations = getLocations(m, iinstance);
     }
     
     public VolumeInfoSmall getVolumeNumber(int volumeNumber) {

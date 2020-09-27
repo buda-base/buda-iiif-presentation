@@ -15,8 +15,8 @@ public class PartInfo implements Comparable<PartInfo> {
     public List<LangString> labels = null;
     @JsonProperty("parts")
     public List<PartInfo> parts = null;
-    @JsonProperty("location")
-    public Location location = null;
+    @JsonProperty("locations")
+    public List<Location> locations = null;
     @JsonProperty("linkToQname")
     public String linkToQname = null;
     @JsonProperty("linkToTypeLname")
