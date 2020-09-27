@@ -9,16 +9,22 @@ See [API.md](API.md) for the API.
 ## Running
 
 - `mvn test` runs the tests
-- `mvn jetty:run` serves the app locally
-- `mvn package` produces a war file
+
+To serve locally:
+
+```
+
+mvn package
+java -Dserver.port=8080 -Dspring.profiles.active=local -Diiifpres.configpath=src/main/resources -jar target/buda-iiif-presentation-exec.war
+```
 
 Ex: 
-- http://localhost:8080/v:bdr:V22084_I0886/manifest
-- http://localhost:8080/collection/i:bdr:I22084
-- http://localhost:8080/v:bdr:VEAP676-7-12/manifest
+- http://localhost:8080/v:bdr:I0886/manifest
+- http://localhost:8080/collection/i:bdr:W22084
+- http://localhost:8080/v:bdr:IEAP676-7-12/manifest
 
-This uses S3 to fetch a dimension.json file, using the default credential provider, make sure the correct environment vars / properties are set.
+This uses S3 to fetch a `dimension.json` file, using the default credential provider, make sure the correct environment vars / properties are set.
 
 ## Copyright and License
 
-All the code and API are `Copyright (C) 2017 Buddhist Digital Resource Center` and are under the [Apache 2.0 Public License](LICENSE).
+All the code and API are `Copyright (C) 2017-2020 Buddhist Digital Resource Center` and are under the [Apache 2.0 Public License](LICENSE).
