@@ -159,7 +159,7 @@ public class ImageInstanceInfo {
         this.volumes = volumes;
         final StmtIterator clItr = iinstance.listProperties(m.getProperty(BDO, "contentLocation"));
         while (clItr.hasNext()) {
-            final Statement s = volumesItr.next();
+            final Statement s = clItr.next();
             final Resource cl = s.getObject().asResource();
             if (this.locations == null)
                 this.locations = new ArrayList<>();
