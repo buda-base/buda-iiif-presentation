@@ -5,6 +5,7 @@ import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix;
 import static io.bdrc.iiif.presentation.AppConstants.IIIFPresPrefix_coll;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -108,6 +109,33 @@ public class CollectionService {
         }
     }
 
+    public static void addManifestsForLocation(final Collection c, List<Location> ll, final ImageInstanceInfo ii, final boolean continuous, final String workQname, final boolean withOutline) {
+        if (ll == null)
+            return;
+        List<Integer> vols = new ArrayList<>();
+        for (final Location loc : ll) {
+            for (int i = loc.bvolnum; i <= loc.evolnum; i++) {
+                if (!vols.contains(i)) {
+                    vols.add(i);
+                }
+            }
+        }
+        for (final Integer i : vols) {
+            VolumeInfoSmall vi = ii.getVolumeNumber(i);
+            if (vi == null)
+                continue;
+            final StringBuilder sb = new StringBuilder();
+            final String prefix = withOutline ? "wvo:" : "wv:";
+            sb.append(IIIFPresPrefix + prefix + workQname + "::" + vi.getPrefixedUri() + "/manifest");
+            if (continuous) {
+                sb.append("?continuous=true");
+            }
+            final Manifest m = new Manifest(sb.toString());
+            m.setLabel(ManifestService.getVolNumPV(i));
+            c.addManifest(m);
+        }
+    }
+    
     public static PropertyValue getLabels(String workId, List<LangString> labels) {
         final PropertyValue label = new PropertyValue();
         if (labels == null || labels.isEmpty()) {
@@ -199,21 +227,27 @@ public class CollectionService {
         }
         logger.info("building item collection for ID {}", id.getId());
         collection.addLabel(id.getImageInstanceId());
-        final String volPrefix = id.getSubType() == Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE ? "vo:" : "v:";
-        for (ImageInstanceInfo.VolumeInfoSmall vi : ii.volumes) {
-            final String manifestId = volPrefix + vi.getPrefixedUri();
-            String manifestUrl;
-            if (vi.iiifManifestUri != null) {
-                manifestUrl = vi.iiifManifestUri;
-            } else {
-                manifestUrl = IIIFPresPrefix + manifestId + "/manifest";
-                if (continuous) {
-                    manifestUrl += "?continuous=true";
+        if (ii.locations != null) {
+            // case of an image instance with location
+            addManifestsForLocation(collection, ii.locations, ii, continuous, itemId, id.getSubType() == Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE);
+        } else {
+            // more general case
+            final String volPrefix = id.getSubType() == Identifier.COLLECTION_ID_ITEM_VOLUME_OUTLINE ? "vo:" : "v:";
+            for (ImageInstanceInfo.VolumeInfoSmall vi : ii.volumes) {
+                final String manifestId = volPrefix + vi.getPrefixedUri();
+                String manifestUrl;
+                if (vi.iiifManifestUri != null) {
+                    manifestUrl = vi.iiifManifestUri;
+                } else {
+                    manifestUrl = IIIFPresPrefix + manifestId + "/manifest";
+                    if (continuous) {
+                        manifestUrl += "?continuous=true";
+                    }
                 }
+                final Manifest manifest = new Manifest(manifestUrl);
+                manifest.setLabel(vi.getLabel());
+                collection.addManifest(manifest);
             }
-            final Manifest manifest = new Manifest(manifestUrl);
-            manifest.setLabel(vi.getLabel());
-            collection.addManifest(manifest);
         }
         return collection;
     }
