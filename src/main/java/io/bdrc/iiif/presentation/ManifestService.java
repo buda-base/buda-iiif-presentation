@@ -289,6 +289,8 @@ public class ManifestService {
     }
 
     public static PropertyValue getPVforLS(final List<LangString> lslist, final Integer volnum) {
+        if (lslist == null)
+            return getVolNumPV(volnum);
         final PropertyValue res = new PropertyValue();
         for (final LangString ls : lslist) {
             final String valueSuffix;
