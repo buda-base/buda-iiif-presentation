@@ -87,7 +87,7 @@ public class ManifestService {
             res.addValue(getLocaleFor("en"), "Bdrc-" + imageIndex);
             return res;
         }
-        res.addValue(getLocaleFor("en"), "p. " + imageIndex);
+        res.addValue(getLocaleFor("en"), "img. " + imageIndex);
         res.addValue(getLocaleFor("bo-x-ewts"), Integer.toString(imageIndex));
         return res;
     }
