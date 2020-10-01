@@ -79,14 +79,9 @@ public class ManifestService {
         }
         return res;
     }
-
+    
     public static PropertyValue getDefaultLabelForImage(final int imageIndex, final ImageGroupInfo vi) {
         final PropertyValue res = new PropertyValue();
-        if (imageIndex < (vi.pagesIntroTbrc + 1)) {
-            // this shouldn't really happen anymore
-            res.addValue(getLocaleFor("en"), "Bdrc-" + imageIndex);
-            return res;
-        }
         res.addValue(getLocaleFor("en"), "img. " + imageIndex);
         res.addValue(getLocaleFor("bo-x-ewts"), Integer.toString(imageIndex));
         return res;
@@ -190,7 +185,7 @@ public class ManifestService {
                 // this width/heigth is a bit random...
                 thisCanvas.setWidth(AppConstants.COPYRIGHT_PAGE_W);
                 thisCanvas.setHeight(AppConstants.COPYRIGHT_PAGE_H);
-                final PropertyValue label = getLabelFromBVMImageInfo(bvmIi, bvm, true);
+                final PropertyValue label = getLabelFromBVMImageInfo(bvmIi, bvm, true, null);
                 if (label != null)
                     thisCanvas.setLabel(label);
                 if (firstCanvas == null)
@@ -548,7 +543,7 @@ public class ManifestService {
 
     public static final PropertyValue pngHint = new PropertyValue("png", "jpg");
 
-    public static PropertyValue getLabelFromBVMImageInfo(final BVMImageInfo bvmIi, final BVM bvm, final boolean missing) {
+    public static PropertyValue getLabelFromBVMImageInfo(final BVMImageInfo bvmIi, final BVM bvm, final boolean missing, final Integer imgSeqNum) {
         // TODO: convert pagination in Tibetan?
         final BVMPaginationItem paginationItem = bvmIi.getDefaultPaginationValue(bvm);
         if (paginationItem == null || paginationItem.value == null || paginationItem.value.isEmpty()) {
@@ -565,6 +560,10 @@ public class ManifestService {
         } else {
             res.addValue(paginationItem.value);
         }
+        if (imgSeqNum != null) {
+            res.addValue(getLocaleFor("en"), "img. " + imgSeqNum);
+            res.addValue(getLocaleFor("bo-x-ewts"), Integer.toString(imgSeqNum));
+        }
         return res;
     }
 
@@ -575,7 +574,7 @@ public class ManifestService {
         final String canvasUri = getCanvasUri(imageInfo.filename, volumeId, imgSeqNum);
         final Canvas canvas = new Canvas(canvasUri);
         if (bvmIi != null) {
-            final PropertyValue label = getLabelFromBVMImageInfo(bvmIi, bvm, false);
+            final PropertyValue label = getLabelFromBVMImageInfo(bvmIi, bvm, false, imgSeqNum);
             if (label != null)
                 canvas.setLabel(label);
         } else {
