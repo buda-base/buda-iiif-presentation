@@ -366,6 +366,7 @@ public class BVM {
     private Map<String,Integer> fnMap = null;
     
     public BVMSection getSection(final String sectionId) {
+        if (sections == null) return null;
         for (BVMSection s : sections) {
             if (s.id.equals(sectionId))
                 return s;
