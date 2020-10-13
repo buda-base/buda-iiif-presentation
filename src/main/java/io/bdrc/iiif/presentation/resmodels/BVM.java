@@ -222,6 +222,10 @@ public class BVM {
       
         public BVMPaginationItem() { }
         
+        public BVMSection getSection(final BVM root) {
+            return root.getSection(section);
+        }
+        
         public void validate(PaginationType type) throws BDRCAPIException {
             if (!type.getTestPattern().matcher(this.value).matches())
                 throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: invalid pagination value "+this.value);
@@ -246,11 +250,14 @@ public class BVM {
         @JsonProperty("rotation")
         public Integer rotation = null;
         @JsonInclude(Include.NON_NULL)
+        @JsonProperty("detail-of")
+        public String detailOf = null;
+        @JsonInclude(Include.NON_NULL)
         @JsonProperty("duplicate-of")
         public String duplicateOf = null;
         @JsonInclude(Include.NON_NULL)
-        @JsonProperty("detail-of")
-        public String detailOf = null;
+        @JsonProperty("imggroup")
+        public String imggroupQname = null;
         @JsonInclude(value = Include.NON_DEFAULT)
         @JsonProperty(value="hidden")
         public Boolean hidden = Boolean.FALSE;
@@ -272,7 +279,7 @@ public class BVM {
                     //if (t == Tag.T0016 && this.detailOf == null)
                     //    throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: missing detail-of field");
                     if ((t == Tag.T0017 || t == Tag.T0018) && this.duplicateOf == null)
-                        throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: missing duplicate-of field");
+                        throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: missing of field for duplicate");
                 }
             }
             boolean filenameIsEmpty = (this.filename == null || this.filename.isEmpty());
@@ -317,7 +324,7 @@ public class BVM {
     
     @JsonProperty(value="rev", required=true)
     public String rev = null;
-    @JsonProperty(value="for-volume", required=true)
+    @JsonProperty(value="imggroup", required=true)
     public String imageGroupQname = null;
     @JsonProperty(value="spec-version", required=true)
     public String specVersion = null;
@@ -357,6 +364,14 @@ public class BVM {
     private Map<String,PaginationType> paginationMap = null;
     @JsonIgnore
     private Map<String,Integer> fnMap = null;
+    
+    public BVMSection getSection(final String sectionId) {
+        for (BVMSection s : sections) {
+            if (s.id.equals(sectionId))
+                return s;
+        }
+        return null;
+    }
     
     
     // in the default view

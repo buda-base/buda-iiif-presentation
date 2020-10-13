@@ -1,5 +1,5 @@
 {
-	"for-volume": "bdr:I0890",
+	"imggroup": "bdr:I0890",
 	"spec-version": "0.1.0",
 	"rev": "860f508e-608e-484d-9fc3-62392fab0b12",
 	"attribution": [{"@value": "data contributed by rKTs", "@language": "en"}],
@@ -51,6 +51,14 @@
 					"tags": ["T0020"]
 				},
 				{
+					"tags": ["T0020"],
+					"pagination": { "pgfolios": {"value": "1'a"} }
+				},
+				{
+					"tags": ["T0020"],
+					"pagination": { "pgfolios": {"value": "1'b"} }
+				},
+				{
 					"filename": "08900005.tif",
 					"pagination": { "pgfolios": {"value": "2a"} }
 				},
@@ -75,6 +83,14 @@
 				{
 					"filename": "08900007.tif",
 					"pagination": { "pgfolios": {"value": "3a"} }
+				},
+				{
+					"tags": ["T0020"],
+					"pagination": { "pgfolios": {"value": "4a"} }
+				},
+				{
+					"tags": ["T0020"],
+					"pagination": { "pgfolios": {"value": "4b"} }
 				}
 			]
 		}

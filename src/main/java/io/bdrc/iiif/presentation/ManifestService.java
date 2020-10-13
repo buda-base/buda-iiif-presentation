@@ -9,6 +9,7 @@ import static io.bdrc.iiif.presentation.AppConstants.NO_ACCESS_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.PDF_URL_PREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.ZIP_URL_PREFIX;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,7 @@ import io.bdrc.iiif.presentation.resmodels.BDRCPresentationImageService;
 import io.bdrc.iiif.presentation.resmodels.BVM;
 import io.bdrc.iiif.presentation.resmodels.BVM.BVMImageInfo;
 import io.bdrc.iiif.presentation.resmodels.BVM.BVMPaginationItem;
+import io.bdrc.iiif.presentation.resmodels.BVM.BVMSection;
 import io.bdrc.iiif.presentation.resmodels.BVM.BVMStatus;
 import io.bdrc.iiif.presentation.resmodels.ImageGroupInfo;
 import io.bdrc.iiif.presentation.resmodels.ImageInfoList;
@@ -83,7 +85,7 @@ public class ManifestService {
     public static PropertyValue getDefaultLabelForImage(final int imageIndex, final ImageGroupInfo vi) {
         final PropertyValue res = new PropertyValue();
         res.addValue(getLocaleFor("en"), "img. " + imageIndex);
-        res.addValue(getLocaleFor("bo-x-ewts"), Integer.toString(imageIndex));
+        res.addValue(getLocaleFor("bo-x-ewts"), "par grangs _" + imageIndex);
         return res;
     }
 
@@ -112,12 +114,12 @@ public class ManifestService {
     }
 
     public static Canvas addOneCanvas(final int imgSeqNum, final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi,
-            final String volumeId, final Sequence mainSeq, final BVMImageInfo bvmIi, final BVM bvm) {
+            final String volumeId, final Sequence mainSeq, final BVMImageInfo bvmIi, final BVM bvm, boolean sectionchange) {
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum - 1);
         final Integer size = imageInfo.size;
         if (size != null && size > 1500000)
             return null;
-        final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi, bvmIi, bvm);
+        final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi, bvmIi, bvm, sectionchange);
         mainSeq.addCanvas(canvas);
         return canvas;
     }
@@ -176,30 +178,68 @@ public class ManifestService {
             bvmEndIndex = bvm.getDefaultImageList().size() - 1;
         }
         final List<BVMImageInfo> bvmIil = bvm.getDefaultImageList();
+        BVMImageInfo firstmissing = null;
+        BVMImageInfo lastmissing = null;
+        String prevsec = null;
         for (int bvmImgIdx = bvmBeginIndex; bvmImgIdx <= bvmEndIndex; bvmImgIdx++) {
             final BVMImageInfo bvmIi = bvmIil.get(bvmImgIdx);
+            if (bvmIi.hidden) continue;
             if (bvmIi.filename == null || bvmIi.filename.isEmpty()) {
-                // empty canvas
-                final String canvasUri = IIIFPresPrefix + "v:" + volumeId + "/canvas/missing-bvmidx-" + bvmImgIdx;
-                final Canvas thisCanvas = new Canvas(canvasUri);
-                // this width/heigth is a bit random...
-                thisCanvas.setWidth(AppConstants.COPYRIGHT_PAGE_W);
-                thisCanvas.setHeight(AppConstants.COPYRIGHT_PAGE_H);
-                final PropertyValue label = getLabelFromBVMImageInfo(bvmIi, bvm, true, null);
-                if (label != null)
-                    thisCanvas.setLabel(label);
-                if (firstCanvas == null)
-                    firstCanvas = thisCanvas;
-                mainSeq.addCanvas(thisCanvas);
+                if (firstmissing == null) {
+                    firstmissing = bvmIi;
+                }
+                lastmissing = bvmIi;
             } else {
+                if (lastmissing != null) {
+                 // empty canvas
+                    final String canvasUri = IIIFPresPrefix + "v:" + volumeId + "/canvas/missing-bvmidx-" + (bvmImgIdx-1);
+                    final Canvas thisCanvas = new Canvas(canvasUri);
+                    // this width/heigth is a bit random...
+                    thisCanvas.setWidth(AppConstants.COPYRIGHT_PAGE_W);
+                    thisCanvas.setHeight(AppConstants.COPYRIGHT_PAGE_H);
+                    final PropertyValue label;
+                    if (lastmissing == firstmissing) {
+                        label = getLabelFromBVMImageInfo(firstmissing, bvm, true, null, false);
+                    } else {
+                        label = getLabelFromBVMMissingRange(firstmissing, lastmissing, bvm);
+                    }
+                    if (label != null)
+                        thisCanvas.setLabel(label);
+                    if (firstCanvas == null)
+                        firstCanvas = thisCanvas;
+                    mainSeq.addCanvas(thisCanvas);
+                    lastmissing = null;
+                    firstmissing = null;
+                }
                 final Integer iiLidx = imageInfoList.getIdxFromFilename(bvmIi.filename);
                 if (iiLidx == null) {
                     throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from bvm not in imagelist: " + bvmIi.filename);
                 }
-                final Canvas thisCanvas = addOneCanvas(iiLidx + 1, id, imageInfoList, vi, volumeId, mainSeq, bvmIi, bvm);
+                final boolean sectionChange = bvmIi.getDefaultPaginationValue(bvm) == null ? false : bvmIi.getDefaultPaginationValue(bvm).section == prevsec;
+                final Canvas thisCanvas = addOneCanvas(iiLidx + 1, id, imageInfoList, vi, volumeId, mainSeq, bvmIi, bvm, sectionChange);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
+            prevsec = bvmIi.getDefaultPaginationValue(bvm) == null ? null : bvmIi.getDefaultPaginationValue(bvm).section;
+        }
+        if (lastmissing != null) {
+            // empty canvas
+           final String canvasUri = IIIFPresPrefix + "v:" + volumeId + "/canvas/missing-bvmidx-final";
+           final Canvas thisCanvas = new Canvas(canvasUri);
+           // this width/heigth is a bit random...
+           thisCanvas.setWidth(AppConstants.COPYRIGHT_PAGE_W);
+           thisCanvas.setHeight(AppConstants.COPYRIGHT_PAGE_H);
+           final PropertyValue label;
+           if (lastmissing == firstmissing) {
+               label = getLabelFromBVMImageInfo(firstmissing, bvm, true, null, false);
+           } else {
+               label = getLabelFromBVMMissingRange(firstmissing, lastmissing, bvm);
+           }
+           if (label != null)
+               thisCanvas.setLabel(label);
+           if (firstCanvas == null)
+               firstCanvas = thisCanvas;
+           mainSeq.addCanvas(thisCanvas);
         }
         mainSeq.setStartCanvas(firstCanvas.getIdentifier());
         return mainSeq;
@@ -224,7 +264,7 @@ public class ManifestService {
         final int totalPages = imageInfoList.size();
         if (!fairUse || isAdmin) {
             for (int imgSeqNum = beginIndex; imgSeqNum <= endIndex; imgSeqNum++) {
-                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, null);
+                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, null, false);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
@@ -235,7 +275,7 @@ public class ManifestService {
             // min(endIndex,firstUnaccessiblePage+1)
             for (int imgSeqNum = Math.min(firstUnaccessiblePage, beginIndex); imgSeqNum <= Math.min(endIndex,
                     firstUnaccessiblePage - 1); imgSeqNum++) {
-                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, null);
+                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, null, false);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
@@ -251,7 +291,7 @@ public class ManifestService {
             // last part: max(beginIndex,lastUnaccessiblePage) to
             // max(endIndex,lastUnaccessiblePage)
             for (int imgSeqNum = Math.max(lastUnaccessiblePage + 1, beginIndex); imgSeqNum <= Math.max(endIndex, lastUnaccessiblePage); imgSeqNum++) {
-                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, null);
+                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, null, false);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
@@ -361,7 +401,7 @@ public class ManifestService {
         Integer bPage;
         Integer ePage;
         final int totalPages = imageInfoList.size();
-        final Sequence mainSeq = new Sequence(IIIFPresPrefix + id.getId() + "/sequence/main");
+        Sequence mainSeq = new Sequence(IIIFPresPrefix + id.getId() + "/sequence/main");
         if (id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE) {
             bPage = 1 + nbPagesIntro;
             ePage = totalPages;
@@ -370,7 +410,7 @@ public class ManifestService {
                 logger.warn("work has no location");
                 bPage = id.getBPageNum();
                 ePage = id.getEPageNum();
-                getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
+                mainSeq = getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
                 final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
                 manifest.setRenderings(oc);
             } else {
@@ -392,8 +432,8 @@ public class ManifestService {
                     if (vi.volumeNumber.equals(location.evolnum) && location.epagenum != -1)
                         ePage = location.epagenum;
                     volumeFound = true;
-                    logger.info("computed: {}-{}", bPage, ePage);
-                    getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
+                    logger.info("computed (wiv): {}-{}", bPage, ePage);
+                    mainSeq = getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
                     final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
                     manifest.setRenderings(oc);
                 }
@@ -404,7 +444,7 @@ public class ManifestService {
             bPage = id.getBPageNum();
             ePage = id.getEPageNum();
             logger.debug("computed: {}-{}", bPage, ePage);
-            getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
+            mainSeq = getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
             final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
             manifest.setRenderings(oc);
         }
@@ -543,13 +583,26 @@ public class ManifestService {
 
     public static final PropertyValue pngHint = new PropertyValue("png", "jpg");
 
-    public static PropertyValue getLabelFromBVMImageInfo(final BVMImageInfo bvmIi, final BVM bvm, final boolean missing, final Integer imgSeqNum) {
+    public static String translatePagination(final String pagination, final String langtag, boolean isFinal) {
+        if (langtag.equals("bo-x-ewts")) {
+            String res;
+            if (isFinal)
+                res = pagination.replace("a", "z").replace("'z", "na og").replace("b", "ba/").replace("'ba/", "ba og").replace("z", "na/");
+            else 
+                res = pagination.replace("a", "na").replace("'na", "na og").replace("'b", "ba og");
+            return res;
+        }
+        return pagination;
+    }
+    
+    public static PropertyValue getLabelFromBVMImageInfo(final BVMImageInfo bvmIi, final BVM bvm, final boolean missing, final Integer imgSeqNum, boolean sectionChange) {
         // TODO: convert pagination in Tibetan?
         final BVMPaginationItem paginationItem = bvmIi.getDefaultPaginationValue(bvm);
         if (paginationItem == null || paginationItem.value == null || paginationItem.value.isEmpty()) {
             if (missing) {
                 final PropertyValue res = new PropertyValue();
                 res.addValue(ManifestService.getLocaleFor("en"), "missing");
+                res.addValue(ManifestService.getLocaleFor("bo-x-ewts"), "chad/");
                 return res;
             }
             return null;
@@ -557,29 +610,55 @@ public class ManifestService {
         final PropertyValue res = new PropertyValue();
         if (missing) {
             res.addValue(ManifestService.getLocaleFor("en"), paginationItem.value + " (missing)");
+            res.addValue(ManifestService.getLocaleFor("bo-x-ewts"), translatePagination(paginationItem.value, "bo-x-ewts", false) + " _chad/");
         } else {
-            res.addValue(paginationItem.value);
+            if (sectionChange) {
+                final BVMSection section = paginationItem.getSection(bvm);
+                if (section != null && section.name != null) {
+                    final LangString pgname = section.name;
+                    res.addValue(ManifestService.getLocaleFor(pgname.language), pgname.value);
+                }
+            }
+            res.addValue(ManifestService.getLocaleFor("en"), paginationItem.value);
+            res.addValue(ManifestService.getLocaleFor("bo-x-ewts"), translatePagination(paginationItem.value, "bo-x-ewts", true));
         }
         if (imgSeqNum != null) {
             res.addValue(getLocaleFor("en"), "img. " + imgSeqNum);
-            res.addValue(getLocaleFor("bo-x-ewts"), Integer.toString(imgSeqNum));
+            res.addValue(getLocaleFor("bo-x-ewts"), "par grangs _" + imgSeqNum);
         }
         return res;
     }
 
+    public static PropertyValue getLabelFromBVMMissingRange(final BVMImageInfo bvmIiStart, final BVMImageInfo bvmIiEnd, final BVM bvm) {
+        final BVMPaginationItem paginationItemStart = bvmIiStart.getDefaultPaginationValue(bvm);
+        final BVMPaginationItem paginationItemEnd = bvmIiEnd.getDefaultPaginationValue(bvm);
+        if (paginationItemStart == null || paginationItemStart.value == null || paginationItemStart.value.isEmpty()
+                || paginationItemEnd == null || paginationItemEnd.value == null || paginationItemEnd.value.isEmpty()) {
+                final PropertyValue res = new PropertyValue();
+                res.addValue(ManifestService.getLocaleFor("en"), "missing");
+                res.addValue(ManifestService.getLocaleFor("bo-x-ewts"), "chad/");
+                return res;
+        }
+        final PropertyValue res = new PropertyValue();
+        res.addValue(ManifestService.getLocaleFor("en"), paginationItemStart.value + " to " + paginationItemEnd.value + " missing");
+        res.addValue(ManifestService.getLocaleFor("bo-x-ewts"), translatePagination(paginationItemStart.value, "bo-x-ewts", false) + " _nas _" + translatePagination(paginationItemEnd.value, "bo-x-ewts", false) + " _bar chad/");
+        return res;
+    }
+    
     public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final ImageInfoList imageInfoList, final String volumeId,
-            final ImageGroupInfo vi, final BVMImageInfo bvmIi, final BVM bvm) {
+            final ImageGroupInfo vi, final BVMImageInfo bvmIi, final BVM bvm, boolean sectionchange) {
         // imgSeqNum starts at 1
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum - 1);
         final String canvasUri = getCanvasUri(imageInfo.filename, volumeId, imgSeqNum);
         final Canvas canvas = new Canvas(canvasUri);
         if (bvmIi != null) {
-            final PropertyValue label = getLabelFromBVMImageInfo(bvmIi, bvm, false, imgSeqNum);
+            final PropertyValue label = getLabelFromBVMImageInfo(bvmIi, bvm, false, imgSeqNum, sectionchange);
             if (label != null)
                 canvas.setLabel(label);
         } else {
             canvas.setLabel(getDefaultLabelForImage(imgSeqNum, vi));
         }
+        canvas.addMetadata("filename", imageInfo.filename);
         canvas.setWidth(imageInfo.width);
         canvas.setHeight(imageInfo.height);
         final String imageServiceUrl = getImageServiceUrl(imageInfo.filename, volumeId);
@@ -618,6 +697,6 @@ public class ManifestService {
         if (imgSeqNum < 1 || imgSeqNum > imageTotal)
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE,
                     "you asked a canvas for an image number that is inferior to 1 or greater than the total number of images");
-        return buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi, null, null);
+        return buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi, null, null, false);
     }
 }

@@ -113,7 +113,7 @@ public class BVMTest {
         final InstanceInfo wi = new InstanceInfo(m, "bdr:MW22084");
         Manifest man = ManifestService.getManifestForIdentifier(false, id, vi, false, "bdr:I0890", false, wi);
         final File fout2 = new File("/tmp/bvm-v-manifest.json");
-        AppConstants.IIIFMAPPER.writer().writeValue(fout2, man);
+        AppConstants.IIIFMAPPER.writerWithDefaultPrettyPrinter().writeValue(fout2, man);
     }
 
 }
