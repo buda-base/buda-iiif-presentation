@@ -29,6 +29,9 @@
 		"view1": {
 			"imagelist": [
 				{
+					"tags": ["T0020"]
+				},
+				{
 					"filename": "08900001.tif",
 					"tags": ["T0005"]
 				},

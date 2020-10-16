@@ -205,8 +205,8 @@ public class ManifestService {
                     }
                     if (label != null)
                         thisCanvas.setLabel(label);
-                    if (firstCanvas == null)
-                        firstCanvas = thisCanvas;
+                    //if (firstCanvas == null)
+                    //    firstCanvas = thisCanvas;
                     mainSeq.addCanvas(thisCanvas);
                     lastmissing = null;
                     firstmissing = null;
@@ -237,11 +237,15 @@ public class ManifestService {
            }
            if (label != null)
                thisCanvas.setLabel(label);
-           if (firstCanvas == null)
-               firstCanvas = thisCanvas;
+           //if (firstCanvas == null)
+           //    firstCanvas = thisCanvas;
            mainSeq.addCanvas(thisCanvas);
         }
-        mainSeq.setStartCanvas(firstCanvas.getIdentifier());
+        if (firstCanvas != null) {
+            mainSeq.setStartCanvas(firstCanvas.getIdentifier());
+            mainSeq.addThumbnail((ImageContent) firstCanvas.getImages().get(0).getResource());
+        } else
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "manifest only has missing images");
         return mainSeq;
     }
 
@@ -285,8 +289,8 @@ public class ManifestService {
                     || (endIndex >= firstUnaccessiblePage && endIndex <= lastUnaccessiblePage)
                     || (beginIndex < firstUnaccessiblePage && endIndex > lastUnaccessiblePage)) {
                 final Canvas thisCanvas = addCopyrightCanvas(mainSeq, volumeId);
-                if (firstCanvas == null)
-                    firstCanvas = thisCanvas;
+                //if (firstCanvas == null)
+                //    firstCanvas = thisCanvas;
             }
             // last part: max(beginIndex,lastUnaccessiblePage) to
             // max(endIndex,lastUnaccessiblePage)
@@ -296,9 +300,10 @@ public class ManifestService {
                     firstCanvas = thisCanvas;
             }
         }
-        if (firstCanvas != null)
+        if (firstCanvas != null) {
             mainSeq.setStartCanvas(firstCanvas.getIdentifier());
-        else
+            mainSeq.addThumbnail((ImageContent) firstCanvas.getImages().get(0).getResource());
+        } else
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "manifest is empty (images are too big to be displayed)");
         return mainSeq;
     }
@@ -454,6 +459,8 @@ public class ManifestService {
             addRangesToManifest(isAdmin, manifest, id, vi, volumeId, fairUse, imageInfoList, rootPart, bvm);
         }
         manifest.addSequence(mainSeq);
+        manifest.addThumbnail(mainSeq.getThumbnail());
+        mainSeq.setThumbnails(null);
         return manifest;
     }
 
