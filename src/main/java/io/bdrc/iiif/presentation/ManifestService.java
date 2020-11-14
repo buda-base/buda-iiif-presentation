@@ -515,7 +515,8 @@ public class ManifestService {
             if (vi.pagesIntroTbrc != null && bPage <= vi.pagesIntroTbrc)
                 bPage = vi.pagesIntroTbrc + 1;
             int ePage = imageInfoList.size();
-            if (loc.evolnum != null && loc.evolnum.equals(vi.volumeNumber) && loc.epagenum != null)
+            // in https://github.com/buda-base/buda-iiif-presentation/issues/104 loc.epagenum was -1, not sure why
+            if (loc.evolnum != null && loc.evolnum.equals(vi.volumeNumber) && loc.epagenum != null && loc.epagenum >= 0)
                 ePage = Math.min(loc.epagenum, ePage);
             if (!fairUse || isAdmin) {
                 if (bvm == null) {
