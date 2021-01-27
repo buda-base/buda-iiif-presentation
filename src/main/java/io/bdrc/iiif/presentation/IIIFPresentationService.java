@@ -290,10 +290,13 @@ public class IIIFPresentationService {
                     .body(getStream("Insufficient rights"));
         }
         Access acc = (Access) req.getAttribute("access");
+        logger.debug("Getting access from request {}", acc);
+        logger.debug("Getting access from request {}", acc.getUser());
         boolean isAdmin = false;
         if (acc == null)
             acc = new Access();
         User usr = acc.getUser();
+        logger.debug("Getting usr from Access {}", usr);
         isAdmin = usr.isAdmin();
         final String accessShortName = getLocalName(vi.access.getUri());
         final String statusShortName = getLocalName(vi.statusUri);

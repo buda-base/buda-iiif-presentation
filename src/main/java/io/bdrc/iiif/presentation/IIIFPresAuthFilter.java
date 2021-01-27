@@ -30,7 +30,8 @@ public class IIIFPresAuthFilter implements Filter {
     public final static Logger log = LoggerFactory.getLogger(IIIFPresAuthFilter.class.getName());
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         String method = ((HttpServletRequest) request).getMethod();
         try {
             if (!SpringBootIIIFPres.isInChina()) {
@@ -61,7 +62,8 @@ public class IIIFPresAuthFilter implements Filter {
                     if (end == null) {
                         isSecuredEndpoint = false;
                         log.debug("Endpoint with path {} is not secured", path);
-                        // endpoint is not secured - Using default (empty endpoint)
+                        // endpoint is not secured - Using default (empty
+                        // endpoint)
                         // for Access Object end=new Endpoint();
                     } else {
                         isSecuredEndpoint = end.isSecured(method);
@@ -72,6 +74,7 @@ public class IIIFPresAuthFilter implements Filter {
                         validation = new TokenValidation(token);
                         prof = validation.getUser();
                         log.debug("validation is {}", validation);
+                        log.debug("profile is {}", prof);
                     }
                     if (isSecuredEndpoint) {
                         // Endpoint is secure
@@ -96,13 +99,16 @@ public class IIIFPresAuthFilter implements Filter {
                             // token present since validation is not null
                             Access acc = new Access(prof, end);
                             request.setAttribute("access", acc);
+                            log.debug("Set access to {}", acc);
                         }
                     }
                 }
             }
             chain.doFilter(request, response);
         } catch (Exception e) {
-            log.error("Auth filter did not go through properly ", e);
+            System.out.println("Auth filter did not go through properly ");
+            // log.error("Auth filter did not go through properly ", e);
+            e.printStackTrace();
             ((HttpServletResponse) response).setStatus(417);
             throw e;
         }
