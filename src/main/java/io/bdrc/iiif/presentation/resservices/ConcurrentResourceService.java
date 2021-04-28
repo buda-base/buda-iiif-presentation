@@ -80,8 +80,6 @@ public class ConcurrentResourceService<T> {
         return resT;
     }
 
-    public static final BDRCAPIException notFoundEx = new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "resource not found");
-
     /*
      * Function returning a CompletableFuture and thus allowing many different calls
      * to iiif-presentation to try to access a non-cached WorkInfo at the same time
@@ -122,7 +120,7 @@ public class ConcurrentResourceService<T> {
                 if (this.canReturnNull) {
                     resCached.complete(null);
                 } else {
-                    resCached.completeExceptionally(notFoundEx);
+                    resCached.completeExceptionally(new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "resource not found: "+resId));
                 }
             }
             return resCached;
@@ -155,7 +153,7 @@ public class ConcurrentResourceService<T> {
         if (resT != null || this.canReturnNull) {
             res.complete(resT);
         } else {
-            res.completeExceptionally(notFoundEx);
+            res.completeExceptionally(new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "resource not found: "+resId));
         }
         putInCache(resId, resT);
         futures.remove(resId);

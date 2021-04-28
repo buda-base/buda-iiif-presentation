@@ -291,13 +291,12 @@ public class IIIFPresentationService {
         }
         Access acc = (Access) req.getAttribute("access");
         logger.debug("Getting access from request {}", acc);
-        logger.debug("Getting access from request {}", acc.getUser());
         boolean isAdmin = false;
         if (acc == null)
             acc = new Access();
         User usr = acc.getUser();
         logger.debug("Getting usr from Access {}", usr);
-        isAdmin = usr.isAdmin();
+        isAdmin = acc.getUserProfile().isAdmin();
         final String accessShortName = getLocalName(vi.access.getUri());
         final String statusShortName = getLocalName(vi.statusUri);
         final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.imageInstanceUri);

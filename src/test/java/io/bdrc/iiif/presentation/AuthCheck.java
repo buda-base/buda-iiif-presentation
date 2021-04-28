@@ -80,7 +80,7 @@ public class AuthCheck {
         JsonNode node = mapper.readTree(json_resp);
         token = node.findValue("access_token").asText();
         RdfAuthModel.init();
-        log.info("USERS >> {}" + RdfAuthModel.getUsers());
+        //log.info("USERS >> {}" + RdfAuthModel.getUsers());
         setPublicToken();
         setAdminToken();
     }
