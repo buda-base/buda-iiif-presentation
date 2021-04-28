@@ -83,12 +83,15 @@ public class InstanceInfo extends PartInfo {
             instanceId = BDR+instanceId.substring(4);
         final Resource instance = m.getResource(instanceId);
         if (instance == null)
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: missing instance");
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: missing instance "+instanceId);
         // checking type (needs to be a bdo:Work)
-        final Triple isInstanceT = new Triple(instance.asNode(), RDF.type.asNode(), m.getResource(BDO+"Instance").asNode());
+        Triple isInstanceT = new Triple(instance.asNode(), RDF.type.asNode(), m.getResource(BDO+"Instance").asNode());
         ExtendedIterator<Triple> ext = m.getGraph().find(isInstanceT);
         if (!ext.hasNext()) {
-            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: not an instance");
+            isInstanceT = new Triple(instance.asNode(), RDF.type.asNode(), m.getResource(BDO+"ImageInstance").asNode());
+            ext = m.getGraph().find(isInstanceT);
+            if (!ext.hasNext())
+                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model, not an instance: "+instanceId);
         }
         final Triple isVirtualInstanceT = new Triple(instance.asNode(), RDF.type.asNode(), m.getResource(BDO+"VirtualInstance").asNode());
         ext = m.getGraph().find(isVirtualInstanceT);
