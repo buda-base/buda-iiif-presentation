@@ -269,6 +269,7 @@ public class BVM {
         
         public BVMImageInfo() {}
         
+        @JsonIgnore
         public int getDegrees() {
             if (this.rotationStr == null)
                 return 0;
