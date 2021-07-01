@@ -3,7 +3,6 @@ package io.bdrc.iiif.presentation.resmodels;
 import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -248,7 +247,7 @@ public class BVM {
         public List<LangString> note = null;
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("rotation")
-        public Integer rotation = null;
+        public String rotationStr = null;
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("detail-of")
         public String detailOf = null;
@@ -269,6 +268,22 @@ public class BVM {
         public Map<String,BVMPaginationItem> pagination = null;
         
         public BVMImageInfo() {}
+        
+        public int getDegrees() {
+            if (this.rotationStr == null)
+                return 0;
+            String intStr;
+            if (this.rotationStr.startsWith("!")) {
+                intStr = this.rotationStr.substring(1);
+            } else {
+                intStr = this.rotationStr;
+            }
+            try {
+                return Integer.valueOf(intStr);
+            } catch (Exception e) {
+                return 0;
+            }
+        }
         
         public void validate(final BVM root) throws BDRCAPIException {
             boolean filenameShouldBeEmpty = false;

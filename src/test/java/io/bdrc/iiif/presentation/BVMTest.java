@@ -115,5 +115,4 @@ public class BVMTest {
         final File fout2 = new File("/tmp/bvm-v-manifest.json");
         AppConstants.IIIFMAPPER.writerWithDefaultPrettyPrinter().writeValue(fout2, man);
     }
-
 }

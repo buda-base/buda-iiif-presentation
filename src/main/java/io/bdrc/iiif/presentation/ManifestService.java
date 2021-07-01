@@ -9,7 +9,6 @@ import static io.bdrc.iiif.presentation.AppConstants.NO_ACCESS_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.PDF_URL_PREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.ZIP_URL_PREFIX;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,13 +21,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.digitalcollections.iiif.model.ImageContent;
+import de.digitalcollections.iiif.model.Motivation;
 import de.digitalcollections.iiif.model.OtherContent;
 import de.digitalcollections.iiif.model.PropertyValue;
 import de.digitalcollections.iiif.model.enums.ViewingDirection;
 import de.digitalcollections.iiif.model.image.ImageApiProfile;
+import de.digitalcollections.iiif.model.image.ImageApiProfile.Format;
+import de.digitalcollections.iiif.model.image.ImageApiSelector;
+import de.digitalcollections.iiif.model.image.ResolvingException;
+import de.digitalcollections.iiif.model.openannotation.Annotation;
+import de.digitalcollections.iiif.model.openannotation.SpecificResource;
 import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import de.digitalcollections.iiif.model.sharedcanvas.Range;
+import de.digitalcollections.iiif.model.sharedcanvas.Resource;
 import de.digitalcollections.iiif.model.sharedcanvas.Sequence;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.BDRCPresentationImageService;
@@ -243,7 +249,16 @@ public class ManifestService {
         }
         if (firstCanvas != null) {
             mainSeq.setStartCanvas(firstCanvas.getIdentifier());
-            mainSeq.addThumbnail((ImageContent) firstCanvas.getImages().get(0).getResource());
+            // sometimes this doesn't work because the first image is rotated and cannot be cast to
+            final Resource<?> firstAnnRes = firstCanvas.getImages().get(0).getResource();
+            if (firstAnnRes instanceof ImageContent) {
+                mainSeq.addThumbnail((ImageContent) firstAnnRes);
+            } else {
+                final ImageContent img = new ImageContent(firstAnnRes.getIdentifier().toString());
+                img.setWidth(firstCanvas.getWidth());
+                img.setHeight(firstCanvas.getHeight());
+                mainSeq.addThumbnail(img);
+            }
         } else
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "manifest only has missing images");
         return mainSeq;
@@ -676,19 +691,55 @@ public class ManifestService {
             profile = ImageApiProfile.LEVEL_ONE;
         final BDRCPresentationImageService imgServ = new BDRCPresentationImageService(imageServiceUrl, profile);
         final String imgUrl;
-        if (pngOutput(imageInfo.filename)) {
+        final boolean png = pngOutput(imageInfo.filename);
+        if (png) {
             imgUrl = imageServiceUrl + "/full/max/0/default.png";
             imgServ.setPreferredFormats(pngHint);
         } else {
             imgUrl = imageServiceUrl + "/full/max/0/default.jpg";
         }
-        imgServ.setHeight(imageInfo.height);
-        imgServ.setWidth(imageInfo.width);
-        final ImageContent img = new ImageContent(imgUrl);
-        img.addService(imgServ);
-        img.setWidth(imageInfo.width);
-        img.setHeight(imageInfo.height);
-        canvas.addImage(img);
+        int degrees = 0;
+        if (bvmIi != null)
+            degrees = bvmIi.getDegrees();
+        if (degrees != 0) {
+            String resUrl = imageServiceUrl + "/full/max/"+bvmIi.rotationStr+"/default."+(png ? "png" : "jpg");
+            Annotation annotation = new Annotation(Motivation.PAINTING);
+            annotation.setOn(new Canvas(canvasUri));
+            SpecificResource res = new SpecificResource(resUrl);
+            ImageContent full = new ImageContent(imgUrl);
+            full.addService(imgServ);
+            res.setFull(full);
+            ImageApiSelector selector = new ImageApiSelector();
+            try {
+                selector.setRotation(bvmIi.rotationStr);
+            } catch (ResolvingException e) {
+                logger.error("cannot add rotation", e);
+                return canvas;
+            }
+            if (png)
+                selector.setFormat(Format.PNG);
+            res.setSelector(selector);
+            annotation.setResource(res);
+            if (degrees == 180) {
+                imgServ.setHeight(imageInfo.height);
+                imgServ.setWidth(imageInfo.width);
+            } else if (degrees == 90 || degrees == 270) {
+                // width and height are switched
+                imgServ.setHeight(imageInfo.width);
+                imgServ.setWidth(imageInfo.height);
+            }
+            List<Annotation> images = new ArrayList<Annotation>();
+            images.add(annotation);
+            canvas.setImages(images);
+        } else {
+            final ImageContent img = new ImageContent(imgUrl);
+            img.addService(imgServ);
+            img.setWidth(imageInfo.width);
+            img.setHeight(imageInfo.height);
+            imgServ.setHeight(imageInfo.height);
+            imgServ.setWidth(imageInfo.width);
+            canvas.addImage(img);
+        }
         return canvas;
     }
 

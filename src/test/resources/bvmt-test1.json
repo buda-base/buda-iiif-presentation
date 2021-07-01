@@ -42,7 +42,8 @@
 				},
 				{
 					"filename": "08900003.tif",
-					"tags": ["T0001"]
+					"tags": ["T0001"],
+					"rotation": "90"
 				},
 				{
 					"filename": "08900004.tif",
