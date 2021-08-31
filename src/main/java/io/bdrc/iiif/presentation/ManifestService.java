@@ -90,7 +90,7 @@ public class ManifestService {
     
     public static PropertyValue getDefaultLabelForImage(final int imageIndex, final ImageGroupInfo vi) {
         final PropertyValue res = new PropertyValue();
-        res.addValue(getLocaleFor("en"), "i. " + imageIndex);
+        res.addValue(getLocaleFor("en"), "img. " + imageIndex);
         res.addValue(getLocaleFor("bo-x-ewts"), "par grangs _" + imageIndex);
         return res;
     }
@@ -646,7 +646,7 @@ public class ManifestService {
             res.addValue(ManifestService.getLocaleFor("bo-x-ewts"), translatePagination(paginationItem.value, "bo-x-ewts", true));
         }
         if (imgSeqNum != null) {
-            res.addValue(getLocaleFor("en"), "i. " + imgSeqNum);
+            res.addValue(getLocaleFor("en"), "img. " + imgSeqNum);
             res.addValue(getLocaleFor("bo-x-ewts"), "par grangs _" + imgSeqNum);
         }
         return res;
