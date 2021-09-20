@@ -180,6 +180,7 @@ public class IIIFPresentationService {
                 itemId = id.getImageInstanceId();
                 break;
             case Identifier.COLLECTION_ID_WORK_OUTLINE :
+            case Identifier.COLLECTION_ID_WORK_OUTLINE_VOLUME:
                 InstanceInfo winf1;
                 try {
                     winf1 = InstanceInfoService.Instance.getAsync(id.getInstanceId()).get();
