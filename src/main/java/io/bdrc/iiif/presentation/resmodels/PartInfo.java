@@ -2,6 +2,9 @@ package io.bdrc.iiif.presentation.resmodels;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +24,8 @@ public class PartInfo implements Comparable<PartInfo> {
     public String linkToQname = null;
     @JsonProperty("linkToTypeLname")
     public String linkToTypeLname = null;
+    
+    private static final Logger logger = LoggerFactory.getLogger(PartInfo.class);
     
     public PartInfo(final String partQname, final Integer partIndex) {
         this.partQname = partQname;

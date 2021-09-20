@@ -203,11 +203,13 @@ public class CollectionService {
         } else {
             // TODO: exception of wi.parts == null ? currently an empty collection is
             // returned
+            logger.error("returning empty collection");
             return collection;
         }
         VolumeInfoSmall vis = iiInf.getImageGroup(id.imageGroupId);
-        if (vis == null || vis.volumeNumber == null)
-            return collection;
+        if (vis == null || vis.volumeNumber == null) {
+            throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "can't find image group (or volume number of) "+id.imageGroupId);
+        }
         boolean hasSeenpartinvolume = false;
         if (iInf.parts != null) {
             for (final PartInfo pi : iInf.parts) {
@@ -224,6 +226,9 @@ public class CollectionService {
                     break;
                 }
             }
+        }
+        if (!hasSeenpartinvolume){
+            logger.info("calling collection per volume for an instance with no parts (or not parts in volume "+vis.volumeNumber+")");
         }
 
         final String volPrefix = "vo:";

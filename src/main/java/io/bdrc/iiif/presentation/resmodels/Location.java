@@ -5,6 +5,9 @@ import static io.bdrc.iiif.presentation.AppConstants.BDO;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,32 +25,32 @@ public class Location implements Comparable<Location> {
     @JsonProperty("instanceUri")
     public String instanceUri = null;
     
+    private static final Logger logger = LoggerFactory.getLogger(Location.class);
+    
+    final private static Property locationVolumeP = ResourceFactory.createProperty(BDO, "contentLocationVolume");
+    final private static Property locationEndVolumeP = ResourceFactory.createProperty(BDO, "contentLocationEndVolume");
+    final private static Property locationPageP = ResourceFactory.createProperty(BDO, "contentLocationPage");
+    final private static Property locationEndPageP = ResourceFactory.createProperty(BDO, "contentLocationEndPage");
+    final private static Property workLocationWorkP = ResourceFactory.createProperty(BDO, "contentLocationInstance");
     
     public Location(final Model m, final Resource location) {
-        final Property locationVolumeP = m.getProperty(BDO, "contentLocationVolume");
-        if (!location.hasProperty(locationVolumeP))
-            this.bvolnum = 1; // probable a reasonable default...
-        else 
+        if (!location.hasProperty(locationVolumeP)) {
+            this.bvolnum = 1; // probably a reasonable default...
+            //logger.info("no location beginning volume for "+location.getLocalName());
+        } else { 
             this.bvolnum = location.getProperty(locationVolumeP).getInt();
-        final Property locationEndVolumeP = m.getProperty(BDO, "contentLocationEndVolume");
-        // a stupid temporary mistake in the data
-        final Property locationEndVolumeTmpP = m.getProperty(BDO, "contentLocationVolumeEnd");
+        }
         if (location.hasProperty(locationEndVolumeP)) {
             this.evolnum = location.getProperty(locationEndVolumeP).getInt();
-        } else if (location.hasProperty(locationEndVolumeTmpP)) {
-            this.evolnum = location.getProperty(locationEndVolumeTmpP).getInt();
         } else {
             this.evolnum = this.bvolnum;
         }
-        final Property locationPageP = m.getProperty(BDO, "contentLocationPage");
         if (location.hasProperty(locationPageP))
             this.bpagenum = location.getProperty(locationPageP).getInt();
-        final Property locationEndPageP = m.getProperty(BDO, "contentLocationEndPage");
         if (location.hasProperty(locationEndPageP))
             this.epagenum = location.getProperty(locationEndPageP).getInt();
         else
             this.epagenum = -1;
-        final Property workLocationWorkP = m.getProperty(BDO, "contentLocationInstance");
         if (location.hasProperty(workLocationWorkP))
             this.instanceUri = location.getPropertyResourceValue(workLocationWorkP).getURI();
     }
