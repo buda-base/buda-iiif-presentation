@@ -15,6 +15,7 @@ public class Identifier {
     public static final int COLLECTION_ID_WORK_IN_ITEM = 3;
     public static final int COLLECTION_ID_WORK_OUTLINE = 7;
     public static final int COLLECTION_ID_ITEM_VOLUME_OUTLINE = 9;
+    public static final int COLLECTION_ID_WORK_OUTLINE_VOLUME = 11;
 
     public static final int MANIFEST_ID_WORK_IN_ITEM = 4;
     public static final int MANIFEST_ID_VOLUMEID = 5;
@@ -136,6 +137,12 @@ public class Identifier {
                 this.imageInstanceId = transitionToNew(secondId, IMAGEINSTANCE_ID);
                 nbMaxPartsExpected = 2;
                 this.subtype = COLLECTION_ID_WORK_OUTLINE;
+                break;
+            case "wiov":
+                this.instanceId = transitionToNew(firstId, INSTANCE_ID);
+                this.imageGroupId = transitionToNew(secondId, IMAGEGROUP_ID);
+                nbMaxPartsExpected = 2;
+                this.subtype = COLLECTION_ID_WORK_OUTLINE_VOLUME;
                 break;
             default:
                 throw new IdentifierException("cannot parse identifier: invalid type \"" + typestr + "\"");

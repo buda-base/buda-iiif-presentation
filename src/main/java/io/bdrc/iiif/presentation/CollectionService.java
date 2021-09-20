@@ -52,6 +52,8 @@ public class CollectionService {
             return getCollectionForItem(getCommonCollection(id), id, wi, continuous);
         case Identifier.COLLECTION_ID_WORK_OUTLINE:
             return getCollectionForOutline(getCommonCollection(id), id, wi, continuous);
+        case Identifier.COLLECTION_ID_WORK_OUTLINE_VOLUME:
+            return getCollectionForOutlinePerVolume(getCommonCollection(id), id, wi, continuous);
         default:
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of manifest yet");
         }
@@ -181,6 +183,68 @@ public class CollectionService {
         return collection;
     }
 
+    public static Collection getCollectionForOutlinePerVolume(final Collection collection, final Identifier id, final InstanceInfo iInf, final boolean continuous) throws BDRCAPIException {
+        final ImageInstanceInfo iiInf;
+        logger.info("building outline in collection per volume for ID {}", id.getId());
+        collection.setLabel(getLabels(id.getInstanceId(), iInf.labels));
+
+        if (id.getImageInstanceId() != null) {
+            try {
+                iiInf = ImageInstanceInfoService.Instance.getAsync(id.getImageInstanceId()).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
+            }
+        } else if (iInf.imageInstanceQname != null) {
+            try {
+                iiInf = ImageInstanceInfoService.Instance.getAsync(iInf.imageInstanceQname).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
+            }
+        } else {
+            // TODO: exception of wi.parts == null ? currently an empty collection is
+            // returned
+            return collection;
+        }
+        VolumeInfoSmall vis = iiInf.getImageGroup(id.imageGroupId);
+        if (vis == null || vis.volumeNumber == null)
+            return collection;
+        boolean hasSeenpartinvolume = false;
+        if (iInf.parts != null) {
+            for (final PartInfo pi : iInf.parts) {
+                if (pi.isInVolumeR(vis.volumeNumber)) {
+                    hasSeenpartinvolume = true;
+                    final String collectionId = "wio:" + pi.partQname;
+                    final Collection subcollection = new Collection(IIIFPresPrefix_coll + collectionId);
+                    final PropertyValue labels = ManifestService.getPropForLabels(pi.labels);
+                    subcollection.setLabel(labels);
+                    collection.addCollection(subcollection);
+                } else if (hasSeenpartinvolume) {
+                    // we assume that once we have seen some parts in a volume then some parts not in the volume,
+                    // no further part will be in the volume
+                    break;
+                }
+            }
+        }
+
+        final String volPrefix = "vo:";
+        boolean needsVolumeIndication = iiInf.volumes.size() > 1;
+        
+        final String manifestId = volPrefix + vis.getPrefixedUri();
+        String manifestUrl;
+        if (vis.iiifManifestUri != null) {
+            manifestUrl = vis.iiifManifestUri;
+        } else {
+            manifestUrl = IIIFPresPrefix + manifestId + "/manifest";
+            if (continuous) {
+                manifestUrl += "?continuous=true";
+            }
+        }
+        final Manifest manifest = new Manifest(manifestUrl);
+        manifest.setLabel(ManifestService.getPVforLS(iInf.labels, needsVolumeIndication ? vis.volumeNumber : null));
+        collection.addManifest(manifest);
+        return collection;
+    }
+    
     public static Collection getCollectionForOutline(final Collection collection, final Identifier id, final InstanceInfo iInf, final boolean continuous) throws BDRCAPIException {
         final ImageInstanceInfo iiInf;
         logger.info("building outline collection for ID {}", id.getId());

@@ -44,4 +44,23 @@ public class PartInfo implements Comparable<PartInfo> {
             return "toString objectmapper exception, this shouldn't happen";
         }
     }
+    
+    public boolean isInVolumeR(int volNum) {
+        if (this.locations != null) {
+            for (final Location loc : this.locations) {
+                if (loc.bvolnum <= volNum && loc.evolnum >= volNum) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (this.parts == null)
+            return false;
+        for (final PartInfo child : this.parts) {
+            if (child.isInVolumeR(volNum)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -89,7 +89,7 @@ public class InstanceOutline {
         PartInfo aChildInVolume = null;
         int nbChildrenInVolume = 0;
         for (final PartInfo child : pi.parts) {
-            if (isInVolumeR(volNum, child)) {
+            if (child.isInVolumeR(volNum)) {
                 aChildInVolume = child;
                 nbChildrenInVolume += 1;
             } else if (nbChildrenInVolume > 0) {
@@ -106,25 +106,6 @@ public class InstanceOutline {
         default:
             return pi;
         }
-    }
-    
-    public static boolean isInVolumeR(int volNum, final PartInfo pi) {
-        if (pi.locations != null) {
-            for (final Location loc : pi.locations) {
-                if (loc.bvolnum <= volNum && loc.evolnum >= volNum) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        if (pi.parts == null)
-            return false;
-        for (final PartInfo child : pi.parts) {
-            if (isInVolumeR(volNum, child)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

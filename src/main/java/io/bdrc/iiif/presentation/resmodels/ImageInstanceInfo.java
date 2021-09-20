@@ -187,6 +187,14 @@ public class ImageInstanceInfo {
         return null;
     }
     
+    public VolumeInfoSmall getImageGroup(String igQname) {
+        for (VolumeInfoSmall vi : volumes) {
+            if (vi.imageGroupQname.equals(igQname))
+                return vi;
+        }
+        return null;
+    }
+    
     @Override
     public String toString() {
         try {
