@@ -251,18 +251,8 @@ public class CollectionService {
     }
     
     public static Collection getCollectionForOutline(final Collection collection, final Identifier id, final InstanceInfo iInf, final boolean continuous) throws BDRCAPIException {
-        final ImageInstanceInfo iiInf;
+        ImageInstanceInfo iiInf = null;
         logger.info("building outline collection for ID {}", id.getId());
-        collection.setLabel(getLabels(id.getInstanceId(), iInf.labels));
-        if (iInf.parts != null) {
-            for (final PartInfo pi : iInf.parts) {
-                final String collectionId = "wio:" + pi.partQname;
-                final Collection subcollection = new Collection(IIIFPresPrefix_coll + collectionId);
-                final PropertyValue labels = ManifestService.getPropForLabels(pi.labels);
-                subcollection.setLabel(labels);
-                collection.addCollection(subcollection);
-            }
-        }
         if (id.getImageInstanceId() != null) {
             try {
                 iiInf = ImageInstanceInfoService.Instance.getAsync(id.getImageInstanceId()).get();
@@ -275,7 +265,35 @@ public class CollectionService {
             } catch (InterruptedException | ExecutionException e) {
                 throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
             }
-        } else {
+        }
+        collection.setLabel(getLabels(id.getInstanceId(), iInf.labels));
+        if (iInf.parts != null) {
+            if (iInf.needsPerVolumeSubsections() && iiInf != null && iiInf.volumes != null && iiInf.volumes.size() > 1) {
+                Integer[] firstandlastvolnum = iInf.getFirstAndLastVolnum();
+                if (firstandlastvolnum != null) {
+                    final String collectionUrlBase = IIIFPresPrefix_coll + "wiov:"+iInf.partQname+"::";
+                    for (ImageInstanceInfo.VolumeInfoSmall vi : iiInf.volumes) {
+                        if (vi.volumeNumber < firstandlastvolnum[0])
+                            continue;
+                        if (vi.volumeNumber > firstandlastvolnum[1])
+                            break;
+                        final String collectionUrl = collectionUrlBase+vi.getPrefixedUri();
+                        final Collection subcollection = new Collection(collectionUrl);
+                        subcollection.setLabel(ManifestService.getPVforLS(iInf.labels, vi.volumeNumber));
+                        collection.addCollection(subcollection);
+                    }
+                }
+            } else {
+                for (final PartInfo pi : iInf.parts) {
+                    final String collectionId = "wio:" + pi.partQname;
+                    final Collection subcollection = new Collection(IIIFPresPrefix_coll + collectionId);
+                    final PropertyValue labels = ManifestService.getPropForLabels(pi.labels);
+                    subcollection.setLabel(labels);
+                    collection.addCollection(subcollection);
+                }
+            }
+        }
+        if (iiInf == null) {
             // TODO: exception of wi.parts == null ? currently an empty collection is
             // returned
             return collection;

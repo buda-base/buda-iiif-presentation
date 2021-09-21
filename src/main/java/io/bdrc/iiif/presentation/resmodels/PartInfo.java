@@ -24,6 +24,12 @@ public class PartInfo implements Comparable<PartInfo> {
     public String linkToQname = null;
     @JsonProperty("linkToTypeLname")
     public String linkToTypeLname = null;
+    @JsonProperty("partType")
+    public PartType partType = PartType.OTHER;
+    
+    public static enum PartType {
+        VOLUME, SECTION, OTHER 
+    }
     
     private static final Logger logger = LoggerFactory.getLogger(PartInfo.class);
     
@@ -48,6 +54,44 @@ public class PartInfo implements Comparable<PartInfo> {
         } catch (JsonProcessingException e) {
             return "toString objectmapper exception, this shouldn't happen";
         }
+    }
+    
+    public boolean needsPerVolumeSubsections() {
+        if (this.partType != PartType.SECTION)
+            return false;
+        if (this.parts == null)
+            return false;
+        for (PartInfo pi : this.parts) {
+            if (pi.partType != PartType.OTHER)
+                return false;
+        }
+        return true;
+    }
+    
+    // could be improved with some recursivity
+    public Integer[] getFirstAndLastVolnum() {
+        Integer[] res = new Integer[2];
+        if (this.locations != null && !this.locations.isEmpty()) {
+            // locations are in order:
+            Location l = this.locations.get(0);
+            res[0] = l.bvolnum;
+            l = this.locations.get(this.locations.size()-1);
+            res[1] = l.evolnum;
+            return res;
+        }
+        // parts are in order too:
+        if (this.parts != null && !this.parts.isEmpty()) {
+            PartInfo pi = this.parts.get(0);
+            if (pi.locations == null || pi.locations.isEmpty()) return null;
+            Location l = pi.locations.get(0);
+            res[0] = l.bvolnum;
+            pi = this.parts.get(this.parts.size()-1);
+            if (pi.locations == null || pi.locations.isEmpty()) return null;
+            l = pi.locations.get(pi.locations.size()-1);
+            res[1] = l.evolnum;
+            return res;
+        }
+        return null;
     }
     
     public boolean isInVolumeR(int volNum) {

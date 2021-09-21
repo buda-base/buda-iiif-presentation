@@ -16,6 +16,7 @@ import org.apache.jena.vocabulary.RDF;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
+import io.bdrc.iiif.presentation.resmodels.PartInfo.PartType;
 
 public class InstanceOutline {
 
@@ -33,6 +34,16 @@ public class InstanceOutline {
         // we currently ignore linkTo, this should never happen with the current
         // code although it would probably be good to implement it at some point
         PartInfo rootPi = new PartInfo();
+        final Resource pType = instance.getPropertyResourceValue(InstanceInfo.partTypeP);
+        if (pType != null) {
+            if (pType.getURI().endsWith("Section"))
+                rootPi.partType = PartType.SECTION;
+            else if (pType.getURI().endsWith("Volume"))
+                rootPi.partType = PartType.VOLUME;
+        } else {
+            // hacky, this is likely the case for the root node, we want to consider it as we consider sections
+            rootPi.partType = PartType.SECTION;
+        }
         this.partQnameToPartInfo.put("bdr:"+instance.getLocalName(), rootPi);
         rootPi.labels = InstanceInfo.getLabels(m, instance);
         // this is recursive

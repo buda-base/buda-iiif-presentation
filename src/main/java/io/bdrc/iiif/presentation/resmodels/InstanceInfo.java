@@ -16,6 +16,7 @@ import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
@@ -85,6 +86,7 @@ public class InstanceInfo extends PartInfo {
         if (instance == null)
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "invalid model: missing instance "+instanceId);
         // checking type (needs to be a bdo:Work)
+        this.partQname = "bdr:"+instance.getLocalName();
         Triple isInstanceT = new Triple(instance.asNode(), RDF.type.asNode(), m.getResource(BDO+"Instance").asNode());
         ExtendedIterator<Triple> ext = m.getGraph().find(isInstanceT);
         if (!ext.hasNext()) {
@@ -141,6 +143,17 @@ public class InstanceInfo extends PartInfo {
             }
         }
 
+        final Resource pType = instance.getPropertyResourceValue(partTypeP);
+        if (pType != null) {
+            final String pTypeURI = pType.getURI();
+            if (pTypeURI.endsWith("Section"))
+                this.partType = PartType.SECTION;
+            else if (pTypeURI.endsWith("Volume"))
+                this.partType = PartType.VOLUME;
+        } else {
+            this.partType = PartType.SECTION;
+        }
+        
         this.parts = getParts(m, instance, null);
         this.labels = getLabels(m, instance);
         
@@ -190,6 +203,8 @@ public class InstanceInfo extends PartInfo {
         return null;
     }
     
+    final static public Property partTypeP = ResourceFactory.createProperty(BDO, "partType");
+    
     // this is recursive, and assumes no loop
     public static List<PartInfo> getParts(final Model m, final Resource work, final Map<String,PartInfo> shortIdPartMap) {
         final StmtIterator partsItr = work.listProperties(m.getProperty(BDO, "hasPart"));
@@ -215,6 +230,14 @@ public class InstanceInfo extends PartInfo {
                     if (linkToType != null) {
                         partInfo.linkToTypeLname = linkToType.getLocalName();
                     }
+                }
+                final Resource pType = part.getPropertyResourceValue(partTypeP);
+                if (pType != null) {
+                    final String pTypeURI = pType.getURI();
+                    if (pTypeURI.endsWith("Section"))
+                        partInfo.partType = PartType.SECTION;
+                    else if (pTypeURI.endsWith("Volume"))
+                        partInfo.partType = PartType.VOLUME;
                 }
                 partInfo.locations = ImageInstanceInfo.getLocations(m, part);
                 partInfo.labels = getLabels(m, part);
