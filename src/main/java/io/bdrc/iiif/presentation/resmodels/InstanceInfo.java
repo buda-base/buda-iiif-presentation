@@ -102,8 +102,14 @@ public class InstanceInfo extends PartInfo {
         }
         final Resource partOf = instance.getPropertyResourceValue(m.getProperty(BDO, "partOf"));
         this.isRoot = (partOf == null);
-        Resource item = instance.getPropertyResourceValue(m.getProperty(TMPPREFIX, "inImageInstance"));
-        if (item != null) {
+        StmtIterator imageInstanceS = instance.listProperties(m.getProperty(TMPPREFIX, "inImageInstance"));
+        Resource item = null;
+        if (imageInstanceS.hasNext()) {
+            item = imageInstanceS.next().getResource();
+            // hack for the Taisho: https://github.com/buda-base/buda-iiif-presentation/issues/113
+            // could be done better
+            if (imageInstanceS.hasNext() && item.getLocalName().equals("W0TT0000"))
+                item = imageInstanceS.next().getResource();
             this.imageInstanceQname = "bdr:"+item.getLocalName();
         }
         readLocations(m, instance);
