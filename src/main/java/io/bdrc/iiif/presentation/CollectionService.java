@@ -146,13 +146,19 @@ public class CollectionService {
             VolumeInfoSmall vi = ii.getVolumeNumber(i);
             if (vi == null)
                 continue;
-            final StringBuilder sb = new StringBuilder();
-            final String prefix = withOutline ? "wvo:" : "wv:";
-            sb.append(IIIFPresPrefix + prefix + workQname + "::" + vi.getPrefixedUri() + "/manifest");
-            if (continuous) {
-                sb.append("?continuous=true");
+            String manifestUrl;
+            if (vi.iiifManifestUri != null) {
+                manifestUrl = vi.iiifManifestUri;
+            } else {
+                final StringBuilder sb = new StringBuilder();
+                final String prefix = withOutline ? "wvo:" : "wv:";
+                sb.append(IIIFPresPrefix + prefix + workQname + "::" + vi.getPrefixedUri() + "/manifest");
+                if (continuous) {
+                    sb.append("?continuous=true");
+                }
+                manifestUrl = sb.toString();
             }
-            final Manifest m = new Manifest(sb.toString());
+            final Manifest m = new Manifest(manifestUrl);
             m.setLabel(ManifestService.getVolNumPV(i));
             c.addManifest(m);
         }
