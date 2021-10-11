@@ -81,23 +81,29 @@ public class CollectionService {
                 VolumeInfoSmall vi = ii.getVolumeNumber(i);
                 if (vi == null)
                     continue;
-                final int volumebPage = (i == loc.bvolnum.intValue()) ? loc.bpagenum : 0;
-                final int volumeePage = (i == loc.evolnum.intValue()) ? loc.epagenum : -1;
-                final StringBuilder sb = new StringBuilder();
-                sb.append(IIIFPresPrefix + "vo:" + vi.getPrefixedUri());
-                if (volumebPage != 0 || volumeePage != -1) {
-                    sb.append("::");
-                    if (volumebPage != 0)
-                        sb.append(volumebPage);
-                    sb.append("-");
-                    if (volumeePage != -1)
-                        sb.append(volumeePage);
+                String manifestUrl;
+                if (vi.iiifManifestUri != null) {
+                    manifestUrl = vi.iiifManifestUri;
+                } else {
+                    final int volumebPage = (i == loc.bvolnum.intValue()) ? loc.bpagenum : 0;
+                    final int volumeePage = (i == loc.evolnum.intValue()) ? loc.epagenum : -1;
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append(IIIFPresPrefix + "vo:" + vi.getPrefixedUri());
+                    if (volumebPage != 0 || volumeePage != -1) {
+                        sb.append("::");
+                        if (volumebPage != 0)
+                            sb.append(volumebPage);
+                        sb.append("-");
+                        if (volumeePage != -1)
+                            sb.append(volumeePage);
+                    }
+                    sb.append("/manifest");
+                    if (continuous) {
+                        sb.append("?continuous=true");
+                    }
+                    manifestUrl = sb.toString();
                 }
-                sb.append("/manifest");
-                if (continuous) {
-                    sb.append("?continuous=true");
-                }
-                final Manifest m = new Manifest(sb.toString());
+                final Manifest m = new Manifest(manifestUrl);
                 m.setLabel(ManifestService.getPVforLS(wi.labels, needsVolumeIndication ? i : null));
                 c.addManifest(m);
             }
@@ -120,12 +126,18 @@ public class CollectionService {
             VolumeInfoSmall vi = ii.getVolumeNumber(i);
             if (vi == null)
                 continue;
-            final StringBuilder sb = new StringBuilder();
-            sb.append(IIIFPresPrefix + "wvo:" + workId + "::" + vi.getPrefixedUri() + "/manifest");
-            if (continuous) {
-                sb.append("?continuous=true");
+            String manifestUrl;
+            if (vi.iiifManifestUri != null) {
+                manifestUrl = vi.iiifManifestUri;
+            } else {
+                final StringBuilder sb = new StringBuilder();
+                sb.append(IIIFPresPrefix + "wvo:" + workId + "::" + vi.getPrefixedUri() + "/manifest");
+                if (continuous) {
+                    sb.append("?continuous=true");
+                }
+                manifestUrl = sb.toString();
             }
-            final Manifest m = new Manifest(sb.toString());
+            final Manifest m = new Manifest(manifestUrl);
             m.setLabel(ManifestService.getPVforLS(wi.labels, needsVolumeIndication ? i : null));
             c.addManifest(m);
         }
