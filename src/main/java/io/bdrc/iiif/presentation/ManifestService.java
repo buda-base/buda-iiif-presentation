@@ -271,8 +271,12 @@ public class ManifestService {
         }
         if (beginIndex == null)
             beginIndex = 1 + vi.pagesIntroTbrc;
-        if (endIndex == null)
+        if (endIndex == null) {
             endIndex = imageInfoList.size();
+        } else if (endIndex > imageInfoList.size()) {
+            logger.error("in "+volumeId+" end index "+endIndex+" > total images "+imageInfoList.size());
+            endIndex = imageInfoList.size();
+        }
         if (endIndex < beginIndex) {
             // this is the case where the manifest would be empty, we return a 404 instead
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "manifest is empty (first page is after last page)");
