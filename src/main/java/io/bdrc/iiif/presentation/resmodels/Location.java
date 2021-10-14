@@ -45,12 +45,22 @@ public class Location implements Comparable<Location> {
         } else {
             this.evolnum = this.bvolnum;
         }
-        if (location.hasProperty(locationPageP))
-            this.bpagenum = location.getProperty(locationPageP).getInt();
-        if (location.hasProperty(locationEndPageP))
-            this.epagenum = location.getProperty(locationEndPageP).getInt();
-        else
+        if (location.hasProperty(locationPageP)) {
+            try {
+                this.bpagenum = location.getProperty(locationPageP).getInt();
+                if (this.bpagenum < 1)
+                    this.bpagenum = null;
+            } catch (Exception e) { }
+        }
+        if (location.hasProperty(locationEndPageP)) {
+            try {
+                this.epagenum = location.getProperty(locationEndPageP).getInt();
+                if (this.epagenum < 1)
+                    this.epagenum = null;
+            } catch (Exception e) { }
+        } else {
             this.epagenum = -1;
+        }
         if (location.hasProperty(workLocationWorkP))
             this.instanceUri = location.getPropertyResourceValue(workLocationWorkP).getURI();
     }
