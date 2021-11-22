@@ -200,13 +200,13 @@
         <dependency>
             <groupId>io.bdrc</groupId>
             <artifactId>bdrc-auth-lib</artifactId>
+            <version>2.6.1</version>
             <exclusions>
-		        <exclusion>
-		          <groupId>org.slf4j</groupId>
-		          <artifactId>slf4j-simple</artifactId>
-		        </exclusion>
-		    </exclusions>
-            <version>2.5.1</version>
+            <exclusion>
+              <groupId>org.slf4j</groupId>
+              <artifactId>slf4j-simple</artifactId>
+            </exclusion>
+          </exclusions>        
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.maxmind.geoip2/geoip2 -->
         <dependency>
