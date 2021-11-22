@@ -19,6 +19,8 @@ import org.springframework.context.event.EventListener;
 
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.rdf.RdfAuthModel;
+import io.bdrc.auth.rdf.Subscribers;
+import io.bdrc.iiif.presentation.IPCacheImpl;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
 
 @SpringBootApplication
@@ -49,6 +51,11 @@ public class SpringBootIIIFPres extends SpringBootServletInitializer {
                 // do nothing, continue props initialization
             }
             AuthProps.init(props);
+            if ("true".equals(props.getProperty("authEnabled")) && !isInChina()) {
+                RdfAuthModel.init();
+                Subscribers.init();
+                Subscribers.setCache(new IPCacheImpl());
+            }
             log.info("SpringBootIIIFPres has loaded properties");
 
         } catch (IOException e) {
