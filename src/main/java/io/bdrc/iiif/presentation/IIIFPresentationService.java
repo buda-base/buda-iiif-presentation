@@ -61,6 +61,7 @@ import io.bdrc.iiif.presentation.resservices.InstanceOutlineService;
 import io.bdrc.iiif.presentation.resservices.ServiceCache;
 import io.bdrc.libraries.GitHelpers;
 import io.bdrc.libraries.IdentifierException;
+import io.bdrc.libraries.Models;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 
@@ -203,7 +204,8 @@ public class IIIFPresentationService {
             acc = new Access();
         final String accessShortName = getLocalName(access.getUri());
         final String statusShortName = getLocalName(statusUri);
-        final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, itemId);
+        final String itemUri = Models.BDR+itemId.substring(4);
+        final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, itemUri);
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
             Metrics.counter("exit.status", "result", acc.isUserLoggedIn() ? "403" : "401").increment();
             return ResponseEntity.status(acc.isUserLoggedIn() ? 403 : 401).cacheControl(CacheControl.noCache())
