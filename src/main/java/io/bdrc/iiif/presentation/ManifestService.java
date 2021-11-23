@@ -62,6 +62,7 @@ public class ManifestService {
     // public static final List<ViewingHint> VIEW_HINTS=Arrays.asList(new
     // ViewingHint[] { ViewingHint.CONTINUOUS});
     public static final String VIEWING_HINTS = "continuous";
+    public static final int byteslimit = 2100*1024;
 
     static {
         attribution.addValue(getLocaleFor("en"), "Buddhist Digital Resource Center");
@@ -123,7 +124,7 @@ public class ManifestService {
             final String volumeId, final Sequence mainSeq, final BVMImageInfo bvmIi, final BVM bvm, boolean sectionchange) {
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum - 1);
         final Integer size = imageInfo.size;
-        if (size != null && size > 1500000)
+        if (size != null && size > byteslimit)
             return null;
         final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi, bvmIi, bvm, sectionchange);
         mainSeq.addCanvas(canvas);
