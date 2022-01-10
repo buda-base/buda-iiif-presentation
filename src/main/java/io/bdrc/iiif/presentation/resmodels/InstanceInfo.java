@@ -123,7 +123,8 @@ public class InstanceInfo extends PartInfo {
         }
         final Statement restrictedInChinaS = instance.getProperty(m.getProperty(TMPPREFIX, "rootRestrictedInChina"));
         if (restrictedInChinaS == null) {
-            this.rootRestrictedInChina = true;
+            // we allow virtual collections in China. Perhaps some should be restricted in the future?
+            this.rootRestrictedInChina = !this.isVirtual;
         } else {
             this.rootRestrictedInChina = restrictedInChinaS.getBoolean();
         }

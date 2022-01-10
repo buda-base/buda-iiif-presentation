@@ -204,7 +204,8 @@ public class IIIFPresentationService {
             acc = new Access();
         final String accessShortName = getLocalName(access.getUri());
         final String statusShortName = getLocalName(statusUri);
-        final String itemUri = Models.BDR+itemId.substring(4);
+        // virtual collections don't have corresponding image instances
+        final String itemUri = itemId == null ? null : Models.BDR+itemId.substring(4);
         final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, itemUri);
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
             Metrics.counter("exit.status", "result", acc.isUserLoggedIn() ? "403" : "401").increment();
