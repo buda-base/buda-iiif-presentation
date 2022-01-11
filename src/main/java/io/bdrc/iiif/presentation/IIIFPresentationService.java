@@ -346,7 +346,7 @@ public class IIIFPresentationService {
         // sure that
         // we get the part asked by the user
         final Manifest resmanifest = ManifestService.getManifestForIdentifier(isAdmin, id, vi, continuous, volumeId,
-                al == AccessLevel.FAIR_USE, rootPart);
+                al == AccessLevel.FAIR_USE, rootPart, acc.isUserLoggedIn());
         if (vi.access == AccessType.OPEN) {
             return ResponseEntity.status(HttpStatus.OK)
                     .cacheControl(CacheControl

@@ -178,7 +178,7 @@ public class PresentationTest {
         vi.imageInstanceUri = BDR + "W22084";
         vi.volumeNumber = 1;
         ServiceCache.put(Optional.empty(), CACHEPREFIX_BVM + "I0890");
-        Manifest man = ManifestService.getManifestForIdentifier(false, id, vi, false, "bdr:I0890", false, wo.getPartForInstanceId("bdr:MW22084"));
+        Manifest man = ManifestService.getManifestForIdentifier(false, id, vi, false, "bdr:I0890", false, wo.getPartForInstanceId("bdr:MW22084"), false);
         // final File fout2 = new File("/tmp/workOutline-manifest.json");
         // IIIFApiObjectMapperProvider.writer.writeValue(fout2, man);
     }
@@ -204,7 +204,7 @@ public class PresentationTest {
         vi.volumeNumber = 1;
         // empty bvm so that it's not fetched
         ServiceCache.put(Optional.empty(), CACHEPREFIX_BVM + "I0890");
-        Manifest man = ManifestService.getManifestForIdentifier(false, id, vi, false, "bdr:I0890", false, wi);
+        Manifest man = ManifestService.getManifestForIdentifier(false, id, vi, false, "bdr:I0890", false, wi, false);
         // final File fout2 = new File("/tmp/wv-manifest.json");
         // AppConstants.IIIFMAPPER.writer().writeValue(fout2, man);
     }

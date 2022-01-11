@@ -266,7 +266,7 @@ public class ManifestService {
     }
 
     public static Sequence getSequenceFrom(final Sequence mainSeq, boolean isAdmin, final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi,
-            final String volumeId, Integer beginIndex, Integer endIndex, final boolean fairUse, final BVM bvm) throws BDRCAPIException {
+            final String volumeId, Integer beginIndex, Integer endIndex, final boolean fairUse, final BVM bvm, final boolean isLogged) throws BDRCAPIException {
         if (bvm != null && !fairUse) {
             return getSequenceFromBvm(id, imageInfoList, vi, volumeId, beginIndex, endIndex, fairUse, bvm);
         }
@@ -295,6 +295,8 @@ public class ManifestService {
         } else {
             final int firstUnaccessiblePage = AppConstants.FAIRUSE_PAGES_S + vi.pagesIntroTbrc + 1;
             final int lastUnaccessiblePage = totalPages - AppConstants.FAIRUSE_PAGES_E;
+            if (beginIndex >= firstUnaccessiblePage && endIndex <= lastUnaccessiblePage)
+                throw new BDRCAPIException(isLogged ? 403 : 401, GENERIC_APP_ERROR_CODE, "manifest is empty (requested range not accessible under fair use)");
             // first part: min(firstUnaccessiblePage+1,beginIndex) to
             // min(endIndex,firstUnaccessiblePage+1)
             for (int imgSeqNum = Math.min(firstUnaccessiblePage, beginIndex); imgSeqNum <= Math.min(endIndex,
@@ -369,7 +371,7 @@ public class ManifestService {
     }
 
     public static Manifest getManifestForIdentifier(boolean isAdmin, final Identifier id, final ImageGroupInfo vi, boolean continuous,
-            final String volumeId, final boolean fairUse, final PartInfo rootPart) throws BDRCAPIException {
+            final String volumeId, final boolean fairUse, final PartInfo rootPart, boolean isLogged) throws BDRCAPIException {
         if (id.getType() != Identifier.MANIFEST_ID || (id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID
                 && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID && id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID_OUTLINE
                 && id.getSubType() != Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE)) {
@@ -435,7 +437,7 @@ public class ManifestService {
                 logger.warn("work has no location");
                 bPage = id.getBPageNum();
                 ePage = id.getEPageNum();
-                mainSeq = getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
+                mainSeq = getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm, isLogged);
                 final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
                 manifest.setRenderings(oc);
             } else {
@@ -458,7 +460,7 @@ public class ManifestService {
                         ePage = location.epagenum;
                     volumeFound = true;
                     logger.info("computed (wiv): {}-{}", bPage, ePage);
-                    mainSeq = getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
+                    mainSeq = getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm, isLogged);
                     final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
                     manifest.setRenderings(oc);
                 }
@@ -469,7 +471,7 @@ public class ManifestService {
             bPage = id.getBPageNum();
             ePage = id.getEPageNum();
             logger.debug("computed: {}-{}", bPage, ePage);
-            mainSeq = getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm);
+            mainSeq = getSequenceFrom(mainSeq, isAdmin, id, imageInfoList, vi, volumeId, bPage, ePage, fairUse, bvm, isLogged);
             final List<OtherContent> oc = getRenderings(volumeId, bPage, ePage);
             manifest.setRenderings(oc);
         }

@@ -111,7 +111,7 @@ public class BVMTest {
         RDFParserBuilder pb = RDFParser.create().source(TESTDIR + "workOutline.ttl").lang(RDFLanguages.TTL);
         pb.parse(StreamRDFLib.graph(m.getGraph()));
         final InstanceInfo wi = new InstanceInfo(m, "bdr:MW22084");
-        Manifest man = ManifestService.getManifestForIdentifier(false, id, vi, false, "bdr:I0890", false, wi);
+        Manifest man = ManifestService.getManifestForIdentifier(false, id, vi, false, "bdr:I0890", false, wi, false);
         final File fout2 = new File("/tmp/bvm-v-manifest.json");
         AppConstants.IIIFMAPPER.writerWithDefaultPrettyPrinter().writeValue(fout2, man);
     }
