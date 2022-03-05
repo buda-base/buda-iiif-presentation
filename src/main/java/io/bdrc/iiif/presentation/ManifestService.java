@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.util.UriUtils;
 
 import de.digitalcollections.iiif.model.ImageContent;
 import de.digitalcollections.iiif.model.Motivation;
@@ -102,7 +103,7 @@ public class ManifestService {
 
     public static String getCanvasUri(final String filename, final String volumeId, final int seqNum) {
         // seqNum starts at 1
-        return IIIFPresPrefix + "v:" + volumeId + "/canvas/" + filename;
+        return IIIFPresPrefix + "v:" + volumeId + "/canvas/" + UriUtils.encodePath(filename, "UTF-8");
     }
 
     public static ViewingDirection getViewingDirection(final ImageInfoList imageInfoList, final BVM bvm) {
