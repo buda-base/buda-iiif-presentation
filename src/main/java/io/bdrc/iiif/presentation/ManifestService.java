@@ -98,7 +98,7 @@ public class ManifestService {
     }
 
     public static String getImageServiceUrl(final String filename, final String volumeId) {
-        return IIIF_IMAGE_PREFIX + volumeId + "::" + filename;
+        return IIIF_IMAGE_PREFIX + volumeId + "::" + UriUtils.encodePath(filename, "UTF-8");
     }
 
     public static String getCanvasUri(final String filename, final String volumeId, final int seqNum) {
