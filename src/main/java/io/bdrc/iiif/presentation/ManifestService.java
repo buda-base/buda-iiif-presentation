@@ -221,7 +221,8 @@ public class ManifestService {
                 }
                 final Integer iiLidx = imageInfoList.getIdxFromFilename(bvmIi.filename);
                 if (iiLidx == null) {
-                    throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from bvm not in imagelist: " + bvmIi.filename);
+                    logger.error("filename from bvm not in imagelist: " + bvmIi.filename);
+                    continue;
                 }
                 final boolean sectionChange = bvmIi.getDefaultPaginationValue(bvm) == null ? false : bvmIi.getDefaultPaginationValue(bvm).section == prevsec;
                 final Canvas thisCanvas = addOneCanvas(iiLidx + 1, id, imageInfoList, vi, volumeId, mainSeq, bvmIi, bvm, sectionChange);
@@ -629,16 +630,20 @@ public class ManifestService {
     public static PropertyValue getLabelFromBVMImageInfo(final BVMImageInfo bvmIi, final BVM bvm, final boolean missing, final Integer imgSeqNum, boolean sectionChange) {
         // TODO: convert pagination in Tibetan?
         final BVMPaginationItem paginationItem = bvmIi.getDefaultPaginationValue(bvm);
+        final PropertyValue res = new PropertyValue();
         if (paginationItem == null || paginationItem.value == null || paginationItem.value.isEmpty()) {
             if (missing) {
-                final PropertyValue res = new PropertyValue();
                 res.addValue(ManifestService.getLocaleFor("en"), "missing");
                 res.addValue(ManifestService.getLocaleFor("bo-x-ewts"), "chad/");
                 return res;
             }
+            if (imgSeqNum != null) {
+                res.addValue(getLocaleFor("en"), "img. " + imgSeqNum);
+                res.addValue(getLocaleFor("bo-x-ewts"), "par grangs _" + imgSeqNum);
+                return res;
+            }
             return null;
         }
-        final PropertyValue res = new PropertyValue();
         if (missing) {
             res.addValue(ManifestService.getLocaleFor("en"), paginationItem.value + " (missing)");
             res.addValue(ManifestService.getLocaleFor("bo-x-ewts"), translatePagination(paginationItem.value, "bo-x-ewts", false) + " _chad/");
