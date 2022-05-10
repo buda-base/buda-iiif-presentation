@@ -104,11 +104,11 @@ public class TokenController {
         List<String> personalAccessL = RdfAuthModel.getPersonalAccess(RdfConstants.AUTH_RESOURCE_BASE + acc.getUser().getUserId());
         ArrayNode an = mapper.valueToTree(personalAccessL);
         rootNode.putArray("personalAccess").addAll(an);
-        final String ipAddress = request.getHeader("X-Real-IP");
+        final String ipAddress = request.getHeader(GeoLocation.HEADER_NAME);
         rootNode.put("ip", ipAddress);
         rootNode.put("subscriber", Subscribers.getCachedSubscriber(ipAddress));
-        String test = GeoLocation.getCountryName(ipAddress);
-        rootNode.put("inChina", test == null || "China".equalsIgnoreCase(test));
+        String test = GeoLocation.getCountryCode(ipAddress);
+        rootNode.put("inChina", test == null || "CN".equalsIgnoreCase(test));
         rootNode.put("isAdmin", acc.getUserProfile().isAdmin());
         
         return new ResponseEntity<String>(mapper.writeValueAsString(rootNode),

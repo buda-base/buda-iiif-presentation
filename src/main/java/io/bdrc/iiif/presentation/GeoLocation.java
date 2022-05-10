@@ -20,7 +20,6 @@ public class GeoLocation {
 
 	private static final String DBLocation = AuthProps.getProperty("geolite_countryDB");
 	public static final String GEO_CACHE_KEY = "GeoDB";
-	private static final String CHINA = "China";
 	public static final String HEADER_NAME = "X-Real-IP";
 	private static final Logger log = LoggerFactory.getLogger(GeoLocation.class);
 	private static DatabaseReader dbReader = getDbReader();
@@ -35,11 +34,11 @@ public class GeoLocation {
 		}
 	}
 
-	public static String getCountryName(String ip) {
+	public static String getCountryCode(String ip) {
 		try {
 			final InetAddress ipAddress = InetAddress.getByName(ip);
 			final CountryResponse response = dbReader.country(ipAddress);
-			return response.getCountry().getName();
+			return response.getCountry().getIsoCode();
 		} catch (IOException | GeoIp2Exception e) {
 			log.error("getCountryName()", e);
 			return null;
@@ -47,9 +46,9 @@ public class GeoLocation {
 	}
 
 	public static boolean isFromChina(final String addr) {
-		final String country = GeoLocation.getCountryName(addr);
+		final String country = GeoLocation.getCountryCode(addr);
 		log.debug("For address {}, country is {}", addr, country);
-		return (country == null || CHINA.equalsIgnoreCase(country));
+		return (country == null || "CN".equalsIgnoreCase(country));
 	}
 
 	public static boolean isFromChina(HttpServletRequest request) {
