@@ -35,8 +35,6 @@ public class ImageGroupInfo {
     public AccessType access;
     @JsonProperty("restrictedInChina")
     public Boolean restrictedInChina = false;
-    @JsonProperty("license")
-    public LicenseType license;
     @JsonProperty("status")
     public String statusUri;
     @JsonProperty("instanceUri")
@@ -68,7 +66,6 @@ public class ImageGroupInfo {
         }
         this.access = AccessType.fromString(sol.getResource("access").getURI());
         this.statusUri = sol.getResource("status").getURI();
-        this.license = LicenseType.fromString(sol.getResource("license").getURI());
         this.instanceUri = sol.getResource("instanceId").getURI();
         this.imageInstanceUri = sol.getResource("iinstanceId").getURI();
         if (sol.contains("?ric")) {
@@ -167,11 +164,6 @@ public class ImageGroupInfo {
         } else {
             logger.warn("cannot find model status for {}", instanceUri);
             this.statusUri = null;
-        }
-
-        final Resource license = instance.getPropertyResourceValue(m.getProperty(TMPPREFIX, "rootLicense"));
-        if (license != null) {
-            this.license = LicenseType.fromString(license.getURI());
         }
 
         final Statement restrictedInChinaS = volume.getProperty(m.getProperty(TMPPREFIX, "rootRestrictedInChina"));

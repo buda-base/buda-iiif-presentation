@@ -403,8 +403,8 @@ public class ManifestService {
         }
         final Manifest manifest = new Manifest(IIIFPresPrefix + id.getId() + "/manifest");
         manifest.setAttribution(attribution);
-        if (vi.license != null)
-            manifest.addLicense(vi.license.getIIIFUri());
+        //if (vi.license != null)
+        //    manifest.addLicense(vi.license.getIIIFUri());
         manifest.addLogo(IIIF_IMAGE_PREFIX + "static::logo.png/full/max/0/default.png");
         if (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID || id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE) {
             // if label is for the whole volume: first bvm, if none then image group info,
