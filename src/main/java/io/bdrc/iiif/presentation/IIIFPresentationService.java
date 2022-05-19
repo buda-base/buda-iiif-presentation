@@ -129,6 +129,13 @@ public class IIIFPresentationService {
             HttpServletRequest request, HttpServletResponse resp) throws BDRCAPIException {
         return getCollection(identifier, "", request, resp);
     }
+    
+    public static boolean isInChina(HttpServletRequest request) {
+        if (SpringBootIIIFPres.isInChina())
+            return true;
+        final String test = GeoLocation.getCountryCode(request.getHeader(GeoLocation.HEADER_NAME));
+        return test == null || "CN".equalsIgnoreCase(test);
+    }
 
     @RequestMapping(value = "/{version:.+}/collection/{identifier}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<StreamingResponseBody> getCollection(@PathVariable String identifier,
@@ -206,7 +213,9 @@ public class IIIFPresentationService {
         final String statusShortName = getLocalName(statusUri);
         // virtual collections don't have corresponding image instances
         final String itemUri = itemId == null ? null : Models.BDR+itemId.substring(4);
-        final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, itemUri);
+        AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, itemUri);
+        if (al == AccessLevel.FAIR_USE && isInChina(request))
+            al = AccessLevel.NOACCESS;
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
             Metrics.counter("exit.status", "result", acc.isUserLoggedIn() ? "403" : "401").increment();
             return ResponseEntity.status(acc.isUserLoggedIn() ? 403 : 401).cacheControl(CacheControl.noCache())
@@ -303,7 +312,9 @@ public class IIIFPresentationService {
         isAdmin = acc.getUserProfile().isAdmin();
         final String accessShortName = getLocalName(vi.access.getUri());
         final String statusShortName = getLocalName(vi.statusUri);
-        final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.imageInstanceUri);
+        AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.imageInstanceUri);
+        if (al == AccessLevel.FAIR_USE && isInChina(req))
+            al = AccessLevel.NOACCESS;
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
             return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401))
                     .cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
@@ -392,7 +403,9 @@ public class IIIFPresentationService {
             acc = new Access();
         final String accessShortName = getLocalName(vi.access.getUri());
         final String statusShortName = getLocalName(vi.statusUri);
-        final AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.imageInstanceUri);
+        AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.imageInstanceUri);
+        if (al == AccessLevel.FAIR_USE && isInChina(req))
+            al = AccessLevel.NOACCESS;
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
             return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401))
                     .cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
