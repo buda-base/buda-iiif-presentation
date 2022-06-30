@@ -77,8 +77,6 @@ public class ImageInstanceInfo {
     public Boolean restrictedInChina;
     @JsonProperty("statusUri")
     public String statusUri;
-    @JsonProperty("license")
-    public LicenseType license;
     @JsonProperty("volumes")
     public List<VolumeInfoSmall> volumes;
     @JsonProperty("locations")
@@ -142,15 +140,9 @@ public class ImageInstanceInfo {
         } else {
             this.restrictedInChina = restrictedInChinaS.getBoolean();
         }
-        final Resource legalData = iinstanceAdmin.getPropertyResourceValue(m.getProperty(ADM, "contentLegal"));
-        if (legalData == null) {
-            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no legal data for item admin data");
-        }
-        final Resource license = legalData.getPropertyResourceValue(m.getProperty(ADM, "license"));
-        if (iinstanceAccess == null || license == null)
-            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no access or license");
-        this.access = AccessType.fromString(iinstanceAccess.getURI());
-        this.license = LicenseType.fromString(license.getURI());
+        if (iinstanceAccess == null)
+            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no access");
+
         final StmtIterator volumesItr = rootImageInstance.listProperties(m.getProperty(BDO, "instanceHasVolume"));
         if (!volumesItr.hasNext())
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "no volume in item");

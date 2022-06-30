@@ -41,6 +41,8 @@ public class ImageGroupInfo {
     public String instanceUri;
     @JsonProperty("imageInstanceUri")
     public String imageInstanceUri;
+    @JsonProperty("copyrightStatusLname")
+    public String copyrightStatusLname = "CopyrightPublicDomain";
     @JsonProperty("pagesIntroTbrc")
     public Integer pagesIntroTbrc = 0;
     @JsonProperty("volumeNumber")
