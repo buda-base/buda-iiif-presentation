@@ -9,6 +9,7 @@ import static io.bdrc.iiif.presentation.AppConstants.NO_ACCESS_ERROR_CODE;
 import static io.bdrc.iiif.presentation.AppConstants.PDF_URL_PREFIX;
 import static io.bdrc.iiif.presentation.AppConstants.ZIP_URL_PREFIX;
 
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,7 @@ import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import de.digitalcollections.iiif.model.sharedcanvas.Range;
 import de.digitalcollections.iiif.model.sharedcanvas.Resource;
 import de.digitalcollections.iiif.model.sharedcanvas.Sequence;
+import de.digitalcollections.model.api.identifiable.resource.MimeType;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.BDRCPresentationImageService;
 import io.bdrc.iiif.presentation.resmodels.BVM;
@@ -714,14 +716,15 @@ public class ManifestService {
         int degrees = 0;
         if (bvmIi != null)
             degrees = bvmIi.getDegrees();
+        ImageContent img;
         if (degrees != 0) {
             String resUrl = imageServiceUrl + "/full/max/"+bvmIi.rotationStr+"/default."+(png ? "png" : "jpg");
             Annotation annotation = new Annotation(Motivation.PAINTING);
             annotation.setOn(new Canvas(canvasUri));
             SpecificResource res = new SpecificResource(resUrl);
-            ImageContent full = new ImageContent(imgUrl);
-            full.addService(imgServ);
-            res.setFull(full);
+            img = new ImageContent(imgUrl);
+            img.addService(imgServ);
+            res.setFull(img);
             ImageApiSelector selector = new ImageApiSelector();
             try {
                 selector.setRotation(bvmIi.rotationStr);
@@ -745,13 +748,23 @@ public class ManifestService {
             images.add(annotation);
             canvas.setImages(images);
         } else {
-            final ImageContent img = new ImageContent(imgUrl);
+            img = new ImageContent(imgUrl);
             img.addService(imgServ);
             img.setWidth(imageInfo.width);
             img.setHeight(imageInfo.height);
             imgServ.setHeight(imageInfo.height);
             imgServ.setWidth(imageInfo.width);
             canvas.addImage(img);
+        }
+        if (bvmIi != null && bvmIi.sourcePath != null) {
+            final String sourceFileUrl = IIIF_IMAGE_PREFIX + "/sourcefile/" + volumeId + "::" + UriUtils.encodePath(imageInfo.filename, "UTF-8");
+            List<OtherContent> seeAlso = new ArrayList<>();
+            final String mimeType = URLConnection.guessContentTypeFromName(bvmIi.sourcePath);
+            final OtherContent oc = new OtherContent(sourceFileUrl, mimeType);
+            oc.setType("Image");
+            oc.setLabel(new PropertyValue().addValue(ManifestService.getLocaleFor("en"), "File originally provided to BDRC (uncompressed)"));
+            seeAlso.add(oc);
+            img.setSeeAlso(seeAlso);
         }
         return canvas;
     }

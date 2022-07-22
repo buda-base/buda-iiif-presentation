@@ -260,6 +260,9 @@ public class BVM {
         @JsonInclude(value = Include.NON_DEFAULT)
         @JsonProperty(value="hidden")
         public Boolean hidden = Boolean.FALSE;
+        @JsonInclude(value = Include.NON_NULL)
+        @JsonProperty(value="sourcePath")
+        public String sourcePath = null;
         @JsonInclude(value = Include.CUSTOM, valueFilter = TrueFilter.class)
         @JsonProperty(value="reviewed")
         public Boolean reviewed = Boolean.TRUE;
