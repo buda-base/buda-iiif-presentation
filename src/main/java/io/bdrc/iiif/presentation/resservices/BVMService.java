@@ -72,7 +72,7 @@ public class BVMService extends ConcurrentResourceService<BVM> {
     public static Instant lastPull = null;
 
     public static synchronized void pullIfNecessary() throws BDRCAPIException {
-        String repoBase = System.getProperty("user.dir") + "/gitData/buda-volume-manifests/";
+        String repoBase = AuthProps.getProperty("bvmgitpath");
         Repository repo = GitHelpers.ensureGitRepo(repoBase);
         // pull if not pull has been made for x s
         final Instant now = Instant.now();
@@ -81,7 +81,7 @@ public class BVMService extends ConcurrentResourceService<BVM> {
                 GitHelpers.pull(repo);
             } catch (GitAPIException e) {
                 throw new BDRCAPIException(500, AppConstants.GENERIC_APP_ERROR_CODE,
-                        "Cannot pull BVM gitData into " + System.getProperty("user.dir") + "/gitData/buda-volume-manifests/", e);
+                        "Cannot pull BVM gitData into " + AuthProps.getProperty("bvmgitpath"), e);
             }
         }
         lastPull = now;
@@ -94,8 +94,8 @@ public class BVMService extends ConcurrentResourceService<BVM> {
     @Override
     public final BVM getFromApi(final String imageGroupLocalName) throws BDRCAPIException {
         final String firstTwo = ImageInfoListService.getFirstMd5Nums(imageGroupLocalName);
-        String filename = System.getProperty("user.dir") + "/gitData/buda-volume-manifests/" + firstTwo + "/" + imageGroupLocalName + ".json";
-        File f = new File(filename);
+        final String filename = AuthProps.getProperty("bvmgitpath") + firstTwo + "/" + imageGroupLocalName + ".json";
+        final File f = new File(filename);
         if (!f.exists()) {
             logger.debug("bvm file doesn't exist: {}", filename);
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "no BVM file for " + imageGroupLocalName);
