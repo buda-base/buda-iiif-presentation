@@ -73,11 +73,11 @@ public class ImageGroupInfo {
         if (sol.contains("?ric")) {
             this.restrictedInChina = sol.get("?ric").asLiteral().getBoolean();
         }
-        if (sol.contains("?prefLabel")) {
+        if (sol.contains("?volumeLabel")) {
             if (this.labels == null) {
                 this.labels = new ArrayList<>();
             }
-            Literal l = sol.get("?prefLabel").asLiteral();
+            final Literal l = sol.get("?volumeLabel").asLiteral();
             this.labels.add(new LangString(l)); 
         }
         if (sol.contains("?volumeNumber")) {
