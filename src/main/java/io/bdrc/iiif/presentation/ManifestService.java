@@ -127,7 +127,8 @@ public class ManifestService {
             final String volumeId, final Sequence mainSeq, final BVMImageInfo bvmIi, final BVM bvm, boolean sectionchange) {
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum - 1);
         final Integer size = imageInfo.size;
-        if (size != null && size > byteslimit)
+        // very dirty trick: for Gandhari material, we don't put any limit on the size
+        if (size != null && size > byteslimit && !imageInfo.filename.startsWith("I0GN"))
             return null;
         final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList, volumeId, vi, bvmIi, bvm, sectionchange);
         mainSeq.addCanvas(canvas);
@@ -292,7 +293,7 @@ public class ManifestService {
         final int totalPages = imageInfoList.size();
         if (!fairUse || isAdmin) {
             for (int imgSeqNum = beginIndex; imgSeqNum <= endIndex; imgSeqNum++) {
-                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, null, false);
+                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, bvm, false);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
@@ -305,7 +306,7 @@ public class ManifestService {
             // min(endIndex,firstUnaccessiblePage+1)
             for (int imgSeqNum = Math.min(firstUnaccessiblePage, beginIndex); imgSeqNum <= Math.min(endIndex,
                     firstUnaccessiblePage - 1); imgSeqNum++) {
-                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, null, false);
+                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, bvm, false);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
@@ -321,7 +322,7 @@ public class ManifestService {
             // last part: max(beginIndex,lastUnaccessiblePage) to
             // max(endIndex,lastUnaccessiblePage)
             for (int imgSeqNum = Math.max(lastUnaccessiblePage + 1, beginIndex); imgSeqNum <= Math.max(endIndex, lastUnaccessiblePage); imgSeqNum++) {
-                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, null, false);
+                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, volumeId, mainSeq, null, bvm, false);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
@@ -757,7 +758,8 @@ public class ManifestService {
             canvas.addImage(img);
         }
         if (bvmIi != null && bvmIi.sourcePath != null) {
-            final String sourceFileUrl = IIIF_IMAGE_PREFIX + "/sourcefile/" + volumeId + "::" + UriUtils.encodePath(imageInfo.filename, "UTF-8");
+            final String sourceFileUrl = IIIF_IMAGE_PREFIX + "sourcefile/" + volumeId + "::" + UriUtils.encodePath(imageInfo.filename, "UTF-8");
+//            canvas.addMetadata("sourcefile", sourceFileUrl);
             List<OtherContent> seeAlso = new ArrayList<>();
             final String mimeType = URLConnection.guessContentTypeFromName(bvmIi.sourcePath);
             final OtherContent oc = new OtherContent(sourceFileUrl, mimeType);
