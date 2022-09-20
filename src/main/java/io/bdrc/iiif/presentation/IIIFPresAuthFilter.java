@@ -16,7 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import io.bdrc.auth.Access;
+import io.bdrc.auth.AccessInfo;
+import io.bdrc.auth.AccessInfoAuthImpl;
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.TokenValidation;
 import io.bdrc.auth.UserProfile;
@@ -38,7 +39,7 @@ public class IIIFPresAuthFilter implements Filter {
                 if ("true".equals(AuthProps.getProperty("useAuth")) && !method.equalsIgnoreCase("OPTIONS")) {
                     HttpServletRequest req = (HttpServletRequest) request;
                     boolean isSecuredEndpoint = true;
-                    request.setAttribute("access", new Access());
+                    request.setAttribute("access", new AccessInfoAuthImpl());
                     String token = getToken(req.getHeader("Authorization"));
                     TokenValidation validation = null;
                     String path = req.getServletPath();
@@ -83,7 +84,7 @@ public class IIIFPresAuthFilter implements Filter {
                             ((HttpServletResponse) response).setStatus(403);
                             return;
                         } else {
-                            Access access = new Access(prof, end);
+                        	AccessInfoAuthImpl access = new AccessInfoAuthImpl(prof, end);
                             log.info("FILTER Access matchGroup >> {}", access.matchGroup());
                             log.info("FILTER Access matchRole >> {}", access.matchRole());
                             log.info("FILTER Access matchPerm >> {}", access.matchPermissions());
@@ -97,7 +98,7 @@ public class IIIFPresAuthFilter implements Filter {
                         // end point not secured
                         if (validation != null) {
                             // token present since validation is not null
-                            Access acc = new Access(prof, end);
+                            AccessInfo acc = new AccessInfoAuthImpl(prof, end);
                             request.setAttribute("access", acc);
                             log.debug("Set access to {}", acc);
                         }
@@ -106,9 +107,7 @@ public class IIIFPresAuthFilter implements Filter {
             }
             chain.doFilter(request, response);
         } catch (Exception e) {
-            System.out.println("Auth filter did not go through properly ");
-            // log.error("Auth filter did not go through properly ", e);
-            e.printStackTrace();
+            log.error("Auth filter did not go through properly ", e);
             ((HttpServletResponse) response).setStatus(417);
             throw e;
         }

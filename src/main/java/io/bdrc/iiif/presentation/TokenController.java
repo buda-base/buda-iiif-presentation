@@ -25,7 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.bdrc.auth.Access;
+import io.bdrc.auth.AccessInfo;
+import io.bdrc.auth.AccessInfoAuthImpl;
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.TokenValidation;
 import io.bdrc.auth.model.Endpoint;
@@ -62,7 +63,7 @@ public class TokenController {
         headers.add("Content-Type", "application/json");
         final ObjectNode rootNode = mapper.createObjectNode();
         
-        Access acc = null;
+        AccessInfoAuthImpl acc = null;
         
         if (!token.isPresent()) {
             // debugging the token of the request
@@ -80,20 +81,17 @@ public class TokenController {
                 }
             }
             rootNode.put("token", mytoken);
-            acc = (Access) request.getAttribute("access");
-            if (acc == null || !acc.isUserLoggedIn())
+            acc = (AccessInfoAuthImpl) request.getAttribute("access");
+            if (acc == null || !acc.isLogged())
                 return new ResponseEntity<String>("\"You must be authenticated to access this service\"",
                         headers, HttpStatus.UNAUTHORIZED);
-            
-
-            
         } else {
             // debugging a token passed as argument
             rootNode.put("token", token.get());
             TokenValidation validation = new TokenValidation(token.get());
             rootNode.put("tokenvalid", validation.isValid());
-            acc = new Access(validation.getUser(), new Endpoint());
-            if (acc == null || !acc.isUserLoggedIn())
+            acc = new AccessInfoAuthImpl(validation.getUser(), new Endpoint());
+            if (acc == null || !acc.isLogged())
                 return new ResponseEntity<String>("\"a valid access cannot be built from this token\"",
                         headers, HttpStatus.UNAUTHORIZED);
             

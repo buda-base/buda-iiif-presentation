@@ -37,8 +37,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.digitalcollections.iiif.model.sharedcanvas.Canvas;
 import de.digitalcollections.iiif.model.sharedcanvas.Collection;
 import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
-import io.bdrc.auth.Access;
-import io.bdrc.auth.Access.AccessLevel;
+import io.bdrc.auth.AccessInfo;
+import io.bdrc.auth.AccessInfo.AccessLevel;
+import io.bdrc.auth.AccessInfoAuthImpl;
 import io.bdrc.auth.AuthProps;
 import io.bdrc.auth.model.User;
 import io.bdrc.auth.rdf.RdfAuthModel;
@@ -206,9 +207,9 @@ public class IIIFPresentationService {
             Metrics.counter("exit.status", "result", "403").increment();
             throw new BDRCAPIException(403, AppConstants.GENERIC_LDS_ERROR, "Insufficient rights");
         }
-        Access acc = (Access) request.getAttribute("access");
+        AccessInfo acc = (AccessInfo) request.getAttribute("access");
         if (acc == null)
-            acc = new Access();
+            acc = new AccessInfoAuthImpl();
         final String accessShortName = getLocalName(access.getUri());
         final String statusShortName = getLocalName(statusUri);
         // virtual collections don't have corresponding image instances
@@ -217,8 +218,8 @@ public class IIIFPresentationService {
         if (al == AccessLevel.FAIR_USE && isInChina(request))
             al = AccessLevel.NOACCESS;
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
-            Metrics.counter("exit.status", "result", acc.isUserLoggedIn() ? "403" : "401").increment();
-            return ResponseEntity.status(acc.isUserLoggedIn() ? 403 : 401).cacheControl(CacheControl.noCache())
+            Metrics.counter("exit.status", "result", acc.isLogged() ? "403" : "401").increment();
+            return ResponseEntity.status(acc.isLogged() ? 403 : 401).cacheControl(CacheControl.noCache())
                     .body(getStream("Insufficient rights"));
         }
         int maxAgeSeconds = Integer.parseInt(AuthProps.getProperty("max-age")) / 1000;
@@ -302,21 +303,19 @@ public class IIIFPresentationService {
             return ResponseEntity.status(HttpStatus.resolve(403)).cacheControl(CacheControl.noCache())
                     .body(getStream("Insufficient rights"));
         }
-        Access acc = (Access) req.getAttribute("access");
+        AccessInfo acc = (AccessInfo) req.getAttribute("access");
         logger.debug("Getting access from request {}", acc);
         boolean isAdmin = false;
         if (acc == null)
-            acc = new Access();
-        User usr = acc.getUser();
-        logger.debug("Getting usr from Access {}", usr);
-        isAdmin = acc.getUserProfile().isAdmin();
+            acc = new AccessInfoAuthImpl();
+        isAdmin = acc.isAdmin();
         final String accessShortName = getLocalName(vi.access.getUri());
         final String statusShortName = getLocalName(vi.statusUri);
         AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.imageInstanceUri);
         if (al == AccessLevel.FAIR_USE && isInChina(req))
             al = AccessLevel.NOACCESS;
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
-            return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401))
+            return ResponseEntity.status(HttpStatus.resolve(acc.isLogged() ? 403 : 401))
                     .cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
         }
         if (vi.iiifManifestUri != null) {
@@ -357,7 +356,7 @@ public class IIIFPresentationService {
         // sure that
         // we get the part asked by the user
         final Manifest resmanifest = ManifestService.getManifestForIdentifier(isAdmin, id, vi, continuous, volumeId,
-                al == AccessLevel.FAIR_USE, rootPart, acc.isUserLoggedIn());
+                al == AccessLevel.FAIR_USE, rootPart, acc.isLogged());
         if (vi.access == AccessType.OPEN) {
             return ResponseEntity.status(HttpStatus.OK)
                     .cacheControl(CacheControl
@@ -398,16 +397,16 @@ public class IIIFPresentationService {
             return ResponseEntity.status(HttpStatus.resolve(403)).cacheControl(CacheControl.noCache())
                     .body(getStream("Insufficient rights"));
         }
-        Access acc = (Access) req.getAttribute("access");
+        AccessInfo acc = (AccessInfo) req.getAttribute("access");
         if (acc == null)
-            acc = new Access();
+            acc = new AccessInfoAuthImpl();
         final String accessShortName = getLocalName(vi.access.getUri());
         final String statusShortName = getLocalName(vi.statusUri);
         AccessLevel al = acc.hasResourceAccess(accessShortName, statusShortName, vi.imageInstanceUri);
         if (al == AccessLevel.FAIR_USE && isInChina(req))
             al = AccessLevel.NOACCESS;
         if (al == AccessLevel.MIXED || al == AccessLevel.NOACCESS) {
-            return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401))
+            return ResponseEntity.status(HttpStatus.resolve(acc.isLogged() ? 403 : 401))
                     .cacheControl(CacheControl.noCache()).body(getStream("Insufficient rights"));
         }
         if (vi.iiifManifestUri != null) {
@@ -428,7 +427,7 @@ public class IIIFPresentationService {
         if (al == AccessLevel.FAIR_USE) {
             if (imgSeqNum > (AppConstants.FAIRUSE_PAGES_S + vi.pagesIntroTbrc)
                     && imgSeqNum < (imageInfoList.size() - AppConstants.FAIRUSE_PAGES_E)) {
-                return ResponseEntity.status(HttpStatus.resolve(acc.isUserLoggedIn() ? 403 : 401))
+                return ResponseEntity.status(HttpStatus.resolve(acc.isLogged() ? 403 : 401))
                         .cacheControl(CacheControl.noCache())
                         .body(getStream("\"Insufficient rights (" + vi.access + ")\""));
             }

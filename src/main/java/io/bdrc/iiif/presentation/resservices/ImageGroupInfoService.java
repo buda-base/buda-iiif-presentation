@@ -51,7 +51,7 @@ public class ImageGroupInfoService extends ConcurrentResourceService<ImageGroupI
 				throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error for volume " + volumeId, response.toString(), "");
 			}
 			final InputStream body = response.getEntity().getContent();
-			final ResultSet res = ResultSetMgr.read(body, ResultSetLang.SPARQLResultSetJSON);
+			final ResultSet res = ResultSetMgr.read(body, ResultSetLang.RS_JSON);
 			if (!res.hasNext()) {
 				throw new BDRCAPIException(500, CANNOT_FIND_VOLUME_ERROR_CODE, "cannot find volume " + volumeId + " in the database");
 			}

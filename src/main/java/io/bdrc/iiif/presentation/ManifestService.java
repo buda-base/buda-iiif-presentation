@@ -38,7 +38,6 @@ import de.digitalcollections.iiif.model.sharedcanvas.Manifest;
 import de.digitalcollections.iiif.model.sharedcanvas.Range;
 import de.digitalcollections.iiif.model.sharedcanvas.Resource;
 import de.digitalcollections.iiif.model.sharedcanvas.Sequence;
-import de.digitalcollections.model.api.identifiable.resource.MimeType;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 import io.bdrc.iiif.presentation.resmodels.BDRCPresentationImageService;
 import io.bdrc.iiif.presentation.resmodels.BVM;
@@ -175,7 +174,7 @@ public class ManifestService {
             final String beginFileName = imageInfoList.get(ilBeginSeqNum - 1).filename;
             bvmBeginIndex = bvm.getDefaultBVMIndexForFilename(beginFileName, true);
             if (bvmBeginIndex == null)
-                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from image list not in bvm: " + beginFileName);
+                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename for begin image "+bvmBeginIndex+" in image list not in bvm: " + beginFileName);
         } else {
             bvmBeginIndex = 0;
         }
@@ -184,7 +183,7 @@ public class ManifestService {
             final String endFileName = imageInfoList.get(ilEndSeqNum - 1).filename;
             bvmEndIndex = bvm.getDefaultBVMIndexForFilename(endFileName, true);
             if (bvmEndIndex == null)
-                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename from image list not in bvm: " + endFileName);
+                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "filename for end image "+bvmEndIndex+" in image list not in bvm: " + endFileName);
         } else {
             bvmEndIndex = bvm.getDefaultImageList().size() - 1;
         }
