@@ -64,6 +64,22 @@ public class TokenController {
         return new String(baos.toByteArray(), StandardCharsets.UTF_8);
     }
     
+    @RequestMapping(value = "/personalAccess/{userqname}", method = {RequestMethod.GET, RequestMethod.HEAD})
+    public ResponseEntity<String> debugPersonalAccess(@PathVariable("userqname") String userqname, HttpServletRequest request, HttpServletResponse response,
+            WebRequest webRequest)
+            throws ClientProtocolException, IOException {
+        final String userUri = "http://purl.bdrc.io/resource-nc/auth/"+userqname.substring(4);
+        final List<String> res = RdfAuthModel.getPersonalAccess(userUri);
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        if (res == null || res.isEmpty()) {
+            return new ResponseEntity<String>("\"\"",
+                    headers, HttpStatus.OK);
+        }
+        return new ResponseEntity<String>(mapper.writeValueAsString(res),
+                headers, HttpStatus.OK);
+    }
+    
     @RequestMapping(value = "/debugAuthModel", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<String> debugAuthModel(HttpServletRequest request, HttpServletResponse response,
             WebRequest webRequest)
@@ -73,7 +89,6 @@ public class TokenController {
         final ObjectNode rootNode = mapper.createObjectNode();
         rootNode.set("subscriberToCollections", mapper.valueToTree(Subscribers.subscriberToCollections));
         rootNode.set("collectionToSubscribers", mapper.valueToTree(Subscribers.collectionToSubscribers));
-        rootNode.put("authModelTtl", modelToTtl(RdfAuthModel.getFullModel()));
     	return new ResponseEntity<String>(mapper.writeValueAsString(rootNode),
                 headers, HttpStatus.OK);
     }
