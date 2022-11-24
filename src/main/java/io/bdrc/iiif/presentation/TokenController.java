@@ -1,7 +1,9 @@
 package io.bdrc.iiif.presentation;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.client.ClientProtocolException;
+import org.apache.jena.rdf.model.Model;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -54,6 +56,26 @@ public class TokenController {
             WebRequest webRequest)
             throws ClientProtocolException, IOException {
         return debugToken(request, response, webRequest, Optional.empty());
+    }
+    
+    public static String modelToTtl(final Model m) {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        m.write(baos, "TTL");
+        return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+    }
+    
+    @RequestMapping(value = "/debugAuthModel", method = {RequestMethod.GET, RequestMethod.HEAD})
+    public ResponseEntity<String> debugAuthModel(HttpServletRequest request, HttpServletResponse response,
+            WebRequest webRequest)
+            throws ClientProtocolException, IOException {
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        final ObjectNode rootNode = mapper.createObjectNode();
+        rootNode.set("subscriberToCollections", mapper.valueToTree(Subscribers.subscriberToCollections));
+        rootNode.set("collectionToSubscribers", mapper.valueToTree(Subscribers.collectionToSubscribers));
+        rootNode.put("authModelTtl", modelToTtl(RdfAuthModel.getFullModel()));
+    	return new ResponseEntity<String>(mapper.writeValueAsString(rootNode),
+                headers, HttpStatus.OK);
     }
         
     public ResponseEntity<String> debugToken(HttpServletRequest request, HttpServletResponse response,
