@@ -776,7 +776,7 @@ public class ManifestService {
         // buildCanvas()
         if (id.getType() != Identifier.MANIFEST_ID || id.getSubType() != Identifier.MANIFEST_ID_VOLUMEID)
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "you cannot access this type of canvas");
-        if (!vi.instanceUri.startsWith(BDR))
+        if (!vi.imageInstanceUri.startsWith(BDR))
             throw new BDRCAPIException(403, NO_ACCESS_ERROR_CODE, "you can only access BDRC volumes through this API");
         logger.info("building canvas for ID {}, imgSeqNum {}", id.getId(), imgSeqNum);
         final int imageTotal = imageInfoList.size();

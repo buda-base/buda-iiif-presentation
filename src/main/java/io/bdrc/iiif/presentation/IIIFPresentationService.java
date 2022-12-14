@@ -324,7 +324,7 @@ public class IIIFPresentationService {
             responseHeaders.add("Location", vi.iiifManifestUri.toString());
             return new ResponseEntity<StreamingResponseBody>(responseHeaders, HttpStatus.resolve(302));
         }
-        if (wo == null && (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE
+        if (wo == null && vi.instanceUri != null && (id.getSubType() == Identifier.MANIFEST_ID_VOLUMEID_OUTLINE
                 || id.getSubType() == Identifier.MANIFEST_ID_WORK_IN_VOLUMEID_OUTLINE)) {
             try {
                 // important: we take the outline of the whole root work, that

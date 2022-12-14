@@ -38,7 +38,7 @@ public class ImageGroupInfo {
     @JsonProperty("status")
     public String statusUri;
     @JsonProperty("instanceUri")
-    public String instanceUri;
+    public String instanceUri = null;
     @JsonProperty("imageInstanceUri")
     public String imageInstanceUri;
     @JsonProperty("copyrightStatusLname")
@@ -68,7 +68,9 @@ public class ImageGroupInfo {
         }
         this.access = AccessType.fromString(sol.getResource("access").getURI());
         this.statusUri = sol.getResource("status").getURI();
-        this.instanceUri = sol.getResource("instanceId").getURI();
+        if (sol.contains("?instanceId")) {
+            this.instanceUri = sol.getResource("instanceId").getURI();
+        }
         this.imageInstanceUri = sol.getResource("iinstanceId").getURI();
         if (sol.contains("?ric")) {
             this.restrictedInChina = sol.get("?ric").asLiteral().getBoolean();
