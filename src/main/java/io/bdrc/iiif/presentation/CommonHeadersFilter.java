@@ -24,9 +24,9 @@ public class CommonHeadersFilter implements Filter {
         ((HttpServletResponse) response).addHeader("Access-Control-Allow-Credentials", "true");
         ((HttpServletResponse) response).addHeader("Access-Control-Allow-Methods", "PUT, GET, HEAD, OPTIONS");
         ((HttpServletResponse) response).addHeader("Access-Control-Allow-Headers",
-                "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, Keep-Alive, User-Agent, If-Modified-Since, If-None-Match, Cache-Control");
+                "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization, Keep-Alive, User-Agent, If-Modified-Since, If-None-Match, Cache-Control, Accept-Encoding");
         ((HttpServletResponse) response).addHeader("Access-Control-Expose-Headers",
-                "Cache-Control, ETag, Last-Modified, Content-Type, Cache-Control, Vary, Access-Control-Max-Age");
+                "Cache-Control, ETag, Last-Modified, Content-Type, Cache-Control, Vary, Access-Control-Max-Age, Content-Encoding");
         ((HttpServletResponse) response).addHeader("Access-Control-Max-Age", Integer.toString(ACCESS_CONTROL_MAX_AGE_IN_SECONDS));
         chain.doFilter(request, response);
     }
