@@ -81,6 +81,8 @@ public class ImageInstanceInfo {
     public List<VolumeInfoSmall> volumes;
     @JsonProperty("locations")
     public List<Location> locations = null;
+    @JsonProperty("virtual")
+    public boolean virtual = false;
     
     public ImageInstanceInfo() {}
     
@@ -123,6 +125,7 @@ public class ImageInstanceInfo {
         } else {
             rootImageInstance = iinstance;
         }
+        this.virtual = iinstance.hasLiteral(m.getProperty(BDO, "virtualImageInstance"), true);
         final Resource iinstanceAdmin =  getAdminForResource(m, rootImageInstance);
         if (iinstanceAdmin == null) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, "invalid model: no admin data for item");

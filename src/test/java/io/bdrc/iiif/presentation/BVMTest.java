@@ -102,7 +102,7 @@ public class BVMTest {
         ServiceCache.put(Optional.of(ii), iilCacheKey);
         final Identifier id = new Identifier("v:bdr:I0890", Identifier.MANIFEST_ID);
         final ImageGroupInfo vi = new ImageGroupInfo();
-        vi.imageGroup = "I0890";
+        vi.imageGroupLname = "I0890";
         vi.instanceUri = BDR + "MW22084";
         vi.imageInstanceUri = BDR + "W22084";
         vi.volumeNumber = 1;

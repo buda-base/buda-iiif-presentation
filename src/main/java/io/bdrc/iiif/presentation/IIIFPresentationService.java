@@ -353,8 +353,7 @@ public class IIIFPresentationService {
             rootPart = iInf;
         }
         // TODO: case where a part is asked with an outline, we need to make
-        // sure that
-        // we get the part asked by the user
+        // sure that we get the part asked by the user
         final Manifest resmanifest = ManifestService.getManifestForIdentifier(isAdmin, id, vi, continuous, volumeId,
                 al == AccessLevel.FAIR_USE, rootPart, acc.isLogged());
         if (vi.access == AccessType.OPEN) {
@@ -416,7 +415,7 @@ public class IIIFPresentationService {
         ImageInfoList imageInfoList;
         try {
             imageInfoList = ImageInfoListService.Instance
-                    .getAsync(vi.imageInstanceUri.substring(AppConstants.BDR_len), vi.imageGroup).get();
+                    .getAsync(vi.imageInstanceUri.substring(AppConstants.BDR_len), vi.imageGroupLname).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new BDRCAPIException(500, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }
@@ -460,7 +459,7 @@ public class IIIFPresentationService {
         ImageInfoList imageInfoList;
         try {
             imageInfoList = ImageInfoListService.Instance
-                    .getAsync(vi.imageInstanceUri.substring(AppConstants.BDR_len), vi.imageGroup).get();
+                    .getAsync(vi.imageInstanceUri.substring(AppConstants.BDR_len), vi.imageGroupLname).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new BDRCAPIException(404, AppConstants.GENERIC_IDENTIFIER_ERROR, e);
         }

@@ -4,9 +4,11 @@ import static io.bdrc.iiif.presentation.AppConstants.GENERIC_APP_ERROR_CODE;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -256,7 +258,7 @@ public class BVM {
         public String duplicateOf = null;
         @JsonInclude(Include.NON_NULL)
         @JsonProperty("imggroup")
-        public String imggroupQname = null;
+        public String imageGroupLname = null;
         @JsonInclude(value = Include.NON_DEFAULT)
         @JsonProperty(value="hidden")
         public Boolean hidden = Boolean.FALSE;
@@ -313,6 +315,15 @@ public class BVM {
                     e.getValue().validate(t);
                 }
             }
+            if (this.imageGroupLname != null) {
+                if (!this.imageGroupLname.startsWith("I"))
+                    throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: imggroup should start with bdr:I");
+                root.imageGroupLnames.add(this.imageGroupLname);
+                if (this.imageGroupLname.equals(root.imageGroupQname.substring(4)))
+                    this.imageGroupLname = null;
+            } else if (!filenameIsEmpty) {
+                root.imageGroupLnames.add(root.imageGroupQname.substring(4));
+            }
         }
         
         @JsonIgnore
@@ -335,9 +346,12 @@ public class BVM {
         public void validate(final BVM root) throws BDRCAPIException {
             if (imageList == null)
                 throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: no image list in view");
+            root.imageGroupLnames = new HashSet<String>();
             for (BVMImageInfo ii : this.imageList) {
                 ii.validate(root);
             }
+            if (!root.imageGroupLnames.contains(root.imageGroupQname.substring(4)))
+                root.purelyVirtual = true;
         }
     }
     
@@ -383,6 +397,14 @@ public class BVM {
     private Map<String,PaginationType> paginationMap = null;
     @JsonIgnore
     private Map<String,Integer> fnMap = null;
+    @JsonIgnore
+    // filled at validation time, true if a bvm contains no image from
+    // the corresponding image group
+    public boolean purelyVirtual = false;
+    @JsonIgnore
+    // filled at validation time, contains all the image groups
+    // referenced in the bvm
+    public Set<String> imageGroupLnames = null;
     
     public BVMSection getSection(final String sectionId) {
         if (sections == null) return null;
@@ -433,6 +455,11 @@ public class BVM {
     }
     
     @JsonIgnore
+    public int getDefaultImageListSize() {
+        return this.getDefaultImageList().size();
+    }
+    
+    @JsonIgnore
     public Map<String,PaginationType> getPaginationMap() {
         if (this.paginationMap != null)
             return this.paginationMap;
@@ -454,7 +481,7 @@ public class BVM {
         if (!"0.1.0".equals(this.specVersion))
             throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: spec must be 0.1.0");
         if (this.imageGroupQname == null || !this.imageGroupQname.startsWith("bdr:I"))
-            throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: for-volume must start with 'bdr:I'");
+            throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: imggroup must start with 'bdr:I'");
         if (this.changes == null)
             throw new BDRCAPIException(422, GENERIC_APP_ERROR_CODE, "invalid bvm: missing changes");
         for (ChangeLogItem ci : this.changes)

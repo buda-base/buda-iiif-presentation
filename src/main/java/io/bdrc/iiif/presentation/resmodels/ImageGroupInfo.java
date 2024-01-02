@@ -48,13 +48,15 @@ public class ImageGroupInfo {
     @JsonProperty("volumeNumber")
     public Integer volumeNumber = 1;
     @JsonProperty("imageGroup")
-    public String imageGroup = null;
+    public String imageGroupLname = null;
     @JsonProperty("iiifManifestUri")
     public URI iiifManifestUri = null;
     @JsonProperty("partInfo")
     public List<PartInfo> partInfo = null;
     @JsonProperty("labels")
     public List<LangString> labels = null;
+    @JsonProperty("virtual")
+    public boolean virtual = false;
 
     private static final Logger logger = LoggerFactory.getLogger(ImageGroupInfoService.class);
 
@@ -62,9 +64,9 @@ public class ImageGroupInfo {
     public ImageGroupInfo(final QuerySolution sol, final String volumeId) {
         logger.debug("creating VolumeInfo for solution {}", sol.toString());
         if (volumeId.startsWith("bdr:")) {
-            this.imageGroup = volumeId.substring(4);
+            this.imageGroupLname = volumeId.substring(4);
         } else {
-            this.imageGroup = volumeId;
+            this.imageGroupLname = volumeId;
         }
         this.access = AccessType.fromString(sol.getResource("access").getURI());
         this.statusUri = sol.getResource("status").getURI();
@@ -84,6 +86,9 @@ public class ImageGroupInfo {
         }
         if (sol.contains("?volumeNumber")) {
             this.volumeNumber = sol.get("?volumeNumber").asLiteral().getInt();
+        }
+        if (sol.contains("?virtualImageInstance")) {
+            this.virtual = sol.get("?virtualImageInstance").asLiteral().getBoolean();
         }
         if (sol.contains("?pagesIntroTbrc")) {
             this.pagesIntroTbrc = sol.get("?pagesIntroTbrc").asLiteral().getInt();
@@ -118,7 +123,7 @@ public class ImageGroupInfo {
         }
         this.imageInstanceUri = imageInstance.getURI();
 
-        this.imageGroup = volume.getLocalName();
+        this.imageGroupLname = volume.getLocalName();
 
         final Statement iiifManifestS = volume.getProperty(m.getProperty(BDO, "hasIIIFManifest"));
         if (iiifManifestS != null) {

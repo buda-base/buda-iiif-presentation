@@ -63,7 +63,7 @@ public class PathTest {
         final ImageInfoList ii = PresentationTest.getTestImageList("W22084-0890.json");
         ServiceCache.put(Optional.of(ii), cacheKey);
         final ImageGroupInfo vi = new ImageGroupInfo();
-        vi.imageGroup = "I0890";
+        vi.imageGroupLname = "I0890";
         vi.instanceUri = BDR + "MW22084";
         vi.imageInstanceUri = BDR + "W22084";
         vi.volumeNumber = 1;
