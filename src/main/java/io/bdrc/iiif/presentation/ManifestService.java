@@ -124,13 +124,13 @@ public class ManifestService {
     }
 
     public static Canvas addOneCanvas(final int imgSeqNum, final Identifier id, final ImageInfoList imageInfoList, final ImageGroupInfo vi,
-            final String imageGroupQname, final Sequence mainSeq, final BVMImageInfo bvmIi, final BVM bvm, boolean sectionchange) {
+            final String imageGroupQname, final Sequence mainSeq, final BVMImageInfo bvmIi, final BVM bvm, boolean sectionchange, final Integer bvmImgSeqNum) {
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum - 1);
         final Integer size = imageInfo.size;
         // very dirty trick: for Gandhari material, we don't put any limit on the size
         if (size != null && size > byteslimit && !imageInfo.filename.startsWith("I0GN"))
             return null;
-        final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList, imageGroupQname, vi, bvmIi, bvm, sectionchange);
+        final Canvas canvas = buildCanvas(id, imgSeqNum, imageInfoList, imageGroupQname, vi, bvmIi, bvm, sectionchange, bvmImgSeqNum);
         mainSeq.addCanvas(canvas);
         return canvas;
     }
@@ -218,7 +218,7 @@ public class ManifestService {
                     thisCanvas.setHeight(AppConstants.COPYRIGHT_PAGE_H);
                     final PropertyValue label;
                     if (lastmissing == firstmissing) {
-                        label = getLabelFromBVMImageInfo(firstmissing, bvm, true, null, false);
+                        label = getLabelFromBVMImageInfo(firstmissing, bvm, true, null, false, bvmImgIdx);
                     } else {
                         label = getLabelFromBVMMissingRange(firstmissing, lastmissing, bvm);
                     }
@@ -238,7 +238,7 @@ public class ManifestService {
                     continue;
                 }
                 final boolean sectionChange = bvmIi.getDefaultPaginationValue(bvm) == null ? false : bvmIi.getDefaultPaginationValue(bvm).section == prevsec;
-                final Canvas thisCanvas = addOneCanvas(iiLidx + 1, id, imageInfoList, vi, "bdr:"+imageGroupLname, mainSeq, bvmIi, bvm, sectionChange);
+                final Canvas thisCanvas = addOneCanvas(iiLidx + 1, id, imageInfoList, vi, "bdr:"+imageGroupLname, mainSeq, bvmIi, bvm, sectionChange, bvmImgIdx);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
@@ -253,7 +253,7 @@ public class ManifestService {
            thisCanvas.setHeight(AppConstants.COPYRIGHT_PAGE_H);
            final PropertyValue label;
            if (lastmissing == firstmissing) {
-               label = getLabelFromBVMImageInfo(firstmissing, bvm, true, null, false);
+               label = getLabelFromBVMImageInfo(firstmissing, bvm, true, null, false, null);
            } else {
                label = getLabelFromBVMMissingRange(firstmissing, lastmissing, bvm);
            }
@@ -304,7 +304,7 @@ public class ManifestService {
         final int totalPages = imageInfoList.size();
         if (!fairUse || isAdmin) {
             for (int imgSeqNum = beginIndex; imgSeqNum <= endIndex; imgSeqNum++) {
-                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, imageGroupQname, mainSeq, null, bvm, false);
+                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, imageGroupQname, mainSeq, null, bvm, false, null);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
@@ -317,7 +317,7 @@ public class ManifestService {
             // min(endIndex,firstUnaccessiblePage+1)
             for (int imgSeqNum = Math.min(firstUnaccessiblePage, beginIndex); imgSeqNum <= Math.min(endIndex,
                     firstUnaccessiblePage - 1); imgSeqNum++) {
-                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, imageGroupQname, mainSeq, null, bvm, false);
+                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, imageGroupQname, mainSeq, null, bvm, false, null);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
@@ -333,7 +333,7 @@ public class ManifestService {
             // last part: max(beginIndex,lastUnaccessiblePage) to
             // max(endIndex,lastUnaccessiblePage)
             for (int imgSeqNum = Math.max(lastUnaccessiblePage + 1, beginIndex); imgSeqNum <= Math.max(endIndex, lastUnaccessiblePage); imgSeqNum++) {
-                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, imageGroupQname, mainSeq, null, bvm, false);
+                final Canvas thisCanvas = addOneCanvas(imgSeqNum, id, imageInfoList, vi, imageGroupQname, mainSeq, null, bvm, false, null);
                 if (firstCanvas == null)
                     firstCanvas = thisCanvas;
             }
@@ -437,7 +437,8 @@ public class ManifestService {
                 final ImageInfoList imageInfoList = ImageInfoListService.Instance.getAsync(imageInstanceLocalName, vi.imageGroupLname).get();
                 imageGroupLnameToImageInfoList.put(vi.imageGroupLname, imageInfoList);
             } catch (InterruptedException | ExecutionException e) {
-                throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
+                // not sure why but we need a 404 here to represent missing volumes
+                throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, e);
             }
         }
         final Manifest manifest = new Manifest(IIIFPresPrefix + id.getId() + "/manifest");
@@ -680,10 +681,12 @@ public class ManifestService {
         return pagination;
     }
     
-    public static PropertyValue getLabelFromBVMImageInfo(final BVMImageInfo bvmIi, final BVM bvm, final boolean missing, final Integer imgSeqNum, boolean sectionChange) {
+    public static PropertyValue getLabelFromBVMImageInfo(final BVMImageInfo bvmIi, final BVM bvm, final boolean missing, Integer imgSeqNum, boolean sectionChange, final Integer bvmImgIdx) {
         // TODO: convert pagination in Tibetan?
         final BVMPaginationItem paginationItem = bvmIi.getDefaultPaginationValue(bvm);
         final PropertyValue res = new PropertyValue();
+        if (bvm.purelyVirtual)
+            imgSeqNum = bvmImgIdx+1;
         if (paginationItem == null || paginationItem.value == null || paginationItem.value.isEmpty()) {
             if (missing) {
                 res.addValue(ManifestService.getLocaleFor("en"), "missing");
@@ -735,13 +738,13 @@ public class ManifestService {
     }
     
     public static Canvas buildCanvas(final Identifier id, final Integer imgSeqNum, final ImageInfoList imageInfoList, final String imageGroupQname,
-            final ImageGroupInfo vi, final BVMImageInfo bvmIi, final BVM bvm, boolean sectionchange) {
+            final ImageGroupInfo vi, final BVMImageInfo bvmIi, final BVM bvm, boolean sectionchange, final Integer bvmImgSeqNum) {
         // imgSeqNum starts at 1
         final ImageInfo imageInfo = imageInfoList.get(imgSeqNum - 1);
         final String canvasUri = getCanvasUri(imageInfo.filename, imageGroupQname, imgSeqNum);
         final Canvas canvas = new Canvas(canvasUri);
         if (bvmIi != null) {
-            final PropertyValue label = getLabelFromBVMImageInfo(bvmIi, bvm, false, imgSeqNum, sectionchange);
+            final PropertyValue label = getLabelFromBVMImageInfo(bvmIi, bvm, false, imgSeqNum, sectionchange, bvmImgSeqNum);
             if (label != null)
                 canvas.setLabel(label);
         } else {
@@ -834,6 +837,6 @@ public class ManifestService {
         if (imgSeqNum < 1 || imgSeqNum > imageTotal)
             throw new BDRCAPIException(404, GENERIC_APP_ERROR_CODE,
                     "you asked a canvas for an image number that is inferior to 1 or greater than the total number of images");
-        return buildCanvas(id, imgSeqNum, imageInfoList, imageGroupQname, vi, null, null, false);
+        return buildCanvas(id, imgSeqNum, imageInfoList, imageGroupQname, vi, null, null, false, null);
     }
 }
