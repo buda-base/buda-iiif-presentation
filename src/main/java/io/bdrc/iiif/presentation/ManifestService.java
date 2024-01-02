@@ -403,7 +403,8 @@ public class ManifestService {
         try {
             logger.info("geting bvm for "+vi.imageGroupLname);
             bvm = BVMService.Instance.getAsync(vi.imageGroupLname).get();
-            bvm.validate();
+            if (bvm != null)
+                bvm.validate();
         } catch (InterruptedException | ExecutionException e) {
             throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, e);
         } catch (BDRCAPIException e) {
