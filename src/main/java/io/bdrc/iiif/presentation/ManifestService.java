@@ -173,7 +173,7 @@ public class ManifestService {
         final ImageInfoList defaultImageInfoList = bvm.purelyVirtual ? null : imageGroupLnameToImageInfoList.get(vi.imageGroupLname);
         if (ilBeginSeqNum != null) {
             if (bvm.purelyVirtual) {
-                bvmBeginIndex = ilBeginSeqNum;
+                bvmBeginIndex = ilBeginSeqNum-1;
             } else {
                 final String beginFileName = defaultImageInfoList.get(ilBeginSeqNum - 1).filename;
                 bvmBeginIndex = bvm.getDefaultBVMIndexForFilename(beginFileName, true);
@@ -186,7 +186,7 @@ public class ManifestService {
         final Integer bvmEndIndex;
         if (ilEndSeqNum != null) {
             if (bvm.purelyVirtual) {
-                bvmEndIndex = ilEndSeqNum;
+                bvmEndIndex = ilEndSeqNum-1;
             } else {
                 final String endFileName = defaultImageInfoList.get(ilEndSeqNum - 1).filename;
                 bvmEndIndex = bvm.getDefaultBVMIndexForFilename(endFileName, true);
