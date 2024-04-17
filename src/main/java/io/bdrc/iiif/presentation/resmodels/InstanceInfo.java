@@ -43,8 +43,6 @@ public class InstanceInfo extends PartInfo {
     public String rootStatusUri = null;
     @JsonProperty("isRoot")
     public Boolean isRoot = false;
-    @JsonProperty("rootInstanceQname")
-    public String rootInstanceQname = null;
     @JsonProperty("creatorLabels")
     public List<LangString> creatorLabels = null; // ?
     @JsonProperty("hasLocation")
@@ -65,9 +63,6 @@ public class InstanceInfo extends PartInfo {
         while (clItr.hasNext()) {
             final Statement s = clItr.next();
             final Resource cl = s.getObject().asResource();
-            final Property locationInstanceP = m.getProperty(BDO, "contentLocationInstance");
-            if (cl.hasProperty(locationInstanceP))
-                this.rootInstanceQname = "bdr:"+cl.getProperty(locationInstanceP).getResource().getLocalName();
             if (this.locations == null)
                 this.locations = new ArrayList<>();
             this.locations.add(new Location(m, cl));
@@ -102,15 +97,23 @@ public class InstanceInfo extends PartInfo {
         }
         final Resource partOf = instance.getPropertyResourceValue(m.getProperty(BDO, "partOf"));
         this.isRoot = (partOf == null);
-        StmtIterator imageInstanceS = instance.listProperties(m.getProperty(TMPPREFIX, "inImageInstance"));
+        // relatively rare case (currently only in Taisho)
+        StmtIterator imageInstanceS = instance.listProperties(m.getProperty(BDO, "instanceHasReproduction"));
         Resource item = null;
         if (imageInstanceS.hasNext()) {
             item = imageInstanceS.next().getResource();
-            // hack for the Taisho: https://github.com/buda-base/buda-iiif-presentation/issues/113
-            // could be done better
-            if (imageInstanceS.hasNext() && item.getLocalName().equals("W0TT0000"))
-                item = imageInstanceS.next().getResource();
             this.imageInstanceQname = "bdr:"+item.getLocalName();
+        } else {
+            // general case
+            imageInstanceS = instance.listProperties(m.getProperty(TMPPREFIX, "inImageInstance"));
+            if (imageInstanceS.hasNext()) {
+                item = imageInstanceS.next().getResource();
+                // hack for the Taisho: https://github.com/buda-base/buda-iiif-presentation/issues/113
+                // could be done better
+                if (imageInstanceS.hasNext() && item.getLocalName().equals("W0TT0000"))
+                    item = imageInstanceS.next().getResource();
+                this.imageInstanceQname = "bdr:"+item.getLocalName();
+            }
         }
         readLocations(m, instance);
         final Resource firstImageGroup = instance.getPropertyResourceValue(m.getProperty(TMPPREFIX, "firstImageGroup"));
