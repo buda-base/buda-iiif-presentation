@@ -97,12 +97,18 @@ public class ImageInstanceInfo {
         return null;
     }
     
+    public static final Property contentLocationP = ResourceFactory.createProperty(BDO, "contentLocation");
+    public static final Property contentLocationInstanceP = ResourceFactory.createProperty(BDO, "contentLocationInstance");
+    
     public static List<Location> getLocations(final Model m, Resource r) {
         List<Location> res = null;
-        final StmtIterator clItr = r.listProperties(m.getProperty(BDO, "contentLocation"));
+        final StmtIterator clItr = r.listProperties(contentLocationP);
         while (clItr.hasNext()) {
             final Statement s = clItr.next();
             final Resource cl = s.getObject().asResource();
+            final Resource repI = cl.getPropertyResourceValue(contentLocationInstanceP);
+            if (repI != null && !repI.getLocalName().startsWith("W"))
+            	continue;
             if (res == null)
                 res = new ArrayList<>();
             res.add(new Location(m, cl));
