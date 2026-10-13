@@ -9,11 +9,9 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
@@ -35,7 +33,6 @@ public class InstanceOutlineService extends ConcurrentResourceService<InstanceOu
 	@Override
 	final public InstanceOutline getFromApi(final String workId) throws BDRCAPIException {
 		logger.debug("fetch workOutline on LDS for {}", workId);
-		final HttpClient httpClient = HttpClientBuilder.create().build();
 		final InstanceOutline res;
 		final String queryUrl = AppConstants.LDS_INSTANCEOUTLINE_QUERY;
 		logger.debug("query {} with argument R_RES={}", queryUrl, workId);
@@ -45,15 +42,16 @@ public class InstanceOutlineService extends ConcurrentResourceService<InstanceOu
 	        builder.setParameter("format", "ttl");
 	        final HttpGet request = new HttpGet(builder.build());
 	        request.addHeader(HttpHeaders.ACCEPT, "text/turtle");
-			final HttpResponse response = httpClient.execute(request);
-			int code = response.getStatusLine().getStatusCode();
-			if (code != 200) {
-				throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error", "request:\n" + request.toString() + "\nresponse:\n" + response.toString(), "");
+			try (CloseableHttpResponse response = LdsHttpClient.execute(request)) {
+				int code = response.getStatusLine().getStatusCode();
+				if (code != 200) {
+					throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error", "request:\n" + request.toString() + "\nresponse:\n" + response.toString(), "");
+				}
+				final InputStream body = response.getEntity().getContent();
+				final Model m = ModelFactory.createDefaultModel();
+				m.read(body, null, "TURTLE");
+				res = new InstanceOutline(m, workId);
 			}
-			final InputStream body = response.getEntity().getContent();
-			final Model m = ModelFactory.createDefaultModel();
-			m.read(body, null, "TURTLE");
-			res = new InstanceOutline(m, workId);
 		} catch (IOException | URISyntaxException ex) {
 			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
 		}

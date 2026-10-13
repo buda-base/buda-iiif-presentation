@@ -61,6 +61,10 @@ public class AppConstants {
 
     public static final int GENERIC_IDENTIFIER_ERROR = 5010;
 
+    public static final int UPSTREAM_CONNECT_TIMEOUT_MS = 5_000;
+    public static final int UPSTREAM_READ_TIMEOUT_MS = 15_000;
+    public static final int RESOURCE_FETCH_TIMEOUT_SECONDS = 20;
+
     public static final int FAIRUSE_PAGES_S = 20;
     public static final int FAIRUSE_PAGES_E = 20;
 

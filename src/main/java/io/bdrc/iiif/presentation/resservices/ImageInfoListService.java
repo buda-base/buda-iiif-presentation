@@ -19,6 +19,7 @@ import java.util.zip.GZIPInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
@@ -67,7 +68,13 @@ public class ImageInfoListService extends ConcurrentResourceService<ImageInfoLis
 
 	private synchronized static AmazonS3 getClient() {
 		if (s3Client == null) {
-			AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard().withRegion(AuthProps.getProperty("awsRegion"));
+			final ClientConfiguration clientConfiguration = new ClientConfiguration()
+					.withConnectionTimeout(AppConstants.UPSTREAM_CONNECT_TIMEOUT_MS)
+					.withSocketTimeout(AppConstants.UPSTREAM_READ_TIMEOUT_MS)
+					.withRequestTimeout(AppConstants.RESOURCE_FETCH_TIMEOUT_SECONDS * 1_000);
+			AmazonS3ClientBuilder clientBuilder = AmazonS3ClientBuilder.standard()
+					.withRegion(AuthProps.getProperty("awsRegion"))
+					.withClientConfiguration(clientConfiguration);
 			s3Client = clientBuilder.build();
 		}
 		return s3Client;

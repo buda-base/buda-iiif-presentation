@@ -124,7 +124,12 @@ public class ImageInstanceInfo {
         if (iinstanceId.startsWith("bdr:"))
             iinstanceId = BDR+iinstanceId.substring(4);
         final Resource iinstance = m.getResource(iinstanceId);
-        this.instanceUri = iinstance.getPropertyResourceValue(m.getProperty(BDO, "instanceReproductionOf")).getURI();
+        final Resource reproducedInstance = iinstance.getPropertyResourceValue(m.getProperty(BDO, "instanceReproductionOf"));
+        if (reproducedInstance == null) {
+            throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE,
+                    "invalid model: no instanceReproductionOf for image instance " + iinstanceId);
+        }
+        this.instanceUri = reproducedInstance.getURI();
         Resource rootImageInstance = iinstance.getPropertyResourceValue(m.getProperty(BDO, "inRootInstance"));
         if (rootImageInstance != null) {
             this.rootIinstanceUri = rootImageInstance.getURI();

@@ -9,11 +9,9 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
@@ -35,7 +33,6 @@ public class ImageInstanceInfoService extends ConcurrentResourceService<ImageIns
 	@Override
 	final public ImageInstanceInfo getFromApi(final String itemId) throws BDRCAPIException {
 		logger.debug("fetch itemInfo on LDS for {}", itemId);
-		final HttpClient httpClient = HttpClientBuilder.create().build(); // Use this instead
 		final ImageInstanceInfo resItemInfo;
 		final String queryUrl = AppConstants.LDS_IMAGEINSTANCEGRAPH_QUERY;
 		logger.debug("query {} with argument R_RES={}", queryUrl, itemId);
@@ -44,17 +41,18 @@ public class ImageInstanceInfoService extends ConcurrentResourceService<ImageIns
             builder.setParameter("R_RES", itemId);
             builder.setParameter("format", "ttl");
             final HttpGet request = new HttpGet(builder.build());
-			final HttpResponse response = httpClient.execute(request);
 			request.addHeader(HttpHeaders.ACCEPT, "text/turtle");
-			int code = response.getStatusLine().getStatusCode();
-			if (code != 200) {
-				throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error", "request:\n" + request.toString() + "\nresponse:\n" + response.toString(), "");
+			try (CloseableHttpResponse response = LdsHttpClient.execute(request)) {
+				int code = response.getStatusLine().getStatusCode();
+				if (code != 200) {
+					throw new BDRCAPIException(500, GENERIC_LDS_ERROR, "LDS lookup returned an error", "request:\n" + request.toString() + "\nresponse:\n" + response.toString(), "");
+				}
+				final InputStream body = response.getEntity().getContent();
+				final Model m = ModelFactory.createDefaultModel();
+				// TODO: prefixes
+				m.read(body, null, "TURTLE");
+				resItemInfo = new ImageInstanceInfo(m, itemId);
 			}
-			final InputStream body = response.getEntity().getContent();
-			final Model m = ModelFactory.createDefaultModel();
-			// TODO: prefixes
-			m.read(body, null, "TURTLE");
-			resItemInfo = new ImageInstanceInfo(m, itemId);
 		} catch (IOException | URISyntaxException ex) {
 			throw new BDRCAPIException(500, GENERIC_APP_ERROR_CODE, ex);
 		}

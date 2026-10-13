@@ -8,10 +8,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.bdrc.iiif.presentation.AppConstants;
 import io.bdrc.iiif.presentation.exceptions.BDRCAPIException;
 
 public class ConcurrentResourceService<T> {
@@ -134,10 +136,19 @@ public class ConcurrentResourceService<T> {
             // except the first one
             return resFromList;
         }
+        final String normalizedResId = resId;
+        res.orTimeout(AppConstants.RESOURCE_FETCH_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .whenComplete((value, error) -> futures.remove(normalizedResId, res));
         T resT = null;
         try {
             resT = getFromApi(resId);
-        } catch (BDRCAPIException e) {
+            if (resT != null || this.canReturnNull) {
+                res.complete(resT);
+            } else {
+                res.completeExceptionally(new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "resource not found: "+resId));
+            }
+            putInCache(resId, resT);
+        } catch (final BDRCAPIException e) {
             if (e.getStatus() == 404 && this.canReturnNull) {
                 res.complete(null);
             } else {
@@ -147,16 +158,12 @@ public class ConcurrentResourceService<T> {
             // this means that we save each failed fetch using empty Optionals in the
             // cache, so that we don't have too many API calls.
             putInCache(resId, null);
-            futures.remove(resId);
-            return res;
+        } catch (final RuntimeException e) {
+            logger.error("Unexpected exception fetching resource {}", resId, e);
+            res.completeExceptionally(e);
+        } finally {
+            futures.remove(resId, res);
         }
-        if (resT != null || this.canReturnNull) {
-            res.complete(resT);
-        } else {
-            res.completeExceptionally(new BDRCAPIException(404, GENERIC_APP_ERROR_CODE, "resource not found: "+resId));
-        }
-        putInCache(resId, resT);
-        futures.remove(resId);
         return res;
     }
 
